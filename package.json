@@ -1,0 +1,22 @@
+{
+  "name": "morefieldastro",
+  "version": "0.0.0",
+  "description": "Astrophotography site",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alavid/morefieldastro.git"
+  },
+  "author": "Alex Morefield",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/alavid/morefieldastro/issues"
+  },
+  "homepage": "https://github.com/alavid/morefieldastro#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
