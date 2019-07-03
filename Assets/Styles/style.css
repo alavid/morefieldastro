@@ -1,0 +1,29 @@
+#bio {
+    display: block;
+    width: 300px;
+    padding-left: 30px;
+    padding-right: 30px;
+}
+
+#content {
+    display: flex;
+}
+
+header {
+    text-align: center;
+}
+
+.collection-title {
+    text-align: center;
+}
+
+.thumbnails {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.thumbnail {
+    margin: 10px;
+    width: 200px;
+}
