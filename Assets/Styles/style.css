@@ -1,3 +1,7 @@
+body {
+    background-color: #f7f7f7;
+}
+
 #bio {
     display: block;
     width: 300px;
@@ -10,6 +14,8 @@
 }
 
 header {
+    font-size: 20pt;
+
     text-align: center;
 }
 
@@ -24,6 +30,90 @@ header {
 }
 
 .thumbnail {
-    margin: 10px;
-    width: 200px;
+    width: 100%;
+}
+
+.post, .col_container, .add_post {
+    display:block;
+
+    border-style: solid;
+    border-color: #e8e8e8;
+
+    padding: 15px;
+}
+
+.col_container {
+    border-width: 0 0 1px 0;
+}
+
+.post, .add_post {
+    background-color: white;
+
+    border-width: 1px;
+    border-radius: 3px;
+
+    margin-right: 5px;
+    margin-bottom: 5px;
+
+    width: 250px;
+    height: 250px;
+}
+
+.post_container {
+    display: flex;
+    flex: 1;
+    flex-wrap: wrap;
+}
+
+.text {
+    font-family: 'Josefin Sans', sans-serif;
+    color: #1c1c1c;
+}
+
+h2 {
+    font-size: 18pt;
+    font-style: bold;
+
+    margin: 0px;
+}
+
+h3{
+    font-size: 14pt;
+    margin-top: 5px;
+    margin-bottom: 0px;
+}
+
+.col_desc {
+    font-size: 12pt;
+    font-style: italic;
+
+    margin-top: 0px;
+    margin-bottom: 10px;
+}
+
+.add_post {
+    width: 80px;
+    height: 282px;
+
+    font-size: 60pt;
+    font-family: 'Josefin Sans', sans-serif;
+    color: #e8e8e8;
+    text-align: center;
+
+    transition-property: color, font-size;
+    transition-duration: 0.1s;
+    transition-delay: 0s;
+    transition-timing-function: ease-in-out;
+}
+
+.add_post:hover {
+    font-size: 65pt;
+    color: #c9c9c9;
+    cursor: pointer;
+}
+
+.add_post:active {
+    font-size: 50pt;
+    color: #c9c9c9;
+    cursor: pointer;
 }
