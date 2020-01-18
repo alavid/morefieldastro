@@ -211,40 +211,6 @@ app.post('/DBRequest', function(req, res) {
     }
 });
 
-app.post('/get', function(req, res) {
-
-    id = req.body.id;
-    table = req.body.table;
-
-    db.one( 'SELECT * FROM $1 WHERE "pid" = $2', [table, id])
-    .then(function(data) {
-
-        var response = data;
-        res.status(200).send(response);
-
-    }).catch(function(err) {
-
-        var response = {status: "Failure: Internal server error"};
-        res.status(400).send(response);
-
-    })
-});
-
-app.post('/update', function(req, res) {
-
-    id = req.body.id;
-    table = req.body.table;
-    values = req.body.values;
-
-    columnClause
-    for (i = 0; i < values.length; i++) {
-
-
-    }
-
-    db.none('UPDATE ')
-});
-
 //Start Server
 
 app.listen(port, function() {
