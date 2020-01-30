@@ -1,3 +1,15 @@
+////////////////////////////////////////////////////////////////////////////////
+// ADMIN CONTROLS SCRIPT - Written by Alex Morefield (2020)                   //
+// - POPULATE: Populates the page. displays and arranges all of the posts in  //
+// | the system, with buttons to interact with them.                          //
+// - EDITMODAL: Generates, and defines event listeners for a modal to edit    //
+// | posts.                                                                   //
+// | - Argument "id": The id of the post being edited.                        //
+// - ADDMODAL: Generates, and defines event listeners for a modal to add      //
+// | posts.                                                                   //
+// | - Argument "collection": The collection the post is being inserted into  //
+////////////////////////////////////////////////////////////////////////////////
+
 window.onload = function() {
 
     let content = document.getElementById("admin-content");
@@ -9,7 +21,7 @@ window.onload = function() {
                             "   Email Address:<br>" +
                             "   <input type='text' id='email' name='Email'><br>" +
                             "   Password:<br>" +
-                            "   <input type='text' id='password' name='Email'><br>" +
+                            "   <input type='password' id='password' name='Email'><br>" +
                             "   <button type='button' id='LogIn'>Log In</button>" +
                             "</form>";
 
@@ -47,6 +59,8 @@ function populate() {
     postEditbuttons = [];
     addPostButtons = [];
 
+    document.getElementById("shadow").style.display = 'none';
+
     $.ajax({
         url: "getEntries",
         type: "POST",
@@ -77,7 +91,8 @@ function populate() {
 
                     newPost.innerHTML = "<img class='thumbnail' src='" + response.posts[n].image_loc + "'>" +
                                         "<h3 class='text'>" + response.posts[n].title + "</h3>" +
-                                        "<button class='edit_post' onClick='editPost(this.id)' id='ep" + response.posts[n].pid + "'>Edit</button>";
+                                        "<button class='edit_post' onClick='editPost(this.id)' id='ep" + response.posts[n].pid + "'>Edit</button>" +
+                                        "<button class='delete_post' onClick='deletePost(this.id)' id='dp" + response.posts[n].pid + "'>Delete</button>";
 
                     cols[i].appendChild(newPost);
                 }
@@ -85,6 +100,7 @@ function populate() {
             var addPostButton = document.createElement("button");
             addPostButton.setAttribute("class", "add_post");
             addPostButton.setAttribute("id", "ap" + response.collections[i].cid);
+            addPostButton.setAttribute("onClick", "addPost(this.id)");
             addPostButton.innerHTML = "+";
             cols[i].appendChild(addPostButton);
         }
@@ -93,13 +109,16 @@ function populate() {
     });
 }
 
+
+
 function editPost(id) {
 
-    let content = document.getElementById("admin-content");
+    document.getElementById("shadow").style.display = 'block';
 
     var split = id.split("ep");
     var postID = split[1];
 
+    //Get info for post edit modal
     $.ajax({
         url: "DBRequest",
         type: "POST",
@@ -107,28 +126,163 @@ function editPost(id) {
         data: { data:
                 JSON.stringify(
                 { query: "SELECT * FROM post WHERE pid = $1",
-                vars: [postID],
-                type: "get"})}
+                  vars: [postID],
+                  type: "get"})}
     }).done(function(response) {
 
+        //Construct modal
         var editModal = document.createElement("div");
         editModal.setAttribute("class", "post_modal");
         editModal.setAttribute("id", "post_edit_modal");
 
-        editModal.innerHTML =   "Title<input type='text' id='post_title' name='title' value='" + response[0].title + "'><br>" +
-                                "Description<input type='text' id='post_desc' name='description' value='" + response[0].description + "'><br>" +
-                                "Price<input type='text' id='post_price' name='price' value='" + response[0].price + "'><br>" +
-                                "<button class='submit' id='submit_post_edit'>Submit</button>" +
-                                "<button class='cancel' id='cancel_post_edit'>Cancel</button>";
+        editModal.innerHTML =   "<img class='thumbnail' src='" + response[0].image_loc + "'><br>" +
+                                "<div id='error'></div>" +
+                                "<p class='modal_thumb text'>Thumbnail</p><input type='file' id='file' name='file'><br>" +
+                                "<p class='modal_title text'>Title</p><input type='text' id='post_title' name='title' value='" + response[0].title + "'><br>" +
+                                "<p class='modal_desc text'>Description</p><textarea id='post_desc' name='description'>" + response[0].description + "</textarea><br>" +
+                                "<p class='modal_price text'>Price</p><input type='text' id='post_price' name='price' value='" + response[0].price + "'><br>" +
+                                "<button type='button' class='submit' id='submit_post_edit'>Submit</button>" +
+                                "<button type='button' class='cancel' id='cancel_post_edit'>Cancel</button>";
 
-        content.appendChild(editModal);
+        document.body.appendChild(editModal);
+
+        //Create submit/cancel listeners
+        submit = document.getElementById("submit_post_edit");
+        cancel = document.getElementById("cancel_post_edit");
+
+        submit.onclick = function() {
+
+            if ($("#file").prop("files").length > 0) {
+
+                var fileData = $("#file").prop("files")[0];
+                var formData = new FormData;
+                formData.append("file", fileData);
+
+                $.ajax({
+                    url: "upload",
+                    dataType: "text",
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    data: formData,
+                    type: "POST",
+                }).done(function(res) {
+
+                    submitText();
+
+                }).catch(function(err) {
+
+                    if (err.status === 400) {
+                        document.getElementById("error").innerHTML = "Internal server error, please try again.</p>";
+                    }
+
+                    else if (err.status === 403) {
+                        document.getElementById("error").innerHTML = "Only png and jpeg files are accepted.";
+                    }
+                });
+
+            } else submitText();
+        }
+
+        cancel.onclick = function() {
+
+            document.getElementById("shadow").style.display = 'none';
+            document.body.removeChild(document.getElementById("post_edit_modal"));
+        }
+
+        //Helper function for submiting text fields
+        function submitText() {
+
+            if ($("#file").prop("files").length > 0) var path = "Images/" + $("#file").prop("files")[0].name;
+            else var path = response[0].image_loc;
+            var title = document.getElementById("post_title").value;
+            var description = document.getElementById("post_desc").value;
+            var price = document.getElementById("post_price").value;
+
+            $.ajax({
+                url: "DBRequest",
+                type: "POST",
+                async: false,
+                data: { data:
+                        JSON.stringify(
+                        { query: "UPDATE post SET title = $1, description = $2, price = $3, image_loc = $5 WHERE pid = $4",
+                          vars: [title, description, price, postID, path],
+                          type: "update"})}
+            }).done(function(res) {
+                document.body.removeChild(document.getElementById("post_edit_modal"));
+                populate();
+            }).catch(function(err) {
+                editModal.innerHTML += "<p class='error'>Internal server error, please try again.</p>";
+            });
+        }
     });
+}
+
+
+
+function addPost(collection) {
+
+    document.getElementById("shadow").style.display = 'block';
+
+    var split = collection.split("ap");
+    var colID = split[1];
+
+    var addModal = document.createElement("div");
+    addModal.setAttribute("class", "post_modal");
+    addModal.setAttribute("id", "post_add_modal");
+
+    addModal.innerHTML =    "<div id='error'></div>" +
+                            "<p class='modal_thumb text'>Thumbnail</p><input type='file' id='file' name='file'><br>" +
+                            "<p class='modal_title text'>Title</p><input type='text' id='post_title' name='title'><br>" +
+                            "<p class='modal_desc text'>Description</p><textarea id='post_desc' name='description'></textarea><br>" +
+                            "<p class='modal_price text'>Price</p><input type='text' id='post_price' name='price'><br>" +
+                            "<button type='button' class='submit' id='submit_post_edit'>Submit</button>" +
+                            "<button type='button' class='cancel' id='cancel_post_edit'>Cancel</button>";
+
+    document.body.appendChild(addModal);
 
     submit = document.getElementById("submit_post_edit");
     cancel = document.getElementById("cancel_post_edit");
 
     submit.onclick = function() {
 
+        var fileData = $("#file").prop("files")[0];
+        var formData = new FormData;
+        formData.append("file", fileData);
+
+        $.ajax({
+            url: "upload",
+            dataType: "text",
+            cache: false,
+            contentType: false,
+            processData: false,
+            data: formData,
+            type: "POST",
+        }).done(function(res) {
+
+            submitText();
+
+        }).catch(function(err) {
+
+            if (err.status === 400) {
+                document.getElementById("error").innerHTML = "Internal server error, please try again.</p>";
+            }
+
+            else if (err.status === 403) {
+                document.getElementById("error").innerHTML = "Only png and jpeg files are accepted.";
+            }
+        });
+    }
+
+    cancel.onclick = function() {
+
+        document.getElementById("shadow").style.display = 'none';
+        document.body.removeChild(document.getElementById("post_add_modal"));
+    }
+
+    function submitText() {
+
+        var path = "Images/" + $("#file").prop("files")[0].name;
         var title = document.getElementById("post_title").value;
         var description = document.getElementById("post_desc").value;
         var price = document.getElementById("post_price").value;
@@ -139,14 +293,87 @@ function editPost(id) {
             async: false,
             data: { data:
                     JSON.stringify(
-                    { query: "UPDATE post SET title = $1, description = $2, price = $3 WHERE pid = $4",
-                    vars: [title, description, price, postID],
-                    type: "update"})}
-        }).done(function(response) {
-            content.removeChild(document.getElementById("post_edit_modal"));
+                    { query: "INSERT INTO post(image_loc, title, description, collection, price) VALUES($5, $1, $2, $4, $3)",
+                      vars: [title, description, price, colID, path],
+                      type: "insert"})}
+        }).done(function(res) {
+            document.body.removeChild(document.getElementById("post_add_modal"));
             populate();
+        }).catch(function(err) {
+            editModal.innerHTML += "<p class='error'>Internal server error, please try again.</p>";
         });
     }
+}
 
-    cancel.onclick = function() { content.removeChild(document.getElementById("post_edit_modal")); }
+
+
+function deletePost(id) {
+
+    document.getElementById("shadow").style.display = 'block';
+
+    var split = id.split("dp");
+    var postID = split[1];
+
+    $.ajax({
+        url: "DBRequest",
+        type: "POST",
+        async: false,
+        data: { data:
+                JSON.stringify(
+                { query: "SELECT title, image_loc FROM post WHERE pid = $1",
+                  vars: [postID],
+                  type: "get"})}
+    }).done(function(response) {
+
+        var confirmModal = document.createElement("div");
+        confirmModal.setAttribute("class", "confirm_modal");
+        confirmModal.setAttribute("id", "confirm_delete_modal");
+
+        confirmModal.innerHTML =    "<div id='error'></div>" +
+                                    "<p class='confirm_modal_text'>Are you sure you want to delete " + response[0].title + "?</p>" +
+                                    "<button type='button' class='submit' id='submit_post_delete'>Yes</button>" +
+                                    "<button type='button' class='cancel' id='cancel_post_delete'>No</button>";
+
+        document.body.appendChild(confirmModal);
+
+        submit = document.getElementById("submit_post_delete");
+        cancel = document.getElementById("cancel_post_delete");
+
+        submit.onclick = function() {
+
+            $.ajax({
+                url: "DBRequest",
+                type: "POST",
+                async: false,
+                data: { data:
+                        JSON.stringify(
+                        { query: "DELETE FROM post WHERE pid = $1",
+                          vars: [postID],
+                          type: "delete"})}
+            }).done(function(res) {
+
+                $.ajax({
+                    url: "delete",
+                    type: "POST",
+                    data: {data: JSON.stringify({fileName: response[0].image_loc})}
+                }).done(function(res) {
+
+                    document.body.removeChild(document.getElementById("confirm_delete_modal"));
+                    populate();
+                }).catch(function(err) {
+
+                    document.getElementById("error").innerHTML = "Internal server error, please try again."
+                });
+            }).catch(function(err) {
+
+                document.getElementById("error").innerHTML = "Internal server error, please try again."
+            });
+        }
+
+        cancel.onclick = function() {
+
+            document.getElementById("shadow").style.display = 'none';
+            document.body.removeChild(document.getElementById("confirm_delete_modal"));
+        }
+    });
 }
