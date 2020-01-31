@@ -14,9 +14,9 @@ window.onload = function() {
 
     let content = document.getElementById("admin-content");
 
-    populate();
+    //populate();
 
-    /*content.innerHTML +=    "<p>Log into and an account with admin access to continue.</p>" +
+    content.innerHTML +=    "<p>Log into and an account with admin access to continue.</p>" +
                             "<form>" +
                             "   Email Address:<br>" +
                             "   <input type='text' id='email' name='Email'><br>" +
@@ -47,7 +47,7 @@ window.onload = function() {
                 alert(err.status);
             });
         }
-    }*/
+    }
 }
 
 function populate() {
