@@ -8,7 +8,7 @@
 // - ADDMODAL: Generates, and defines event listeners for a modal to add      //
 // | posts.                                                                   //
 // | - Argument "collection": The collection the post is being inserted into  //
-////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////funky
 
 window.onload = function() {
 
