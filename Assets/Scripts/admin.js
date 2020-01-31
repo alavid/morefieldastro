@@ -195,9 +195,9 @@ function editPost(id) {
 
             if ($("#file").prop("files").length > 0) var path = "Images/" + $("#file").prop("files")[0].name;
             else var path = response[0].image_loc;
-            var title = document.getElementById("post_title").value;
-            var description = document.getElementById("post_desc").value;
-            var price = document.getElementById("post_price").value;
+            var title = DOMPurify.sanitize(document.getElementById("post_title").value);
+            var description = DOMPurify.sanitize(document.getElementById("post_desc").value);
+            var price = DOMPurify.sanitize(document.getElementById("post_price").value);
 
             $.ajax({
                 url: "DBRequest",
@@ -283,9 +283,9 @@ function addPost(collection) {
     function submitText() {
 
         var path = "Images/" + $("#file").prop("files")[0].name;
-        var title = document.getElementById("post_title").value;
-        var description = document.getElementById("post_desc").value;
-        var price = document.getElementById("post_price").value;
+        var title = DOMPurify.sanitize(document.getElementById("post_title").value);
+        var description = DOMPurify.sanitize(document.getElementById("post_desc").value);
+        var price = DOMPurify.sanitize(document.getElementById("post_price").value);
 
         $.ajax({
             url: "DBRequest",

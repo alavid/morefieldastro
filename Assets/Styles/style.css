@@ -56,7 +56,6 @@ header {
     margin-bottom: 5px;
 
     width: 250px;
-    height: 250px;
 }
 
 .post_container {
@@ -93,7 +92,7 @@ h3{
 
 .add_post {
     width: 80px;
-    height: 282px;
+    height: auto;
 
     font-size: 60pt;
     font-family: 'Josefin Sans', sans-serif;
@@ -119,10 +118,11 @@ h3{
 }
 
 .post_modal, .confirm_modal {
-    position: absolute;
+    position: fixed;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
+    z-index: 2;
 
     background-color: white;
     border-style: solid;
@@ -137,12 +137,13 @@ h3{
 #shadow {
     background: black;
     display: none;
-    position: absolute;
+    position: fixed;
     top: 0;
     right: 0;
     bottom: 0;
     left: 0;
     opacity: 0.5;
+    z-index: 1;
 }
 
 #post_desc {
@@ -158,7 +159,7 @@ h3{
     margin-bottom: 3px;
 }
 
-.submit, .cancel {
+.submit, .cancel, .edit_post, .delete_post {
     position: relative;
 
     top: 0px;
@@ -186,27 +187,27 @@ h3{
     transition-timing-function: ease-in-out;
 }
 
-.submit:hover {
+.submit:hover, .edit_post:hover {
     background-color: #8b3cfa;
 }
 
-.submit:active {
+.submit:active, .edit_post:active {
     background-color: #6918db;
     top: 5px;
     border-width: 0px;
 }
 
-.cancel {
+.cancel, .delete_post {
     background-color: #f7f7f7;
     color: #1c1c1c;
     border-color: #e3e3e3;
 }
 
-.cancel:hover {
+.cancel:hover, .delete_post:hover {
     background-color: white;
 }
 
-.cancel:active {
+.cancel:active, .delete_post:active {
     background-color: #f7f7f7;
     top: 5px;
     border-width: 0px;
