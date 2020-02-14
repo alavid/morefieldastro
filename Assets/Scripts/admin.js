@@ -8,15 +8,15 @@
 // - ADDMODAL: Generates, and defines event listeners for a modal to add      //
 // | posts.                                                                   //
 // | - Argument "collection": The collection the post is being inserted into  //
-////////////////////////////////////////////////////////////////////////////////funky
+////////////////////////////////////////////////////////////////////////////////
 
 window.onload = function() {
 
     let content = document.getElementById("admin-content");
 
-    //populate();
+    populate();
 
-    content.innerHTML +=    "<p>Log into and an account with admin access to continue.</p>" +
+    /*content.innerHTML +=    "<p>Log into and an account with admin access to continue.</p>" +
                             "<form>" +
                             "   Email Address:<br>" +
                             "   <input type='text' id='email' name='Email'><br>" +
@@ -44,10 +44,11 @@ window.onload = function() {
                 if (response.authorize) populate();
                 else alert("You don't have access");
             }).catch(function(err) {
-                alert(err.status);
+                console.log(JSON.stringify(err));
+                alert(err.message);
             });
         }
-    }
+    }*/
 }
 
 function populate() {
@@ -168,7 +169,7 @@ function editPost(id) {
                     type: "POST",
                 }).done(function(res) {
 
-                    submitText();
+                    submitText(JSON.parse(res).cube);
 
                 }).catch(function(err) {
 
@@ -191,9 +192,9 @@ function editPost(id) {
         }
 
         //Helper function for submiting text fields
-        function submitText() {
+        function submitText(cube) {
 
-            if ($("#file").prop("files").length > 0) var path = "Images/" + $("#file").prop("files")[0].name;
+            if ($("#file").prop("files").length > 0) var path = "https://cloud-cube.s3.amazonaws.com/" + cube + "/public/" + $("#file").prop("files")[0].name;
             else var path = response[0].image_loc;
             var title = DOMPurify.sanitize(document.getElementById("post_title").value);
             var description = DOMPurify.sanitize(document.getElementById("post_desc").value);
@@ -260,7 +261,7 @@ function addPost(collection) {
             type: "POST",
         }).done(function(res) {
 
-            submitText();
+            submitText(JSON.parse(res).cube);
 
         }).catch(function(err) {
 
@@ -280,9 +281,9 @@ function addPost(collection) {
         document.body.removeChild(document.getElementById("post_add_modal"));
     }
 
-    function submitText() {
+    function submitText(cube) {
 
-        var path = "Images/" + $("#file").prop("files")[0].name;
+        var path = "https://cloud-cube.s3.amazonaws.com/" + cube + "/public/" + $("#file").prop("files")[0].name;
         var title = DOMPurify.sanitize(document.getElementById("post_title").value);
         var description = DOMPurify.sanitize(document.getElementById("post_desc").value);
         var price = DOMPurify.sanitize(document.getElementById("post_price").value);

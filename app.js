@@ -8,27 +8,49 @@ let cookieParser = require("cookie-parser");
 let logger = require("morgan");
 let bcrypt = require("bcryptjs");
 let multer = require("multer");
+let AWS = require("aws-sdk");
+let pgp = require("pg-promise")({promiseLib: promise});
 
-const initOptions = {
-    promiseLib: promise
-}
-let pgp = require("pg-promise")(initOptions);
 
-// Hardcoded database connection data for running locally.
-// Needs to be reset every few weeks, comment out before making commits.
+//Establish database connection
+//NOTE: IF RUNNING LOCALLY, process.env will only work if you copy the heroku config vars to a .env file.
+//  Check all config vars with command "heroku config -a morefield-astro"
+//  Add each variable to .env with command "heroku config:get <varname> -a morefield-astro -s >> .env"
+//  Database credentials are rotated occasionally, so if the connection is failing make sure the .env still contains the right var.
+
+var conString = process.env.DATABASE_URL;
+
+var conData = conString.split(/\/|@|:/);
+
 const cn = {
-    host: "ec2-107-22-216-151.compute-1.amazonaws.com",
-    port: 5432,
-    database: "d2risv9l0s4qkg",
-    user: "sziueutmcjzjtv",
-    password: "fd7d58d2bdb9952599ba3a03b6a8286fa9efc8a05e296b375458f2235aed26e3",
+    host: conData[5],
+    port: conData[6],
+    database: conData[7],
+    user: conData[3],
+    password: conData[4],
     ssl: true
 };
 
-// Env variable for database connection for use in Heroku environment.
-
-
 let db = pgp(cn);
+
+
+//Configuring S3 cube
+
+var url = process.env.CLOUDCUBE_URL;
+
+var urlData = url.split(/\/|\./);
+
+let ID = process.env.CLOUDCUBE_ACCESS_KEY_ID;
+let SECRET = process.env.CLOUDCUBE_SECRET_ACCESS_KEY;
+let BUCKET = urlData[2];
+let CUBE = urlData[6]
+
+const s3 = new AWS.S3({
+    accessKeyId: ID,
+    secretAccessKey: SECRET
+});
+
+//Configuring server
 
 let app = express();
 let port = process.env.PORT || 3000;
@@ -73,24 +95,24 @@ app.post('/logIn', function(req, res) {
 
             if (err) {
 
-                res.status(400).send({status: "Failure: Internal server error", authorize: false});
+                res.status(400).send({message: "Failure: Internal server error", authorize: false});
                 return;
             }
 
             if (result) {
 
-                if (data.admin_status) var response = {status: "Success", authorize: true};
-                else var response = {status: "Success", authorize: false};
+                if (data.admin_status) var response = {message: "Success", authorize: true};
+                else var response = {message: "Success", authorize: false};
             }
-            else var response = {status: "Failure: Incorrect password", authorize: false};
+            else var response = {message: "Failure: Incorrect password", authorize: false};
 
             res.status(200).send(response);
         });
 
     }).catch(function(err) {
 
-        var response = {status: "Failure: account not found", authorize: "No"};
-        res.status(400).send(response);
+        console.log(JSON.stringify(err));
+        res.status(400).send({message: "Failure: account not found", authorize: "No"});
     });
 });
 
@@ -103,14 +125,14 @@ app.post('/signUp', function(req, res) {
     bcrypt.genSalt(10, function(err, salt) {
 
         if (err) {
-            res.status(400).send({status: "Failure: Internal server error", authorize: false});
+            res.status(400).send({message: "Failure: Internal server error", authorize: false});
             return;
         }
 
         bcrypt.hash(password, salt, function(err, hash) {
 
             if (err) {
-                res.status(400).send({status: "Failure: Internal server error"});
+                res.status(400).send({message: "Failure: Internal server error"});
                 return;
             }
 
@@ -118,11 +140,11 @@ app.post('/signUp', function(req, res) {
                     'VALUES($1, $2, false)', [email, hash])
             .then(function(data) {
 
-                res.status(200).send({status: "Success"});
+                res.status(200).send({message: "Success"});
 
             }).catch(function(data) {
 
-                res.status(400).send({status: "Failure: Internal server error"});
+                res.status(400).send({message: "Failure: Internal server error"});
             })
         });
 
@@ -159,8 +181,6 @@ app.post('/getEntries', function(req, res) {
 app.post('/DBRequest', function(req, res) {
 
     let data = JSON.parse(req.body.data);
-
-    console.log(req.body.data);
 
     let query = data.query;
     let vars = data.vars;
@@ -203,37 +223,46 @@ app.post('/DBRequest', function(req, res) {
 
 app.post('/upload', upload.single("file"), function(req, res) {
 
-    const tempPath = req.file.path;
-    const targetPath = path.join(__dirname, "./Assets/Images/" + req.file.originalname);
+    const content = fs.readFileSync(req.file.path);
 
-    if (path.extname(req.file.originalname).toLowerCase() === ".png"
-        || path.extname(req.file.originalname).toLowerCase() === ".jpg") {
-
-        fs.rename(tempPath, targetPath, function(err) {
-
-            if (err) res.status(400).send({message: "Failure: Internal server error"});
-            else res.status(200).send({message: "Success"});
-        });
+    const params = {
+        Bucket: BUCKET,
+        Key: CUBE + "/public/" + req.file.originalname,
+        Body: content
     }
-    else {
-        fs.unlink(tempPath, function(err) {
 
-            if (err) res.status(400).send({message: "Failure: Internal server error"});
-            else res.status(403).send({message: "Failure: Only png and jpeg accepted"});
-        });
-    }
+    s3.upload(params, function(err, data) {
+        if (err) {
+            console.log(err);
+            res.status(400).send({message: "Failure: Internal server error"});
+        }
+        else {
+            var response = {message: "Success", cube: CUBE};
+            res.status(200).send(response);
+        }
+    });
 })
 
 app.post("/delete", function(req, res) {
 
     let data = JSON.parse(req.body.data);
 
-    const targetPath = path.join(__dirname, "./Assets/" + data.fileName);
+    var pathData = data.fileName.split("/");
 
-    fs.unlink(targetPath, function(err) {
+    const params = {
+        Bucket: BUCKET,
+        Key: pathData[3] + "/" + pathData[4] + "/" + pathData[5],
+    }
 
-        if (err) res.status(400).send({message: "Failure: Internal server error"});
-        else res.status(200).send({message: "Success"});
+    s3.deleteObject(params, function(err, data) {
+        if (err) {
+            console.log(err);
+            res.status(400).send({message: "Failure: Internal server error"});
+        }
+        else {
+            var response = {message: "Success"};
+            res.status(200).send(response);
+        }
     });
 })
 
