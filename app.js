@@ -65,6 +65,8 @@ app.use(cookieParser());
 app.use(express.static(__dirname + 'Assets'));
 app.use(express.static(path.join(__dirname, 'Assets')));
 
+const upload = multer({ dest: "uploads/" });
+
 //Web Pages
 
 app.get('/', function(req, res) {
