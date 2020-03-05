@@ -1,5 +1,5 @@
 body {
-    background-color: #f7f7f7;
+    background-color: black;
 }
 
 #bio {
@@ -14,7 +14,7 @@ body {
 }
 
 header {
-    font-size: 20pt;
+    font-size: 16pt;
 
     text-align: center;
 }
@@ -37,7 +37,7 @@ header {
     display:block;
 
     border-style: solid;
-    border-color: #e8e8e8;
+    border-color: #141414;
 
     padding: 15px;
 }
@@ -47,9 +47,9 @@ header {
 }
 
 .post, .add_post {
-    background-color: white;
+    background-color: #141414;
 
-    border-width: 1px;
+    border-width: 0px;
     border-radius: 3px;
 
     margin-right: 5px;
@@ -65,8 +65,12 @@ header {
 }
 
 .text {
-    font-family: 'Josefin Sans', sans-serif;
-    color: #1c1c1c;
+    font-family: 'Roboto', sans-serif;
+    color: white;
+}
+
+.col_desc {
+    color: #919191;
 }
 
 h2 {
@@ -88,6 +92,8 @@ h3{
 
     margin-top: 0px;
     margin-bottom: 10px;
+
+    white-space: pre-wrap;
 }
 
 .add_post {
@@ -117,7 +123,7 @@ h3{
     cursor: pointer;
 }
 
-.post_modal, .confirm_modal {
+.post_modal, .confirm_modal, .col_modal {
     position: fixed;
     left: 50%;
     top: 50%;
@@ -146,34 +152,33 @@ h3{
     z-index: 1;
 }
 
-#post_desc {
+#post_desc, #col_desc {
     width: 390px;
-    height: 72px;
+    height: 100px;
 }
 
 .modal_title, .modal_desc, .modal_price, .modal_thumb, .confirm_modal_text {
     font-family: 'Roboto', sans-serif;
+    color: black;
     font-size: 11pt;
     font-weight: bold;
     margin-top: 8px;
     margin-bottom: 3px;
 }
 
-.submit, .cancel, .edit_post, .delete_post {
-    position: relative;
+.submit, .cancel, .edit_button, .delete_button, #add_col {
 
-    top: 0px;
-    background-color: #6918db;
+    background-color: #141414;
     color: white;
     font-family: 'Roboto', sans-serif;
     font-size: 11pt;
     font-weight: bold;
     letter-spacing: 0.8pt;
     text-align: center;
-    border-width: 0px 0px 5px 0px;
+    border-width: 2px;
+    border-radius: 9px;
     border-style: solid;
-    border-color: #5b15bd;
-    border-radius: 20px;
+    border-color: #262626;
     cursor: pointer;
 
     margin-top: 20px;
@@ -187,28 +192,44 @@ h3{
     transition-timing-function: ease-in-out;
 }
 
-.submit:hover, .edit_post:hover {
-    background-color: #8b3cfa;
+.cancel:hover, .delete_button:hover, .submit:hover, .edit_button:hover, #add_col:hover {
+    background-color: #262626;
 }
 
-.submit:active, .edit_post:active {
-    background-color: #6918db;
-    top: 5px;
-    border-width: 0px;
+#col_header {
+
+    display: flex;
 }
 
-.cancel, .delete_post {
-    background-color: #f7f7f7;
-    color: #1c1c1c;
-    border-color: #e3e3e3;
+.edit_col_button, .delete_col_button {
+
+    margin: 10px;
 }
 
-.cancel:hover, .delete_post:hover {
-    background-color: white;
+.col_buttons {
+
+    display: inline-block;
+    margin-left: auto;
 }
 
-.cancel:active, .delete_post:active {
-    background-color: #f7f7f7;
-    top: 5px;
-    border-width: 0px;
+.feat_note {
+
+    background-color: #2ed95b;
+    color: white;
+    font-family: 'Roboto', sans-serif;
+    font-size: 11pt;
+    font-weight: bold;
+    letter-spacing: 0.8pt;
+    text-align: center;
+    border-width: 2px;
+    border-radius: 9px;
+    border-style: solid;
+    border-color: #29c251;
+    margin: 10px;
+    width: 90px;
+    padding: 6px 0px;
+}
+
+#error {
+    color: red;
 }

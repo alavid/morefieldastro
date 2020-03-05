@@ -17,7 +17,8 @@ window.onload = function() {
     //populate();
 
     content.innerHTML +=    "<p>Log into and an account with admin access to continue.</p>" +
-                            "<form>" +
+                            "<p id='error' class='text'></p>" +
+                            "<form id='login' class='text'>" +
                             "   Email Address:<br>" +
                             "   <input type='text' id='email' name='Email'><br>" +
                             "   Password:<br>" +
@@ -42,10 +43,13 @@ window.onload = function() {
                 }
             }).done(function(response) {
                 if (response.authorize) populate();
-                else alert("You don't have access");
+                else if (response.message === "Failure: Incorrect password") document.getElementById("error").innerHTML = response.message;
+                else document.getElementById("error").innerHTML = "You don't have access";
             }).catch(function(err) {
-                console.log(JSON.stringify(err));
-                alert(err.message);
+
+                error = JSON.parse(err.responseText).message
+
+                document.getElementById("error").innerHTML = error;
             });
         }
     }
@@ -63,50 +67,100 @@ function populate() {
     document.getElementById("shadow").style.display = 'none';
 
     $.ajax({
-        url: "getEntries",
+        url: "DBRequest",
         type: "POST",
         async: false,
-        data: {}
-    }).done(function(response) {
+        data: { data:
+                JSON.stringify(
+                { query: "SELECT cid FROM collection WHERE featured = true",
+                  vars: [],
+                  type: "get"})}
+    }).done(function(feat) {
 
-        content.innerHTML = "";
-        cols = [];
+        $.ajax({
+            url: "getEntries",
+            type: "POST",
+            async: false,
+            data: {}
+        }).done(function(response) {
 
-        for (i = 0; i < response.collections.length; i++) {
+            content.innerHTML = "";
+            cols = [];
 
-            content.innerHTML +=    "<div class='col_container' id='" + response.collections[i].cid + "'>" +
-                                    "   <h2 class='text'>" + response.collections[i].title + "</h2>" +
-                                    "   <p class='text col_desc'>" + response.collections[i].description + "</p>" +
-                                    "   <div class='post_container' id='pc_" + response.collections[i].cid + "'></div>" +
-                                    "</div>";
+            for (i = 0; i < response.collections.length; i++) {
 
-            cols[i] = document.getElementById("pc_" + response.collections[i].cid);
+                content.innerHTML +=    "<div class='col_container' id='" + response.collections[i].cid + "'>" +
+                                        "   <div id='col_header'>" +
+                                        "       <div id='col_info'>" +
+                                        "           <h2 class='text'>" + response.collections[i].title + "</h2>" +
+                                        "           <p class='text col_desc'>" + response.collections[i].description + "</p>" +
+                                        "       </div>" +
+                                        "       <div class='col_buttons' id='cb" + response.collections[i].cid + "'>" +
+                                        "           <button class='edit_button edit_col_button' onClick='editCollection(this.id)' id='ec" + response.collections[i].cid + "'>Edit</button>" +
+                                        "           <button class='delete_button delete_col_button' onClick='deleteCollection(this.id)' id='dc" + response.collections[i].cid + "'>Delete</button>" +
+                                        "       </div>" +
+                                        "   </div>" +
+                                        "   <div class='post_container' id='pc_" + response.collections[i].cid + "'></div>" +
+                                        "</div>";
 
-            for (n = 0; n < response.posts.length; n++) {
+                if (response.collections[i].cid === feat[0].cid) {
 
-                if (response.posts[n].collection === response.collections[i].cid) {
+                    var featNote = document.createElement("button");
+                    featNote.setAttribute("class", "feat_note");
 
-                    var newPost = document.createElement("div");
-                    newPost.setAttribute("class", "post");
-                    newPost.setAttribute("id", "post" + response.posts[n].pid);
+                    featNote.innerHTML = "<i>Featured</i>";
 
-                    newPost.innerHTML = "<img class='thumbnail' src='" + response.posts[n].image_loc + "'>" +
-                                        "<h3 class='text'>" + response.posts[n].title + "</h3>" +
-                                        "<button class='edit_post' onClick='editPost(this.id)' id='ep" + response.posts[n].pid + "'>Edit</button>" +
-                                        "<button class='delete_post' onClick='deletePost(this.id)' id='dp" + response.posts[n].pid + "'>Delete</button>";
-
-                    cols[i].appendChild(newPost);
+                    var colButtons = document.getElementById("cb" + response.collections[i].cid);
+                    colButtons.insertBefore(featNote, colButtons.firstChild);
                 }
+                else {
+
+                    var featButton = document.createElement("button");
+                    featButton.setAttribute("class", "edit_button edit_col_button");
+                    featButton.setAttribute("id", "fb" + response.collections[i].cid);
+                    featButton.setAttribute("onClick", "feature(this.id)");
+
+                    featButton.innerHTML = "Feature";
+
+                    var colButtons = document.getElementById("cb" + response.collections[i].cid);
+                    colButtons.insertBefore(featButton, colButtons.firstChild);
+                }
+
+                cols[i] = document.getElementById("pc_" + response.collections[i].cid);
+
+                for (n = 0; n < response.posts.length; n++) {
+
+                    if (response.posts[n].collection === response.collections[i].cid) {
+
+                        var newPost = document.createElement("div");
+                        newPost.setAttribute("class", "post");
+                        newPost.setAttribute("id", "post" + response.posts[n].pid);
+
+                        newPost.innerHTML = "<img class='thumbnail' src='" + response.posts[n].image_loc + "'>" +
+                                            "<h3 class='text'>" + response.posts[n].title + "</h3>" +
+                                            "<button class='edit_button' onClick='editPost(this.id)' id='ep" + response.posts[n].pid + "'>Edit</button>" +
+                                            "<button class='delete_button' onClick='deletePost(this.id)' id='dp" + response.posts[n].pid + "'>Delete</button>";
+
+                        cols[i].appendChild(newPost);
+                    }
+                }
+                var addPostButton = document.createElement("button");
+                addPostButton.setAttribute("class", "add_post");
+                addPostButton.setAttribute("id", "ap" + response.collections[i].cid);
+                addPostButton.setAttribute("onClick", "addPost(this.id)");
+                addPostButton.innerHTML = "+";
+                cols[i].appendChild(addPostButton);
             }
-            var addPostButton = document.createElement("button");
-            addPostButton.setAttribute("class", "add_post");
-            addPostButton.setAttribute("id", "ap" + response.collections[i].cid);
-            addPostButton.setAttribute("onClick", "addPost(this.id)");
-            addPostButton.innerHTML = "+";
-            cols[i].appendChild(addPostButton);
-        }
-    }).catch(function(err) {
-        alert(err.status);
+
+            var addColButton = document.createElement("button");
+            addColButton.setAttribute("id", "add_col");
+            addColButton.setAttribute("onClick", "addCollection()");
+            addColButton.innerHTML = "Add Collection";
+            content.appendChild(addColButton);
+
+        }).catch(function(err) {
+            alert(err.status);
+        });
     });
 }
 
@@ -196,9 +250,9 @@ function editPost(id) {
 
             if ($("#file").prop("files").length > 0) var path = "https://cloud-cube.s3.amazonaws.com/" + cube + "/public/" + $("#file").prop("files")[0].name;
             else var path = response[0].image_loc;
-            var title = DOMPurify.sanitize(document.getElementById("post_title").value);
-            var description = DOMPurify.sanitize(document.getElementById("post_desc").value);
-            var price = DOMPurify.sanitize(document.getElementById("post_price").value);
+            var title = document.getElementById("post_title").value;
+            var description = document.getElementById("post_desc").value;
+            var price = document.getElementById("post_price").value;
 
             $.ajax({
                 url: "DBRequest",
@@ -213,7 +267,7 @@ function editPost(id) {
                 document.body.removeChild(document.getElementById("post_edit_modal"));
                 populate();
             }).catch(function(err) {
-                editModal.innerHTML += "<p class='error'>Internal server error, please try again.</p>";
+                document.getElementById("error").innerHTML = "Internal server error, please try again.";
             });
         }
     });
@@ -237,13 +291,13 @@ function addPost(collection) {
                             "<p class='modal_title text'>Title</p><input type='text' id='post_title' name='title'><br>" +
                             "<p class='modal_desc text'>Description</p><textarea id='post_desc' name='description'></textarea><br>" +
                             "<p class='modal_price text'>Price</p><input type='text' id='post_price' name='price'><br>" +
-                            "<button type='button' class='submit' id='submit_post_edit'>Submit</button>" +
-                            "<button type='button' class='cancel' id='cancel_post_edit'>Cancel</button>";
+                            "<button type='button' class='submit' id='submit_post'>Submit</button>" +
+                            "<button type='button' class='cancel' id='cancel_post'>Cancel</button>";
 
     document.body.appendChild(addModal);
 
-    submit = document.getElementById("submit_post_edit");
-    cancel = document.getElementById("cancel_post_edit");
+    submit = document.getElementById("submit_post");
+    cancel = document.getElementById("cancel_post");
 
     submit.onclick = function() {
 
@@ -284,9 +338,9 @@ function addPost(collection) {
     function submitText(cube) {
 
         var path = "https://cloud-cube.s3.amazonaws.com/" + cube + "/public/" + $("#file").prop("files")[0].name;
-        var title = DOMPurify.sanitize(document.getElementById("post_title").value);
-        var description = DOMPurify.sanitize(document.getElementById("post_desc").value);
-        var price = DOMPurify.sanitize(document.getElementById("post_price").value);
+        var title = document.getElementById("post_title").value;
+        var description = document.getElementById("post_desc").value;
+        var price = document.getElementById("post_price").value;
 
         $.ajax({
             url: "DBRequest",
@@ -301,7 +355,7 @@ function addPost(collection) {
             document.body.removeChild(document.getElementById("post_add_modal"));
             populate();
         }).catch(function(err) {
-            editModal.innerHTML += "<p class='error'>Internal server error, please try again.</p>";
+            document.getElementById("error").innerHTML = "Internal server error, please try again.";
         });
     }
 }
@@ -361,6 +415,7 @@ function deletePost(id) {
 
                     document.body.removeChild(document.getElementById("confirm_delete_modal"));
                     populate();
+
                 }).catch(function(err) {
 
                     document.getElementById("error").innerHTML = "Internal server error, please try again."
@@ -376,5 +431,237 @@ function deletePost(id) {
             document.getElementById("shadow").style.display = 'none';
             document.body.removeChild(document.getElementById("confirm_delete_modal"));
         }
+    });
+}
+
+
+function addCollection() {
+
+    document.getElementById("shadow").style.display = "block";
+
+    var addModal = document.createElement("div");
+    addModal.setAttribute("class", "col_modal");
+    addModal.setAttribute("id", "col_add_modal");
+
+    addModal.innerHTML =    "<div id='error'></div>" +
+                            "<p class='modal_title text'>Title</p><input type='text' id='col_title' name='title'><br>" +
+                            "<p class='modal_desc text'>Description</p><textarea id='col_desc' name='description'></textarea><br>" +
+                            "<button type='button' class='submit' id='submit_col'>Submit</button>" +
+                            "<button type='button' class='cancel' id='cancel_col'>Cancel</button>";
+
+    document.body.appendChild(addModal);
+
+    submit = document.getElementById("submit_col");
+    cancel = document.getElementById("cancel_col");
+
+    submit.onclick = function() {
+
+        var title = document.getElementById("col_title").value;
+        var description = document.getElementById("col_desc").value;
+
+        $.ajax({
+            url: "DBRequest",
+            type: "POST",
+            async: false,
+            data: { data:
+                    JSON.stringify({
+                        query: "INSERT INTO collection(title, description) VALUES($1, $2)",
+                        vars: [title, description],
+                        type: "insert"
+                    })}
+        }).done(function(res) {
+            document.body.removeChild(document.getElementById("col_add_modal"));
+            populate();
+        }).catch(function(err) {
+            document.getElementById("error").innerHTML = "Internal server error, please try again.";
+        })
+    }
+
+    cancel.onclick = function() {
+
+        document.getElementById("shadow").style.display = 'none';
+        document.body.removeChild(document.getElementById("col_add_modal"));
+    }
+}
+
+function editCollection(id) {
+
+    document.getElementById("shadow").style.display = "block";
+
+    var split = id.split("ec");
+    var colID = split[1];
+
+    $.ajax({
+        url: "DBRequest",
+        type: "POST",
+        async: false,
+        data: { data:
+                JSON.stringify(
+                { query: "SELECT * FROM collection WHERE cid = $1",
+                  vars: [colID],
+                  type: "get"})}
+    }).done(function(response) {
+
+        var editModal = document.createElement("div");
+        editModal.setAttribute("class", "col_modal");
+        editModal.setAttribute("id", "col_edit_modal");
+
+        editModal.innerHTML =   "<div id='error'></div>" +
+                                "<p class='modal_title text'>Title</p><input type='text' id='col_title' name='title' value='" + response[0].title + "'><br>" +
+                                "<p class='modal_desc text'>Description</p><textarea id='col_desc' name='description'>" + response[0].description + "</textarea><br>" +
+                                "<button type='button' class='submit' id='submit_col'>Submit</button>" +
+                                "<button type='button' class='cancel' id='cancel_col'>Cancel</button>";
+
+        document.body.appendChild(editModal);
+
+        submit = document.getElementById("submit_col");
+        cancel = document.getElementById("cancel_col");
+
+        submit.onclick = function() {
+
+            var title = document.getElementById("col_title").value;
+            var description = document.getElementById("col_desc").value;
+
+            $.ajax({
+                url: "DBRequest",
+                type: "POST",
+                async: false,
+                data: { data:
+                        JSON.stringify({
+                            query: "UPDATE collection SET title = $1, description = $2 WHERE cid = $3",
+                            vars: [title, description, response[0].cid],
+                            type: "update"
+                        })}
+            }).done(function(res) {
+                document.body.removeChild(document.getElementById("col_edit_modal"));
+                populate();
+            }).catch(function(err) {
+                document.getElementById("error").innerHTML = "Internal server error, please try again.";
+            })
+        }
+
+        cancel.onclick = function() {
+
+            document.getElementById("shadow").style.display = 'none';
+            document.body.removeChild(document.getElementById("col_edit_modal"));
+        }
+    });
+}
+
+function deleteCollection(id) {
+
+    document.getElementById("shadow").style.display = "block";
+
+    var split = id.split("dc");
+    var colID = split[1];
+
+    $.ajax({
+        url: "DBRequest",
+        type: "POST",
+        async: false,
+        data: { data:
+                JSON.stringify(
+                { query: "SELECT title FROM collection WHERE cid = $1",
+                  vars: [colID],
+                  type: "get"})}
+    }).done(function(response) {
+
+        var confirmModal = document.createElement("div");
+        confirmModal.setAttribute("class", "confirm_modal");
+        confirmModal.setAttribute("id", "confirm_delete_modal");
+
+        confirmModal.innerHTML =    "<div id='error'></div>" +
+                                    "<p class='confirm_modal_text'>Are you sure you want to delete " + response[0].title + "? This will delete all of it's contents.</p>" +
+                                    "<button type='button' class='submit' id='submit_col_delete'>Yes</button>" +
+                                    "<button type='button' class='cancel' id='cancel_col_delete'>No</button>";
+
+        document.body.appendChild(confirmModal);
+
+        submit = document.getElementById("submit_col_delete");
+        cancel = document.getElementById("cancel_col_delete");
+
+        submit.onclick = function() {
+
+            $.ajax({
+                url: "DBRequest",
+                type: "POST",
+                async: false,
+                data: { data:
+                        JSON.stringify(
+                        { query: "DELETE FROM post WHERE collection = $1",
+                          vars: [colID],
+                          type: "delete"})}
+            }).done(function(res) {
+
+                $.ajax({
+                    url: "DBRequest",
+                    type: "POST",
+                    async: false,
+                    data: { data:
+                            JSON.stringify(
+                            { query: "DELETE FROM collection WHERE cid = $1",
+                              vars: [colID],
+                              type: "delete"})}
+                }).done(function(res) {
+
+                    document.body.removeChild(document.getElementById("confirm_delete_modal"));
+                    populate();
+
+                }).catch(function(err) {
+
+                    document.getElementById("error").innerHTML = "Internal server error, please try again.";
+
+                });
+
+            }).catch(function(err) {
+
+                document.getElementById("error").innerHTML = "Internal server error, please try again."
+            });
+        }
+
+        cancel.onclick = function() {
+
+            document.getElementById("shadow").style.display = 'none';
+            document.body.removeChild(document.getElementById("confirm_delete_modal"));
+        }
+    })
+}
+
+function feature(id) {
+
+    var split = id.split("fb");
+    var colID = split[1];
+
+    $.ajax({
+        url: "DBRequest",
+        type: "POST",
+        async: false,
+        data: { data:
+                JSON.stringify(
+                { query: "UPDATE collection SET featured = false WHERE cid = (SELECT cid FROM collection WHERE featured = true)",
+                  vars: [],
+                  type: "update"})}
+    }).done(function(response) {
+
+        $.ajax({
+            url: "DBRequest",
+            type: "POST",
+            async: false,
+            data: { data:
+                    JSON.stringify(
+                    { query: "UPDATE collection SET featured = true WHERE cid = $1",
+                      vars: [colID],
+                      type: "update"})}
+        }).done(function(res) {
+
+            populate();
+
+        }).catch(function(err) {
+
+            alert("Internal server error, please try again.");
+        });
+    }).catch(function(err) {
+
+        alert("Internal server error, please try again.");
     });
 }

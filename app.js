@@ -10,6 +10,7 @@ let bcrypt = require("bcryptjs");
 let multer = require("multer");
 let AWS = require("aws-sdk");
 let pgp = require("pg-promise")({promiseLib: promise});
+let sanitize = require("sanitize");
 
 
 //Establish database connection
@@ -154,7 +155,7 @@ app.post('/signUp', function(req, res) {
 //Returns all content for intitally rendering the page.
 app.post('/getEntries', function(req, res) {
 
-    db.any( 'SELECT * FROM "collection"' )
+    db.any( 'SELECT * FROM "collection" ORDER BY cid' )
     .then(function(collections) {
 
         db.any( 'SELECT * FROM "post"' )
@@ -180,6 +181,8 @@ app.post('/getEntries', function(req, res) {
 //type of query and returns either requested data or a success/failure message.
 app.post('/DBRequest', function(req, res) {
 
+    console.log(req.body.data);
+
     let data = JSON.parse(req.body.data);
 
     let query = data.query;
@@ -200,6 +203,7 @@ app.post('/DBRequest', function(req, res) {
 
         }).catch(function(err) {
 
+            console.log(JSON.stringify(err));
             res.status(400).send({message: "Failure: Internal server error"});
 
         });
@@ -212,6 +216,7 @@ app.post('/DBRequest', function(req, res) {
 
         }).catch(function(err) {
 
+            console.log(JSON.stringify(err));
             res.status(400).send({message: "Failure: Internal server error"});
 
         });
