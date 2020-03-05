@@ -195,7 +195,7 @@ function editPost(id) {
                                 "<p class='modal_thumb text'>Thumbnail</p><input type='file' id='file' name='file'><br>" +
                                 "<p class='modal_title text'>Title</p><input type='text' id='post_title' name='title' value='" + response[0].title + "'><br>" +
                                 "<p class='modal_desc text'>Description</p><textarea id='post_desc' name='description'>" + response[0].description + "</textarea><br>" +
-                                "<p class='modal_price text'>Price</p><input type='text' id='post_price' name='price' value='" + response[0].price + "'><br>" +
+                                "<p class='modal_size text'>Size</p><input type='text' id='post_size' name='size' value='" + response[0].size + "'><br>" +
                                 "<button type='button' class='submit' id='submit_post_edit'>Submit</button>" +
                                 "<button type='button' class='cancel' id='cancel_post_edit'>Cancel</button>";
 
@@ -252,7 +252,7 @@ function editPost(id) {
             else var path = response[0].image_loc;
             var title = document.getElementById("post_title").value;
             var description = document.getElementById("post_desc").value;
-            var price = document.getElementById("post_price").value;
+            var size = document.getElementById("post_size").value;
 
             $.ajax({
                 url: "DBRequest",
@@ -260,8 +260,8 @@ function editPost(id) {
                 async: false,
                 data: { data:
                         JSON.stringify(
-                        { query: "UPDATE post SET title = $1, description = $2, price = $3, image_loc = $5 WHERE pid = $4",
-                          vars: [title, description, price, postID, path],
+                        { query: "UPDATE post SET title = $1, description = $2, size = $3, image_loc = $5 WHERE pid = $4",
+                          vars: [title, description, size, postID, path],
                           type: "update"})}
             }).done(function(res) {
                 document.body.removeChild(document.getElementById("post_edit_modal"));
@@ -290,7 +290,7 @@ function addPost(collection) {
                             "<p class='modal_thumb text'>Thumbnail</p><input type='file' id='file' name='file'><br>" +
                             "<p class='modal_title text'>Title</p><input type='text' id='post_title' name='title'><br>" +
                             "<p class='modal_desc text'>Description</p><textarea id='post_desc' name='description'></textarea><br>" +
-                            "<p class='modal_price text'>Price</p><input type='text' id='post_price' name='price'><br>" +
+                            "<p class='modal_size text'>Size</p><input type='text' id='post_size' name='size'><br>" +
                             "<button type='button' class='submit' id='submit_post'>Submit</button>" +
                             "<button type='button' class='cancel' id='cancel_post'>Cancel</button>";
 
@@ -340,7 +340,7 @@ function addPost(collection) {
         var path = "https://cloud-cube.s3.amazonaws.com/" + cube + "/public/" + $("#file").prop("files")[0].name;
         var title = document.getElementById("post_title").value;
         var description = document.getElementById("post_desc").value;
-        var price = document.getElementById("post_price").value;
+        var size = document.getElementById("post_size").value;
 
         $.ajax({
             url: "DBRequest",
@@ -348,8 +348,8 @@ function addPost(collection) {
             async: false,
             data: { data:
                     JSON.stringify(
-                    { query: "INSERT INTO post(image_loc, title, description, collection, price) VALUES($5, $1, $2, $4, $3)",
-                      vars: [title, description, price, colID, path],
+                    { query: "INSERT INTO post(image_loc, title, description, collection, size) VALUES($5, $1, $2, $4, $3)",
+                      vars: [title, description, size, colID, path],
                       type: "insert"})}
         }).done(function(res) {
             document.body.removeChild(document.getElementById("post_add_modal"));

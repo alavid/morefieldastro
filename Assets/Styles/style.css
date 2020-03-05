@@ -157,7 +157,7 @@ h3{
     height: 100px;
 }
 
-.modal_title, .modal_desc, .modal_price, .modal_thumb, .confirm_modal_text {
+.modal_title, .modal_desc, .modal_size, .modal_thumb, .confirm_modal_text {
     font-family: 'Roboto', sans-serif;
     color: black;
     font-size: 11pt;
