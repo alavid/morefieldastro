@@ -1,4 +1,5 @@
 let http = require("http");
+let enforce = require("express-sslify");
 let fs = require("fs");
 let path = require("path");
 let express = require("express");
@@ -55,6 +56,8 @@ const s3 = new AWS.S3({
 
 let app = express();
 let port = process.env.PORT || 3000;
+
+app.use(enforce.HTTPS());
 
 app.use(bodyParser.json());
 app.use(logger('dev'));
