@@ -313,7 +313,7 @@ button:hover, .selected, .gallery_post:hover {
     margin-left: 15%;
     margin-right: 15%;
     margin-bottom: 45px;
-    text-align: left;
+    text-align: center;
     line-height: 24px;
     white-space: pre-wrap;
 }
