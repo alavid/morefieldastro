@@ -51,7 +51,7 @@ window.onload = function() {
                                                     "   <div class='feat_entry_img'><img class='feat_thumb' src='" + posts[i].image_loc + "'></div>" +
                                                     "   <div class='feat_entry_info right'>" +
                                                     "       <h4 class='feat_entry_title text'>" + posts[i].title + "</h4>" +
-                                                    "       <p class='feat_entry_desc text'>" + posts[i].description + "</p>"
+                                                    "       <p class='feat_entry_desc text block'>" + posts[i].description + "</p>"
                                                     "   </div>" +
                                                     "</div>";
                         }
@@ -59,7 +59,7 @@ window.onload = function() {
                             content.innerHTML +=    "<div class='feat_entry'>" +
                                                     "   <div class='feat_entry_info left'>" +
                                                     "       <h4 class='feat_entry_title text'>" + posts[i].title + "</h4>" +
-                                                    "       <p class='feat_entry_desc text'>" + posts[i].description + "</p>" +
+                                                    "       <p class='feat_entry_desc text block'>" + posts[i].description + "</p>" +
                                                     "   </div>" +
                                                     "   <div class='feat_entry_img'><img class='feat_thumb' src='" + posts[i].image_loc + "'></div>" +
                                                     "</div>";
