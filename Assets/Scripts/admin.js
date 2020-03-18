@@ -754,8 +754,11 @@ function basicInfo(type) {
             function submitText(cube) {
 
                 if ($("#file").prop("files").length > 0) var path = "https://cloud-cube.s3.amazonaws.com/" + cube + "/public/" + $("#file").prop("files")[0].name;
-                else var path = info[0].about_image_loc;
+                else var path = info[0].about_img_loc;
                 var bio = document.getElementById("bio").value;
+
+                console.log(path);
+                console.log()
 
                 $.ajax({
                     url: "DBRequest",
