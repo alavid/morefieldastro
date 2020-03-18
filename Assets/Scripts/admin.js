@@ -66,6 +66,18 @@ function populate() {
 
     document.getElementById("shadow").style.display = 'none';
 
+    content.innerHTML = "";
+
+    content.innerHTML +=    "<div id='basic_info_buttons'>" +
+                            "   <button class='basic_info_button' id='about_button'>About Info</button>" +
+                            "   <button class='basic_info_button' id='contact_button'>Contact Info</button>" +
+                            "   <button class='basic_info_button' id='purchase_button'>Purchase Info</button>" +
+                            "</div>";
+
+    document.getElementById("about_button").setAttribute("onClick", "basicInfo('About')");
+    document.getElementById("contact_button").setAttribute("onClick", "basicInfo('Contact')");
+    document.getElementById("purchase_button").setAttribute("onClick", "basicInfo('Purchase')");
+
     $.ajax({
         url: "DBRequest",
         type: "POST",
@@ -84,7 +96,6 @@ function populate() {
             data: {}
         }).done(function(response) {
 
-            content.innerHTML = "";
             cols = [];
 
             for (i = 0; i < response.collections.length; i++) {
@@ -187,15 +198,15 @@ function editPost(id) {
 
         //Construct modal
         var editModal = document.createElement("div");
-        editModal.setAttribute("class", "post_modal");
+        editModal.setAttribute("class", "modal");
         editModal.setAttribute("id", "post_edit_modal");
 
         editModal.innerHTML =   "<img class='thumbnail' src='" + response[0].image_loc + "'><br>" +
                                 "<div id='error'></div>" +
                                 "<p class='modal_thumb text'>Thumbnail</p><input type='file' id='file' name='file'><br>" +
-                                "<p class='modal_title text'>Title</p><input type='text' id='post_title' name='title' value='" + response[0].title + "'><br>" +
-                                "<p class='modal_desc text'>Description</p><textarea id='post_desc' name='description'>" + response[0].description + "</textarea><br>" +
-                                "<p class='modal_size text'>Size</p><input type='text' id='post_size' name='size' value='" + response[0].size + "'><br>" +
+                                "<p class='modal_field_label text'>Title</p><input type='text' id='post_title' name='title' value='" + response[0].title + "'><br>" +
+                                "<p class='modal_field_label text'>Description</p><textarea id='post_desc' name='description'>" + response[0].description + "</textarea><br>" +
+                                "<p class='modal_field_label text'>Max Size</p><input type='text' id='post_size' name='size' value='" + response[0].size + "'><br>" +
                                 "<button type='button' class='submit' id='submit_post_edit'>Submit</button>" +
                                 "<button type='button' class='cancel' id='cancel_post_edit'>Cancel</button>";
 
@@ -283,14 +294,14 @@ function addPost(collection) {
     var colID = split[1];
 
     var addModal = document.createElement("div");
-    addModal.setAttribute("class", "post_modal");
+    addModal.setAttribute("class", "modal");
     addModal.setAttribute("id", "post_add_modal");
 
     addModal.innerHTML =    "<div id='error'></div>" +
                             "<p class='modal_thumb text'>Thumbnail</p><input type='file' id='file' name='file'><br>" +
-                            "<p class='modal_title text'>Title</p><input type='text' id='post_title' name='title'><br>" +
-                            "<p class='modal_desc text'>Description</p><textarea id='post_desc' name='description'></textarea><br>" +
-                            "<p class='modal_size text'>Size</p><input type='text' id='post_size' name='size'><br>" +
+                            "<p class='modal_field_label text'>Title</p><input type='text' id='post_title' name='title'><br>" +
+                            "<p class='modal_field_label text'>Description</p><textarea id='post_desc' name='description'></textarea><br>" +
+                            "<p class='modal_field_label text'>Max Size</p><input type='text' id='post_size' name='size'><br>" +
                             "<button type='button' class='submit' id='submit_post'>Submit</button>" +
                             "<button type='button' class='cancel' id='cancel_post'>Cancel</button>";
 
@@ -381,11 +392,11 @@ function deletePost(id) {
     }).done(function(response) {
 
         var confirmModal = document.createElement("div");
-        confirmModal.setAttribute("class", "confirm_modal");
+        confirmModal.setAttribute("class", "modal");
         confirmModal.setAttribute("id", "confirm_delete_modal");
 
         confirmModal.innerHTML =    "<div id='error'></div>" +
-                                    "<p class='confirm_modal_text'>Are you sure you want to delete " + response[0].title + "?</p>" +
+                                    "<p class='modal_text'>Are you sure you want to delete " + response[0].title + "?</p>" +
                                     "<button type='button' class='submit' id='submit_post_delete'>Yes</button>" +
                                     "<button type='button' class='cancel' id='cancel_post_delete'>No</button>";
 
@@ -440,12 +451,12 @@ function addCollection() {
     document.getElementById("shadow").style.display = "block";
 
     var addModal = document.createElement("div");
-    addModal.setAttribute("class", "col_modal");
+    addModal.setAttribute("class", "modal");
     addModal.setAttribute("id", "col_add_modal");
 
     addModal.innerHTML =    "<div id='error'></div>" +
-                            "<p class='modal_title text'>Title</p><input type='text' id='col_title' name='title'><br>" +
-                            "<p class='modal_desc text'>Description</p><textarea id='col_desc' name='description'></textarea><br>" +
+                            "<p class='modal_field_label text'>Title</p><input type='text' id='col_title' name='title'><br>" +
+                            "<p class='modal_field_label text'>Description</p><textarea id='col_desc' name='description'></textarea><br>" +
                             "<button type='button' class='submit' id='submit_col'>Submit</button>" +
                             "<button type='button' class='cancel' id='cancel_col'>Cancel</button>";
 
@@ -503,12 +514,12 @@ function editCollection(id) {
     }).done(function(response) {
 
         var editModal = document.createElement("div");
-        editModal.setAttribute("class", "col_modal");
+        editModal.setAttribute("class", "modal");
         editModal.setAttribute("id", "col_edit_modal");
 
         editModal.innerHTML =   "<div id='error'></div>" +
-                                "<p class='modal_title text'>Title</p><input type='text' id='col_title' name='title' value='" + response[0].title + "'><br>" +
-                                "<p class='modal_desc text'>Description</p><textarea id='col_desc' name='description'>" + response[0].description + "</textarea><br>" +
+                                "<p class='modal_field_label text'>Title</p><input type='text' id='col_title' name='title' value='" + response[0].title + "'><br>" +
+                                "<p class='modal_field_label text'>Description</p><textarea id='col_desc' name='description'>" + response[0].description + "</textarea><br>" +
                                 "<button type='button' class='submit' id='submit_col'>Submit</button>" +
                                 "<button type='button' class='cancel' id='cancel_col'>Cancel</button>";
 
@@ -567,11 +578,11 @@ function deleteCollection(id) {
     }).done(function(response) {
 
         var confirmModal = document.createElement("div");
-        confirmModal.setAttribute("class", "confirm_modal");
+        confirmModal.setAttribute("class", "modal");
         confirmModal.setAttribute("id", "confirm_delete_modal");
 
         confirmModal.innerHTML =    "<div id='error'></div>" +
-                                    "<p class='confirm_modal_text'>Are you sure you want to delete " + response[0].title + "? This will delete all of it's contents.</p>" +
+                                    "<p class='modal_text'>Are you sure you want to delete " + response[0].title + "? This will delete all of it's contents.</p>" +
                                     "<button type='button' class='submit' id='submit_col_delete'>Yes</button>" +
                                     "<button type='button' class='cancel' id='cancel_col_delete'>No</button>";
 
@@ -664,4 +675,214 @@ function feature(id) {
 
         alert("Internal server error, please try again.");
     });
+}
+
+function basicInfo(type) {
+
+    document.getElementById("shadow").style.display = "block";
+
+    if (type === "About") {
+
+        $.ajax({
+            url: "DBRequest",
+            type: "POST",
+            async: false,
+            data: { data:
+                    JSON.stringify(
+                    { query: "SELECT about_img_loc, about FROM basic_info WHERE bid=0",
+                      vars: [],
+                      type: "get"})}
+        }).done(function(info) {
+
+            var aboutModal = document.createElement("div");
+            aboutModal.setAttribute("class", "modal");
+            aboutModal.setAttribute("id", "about_modal");
+
+            aboutModal.innerHTML =  "<img class='thumbnail' src='" + info[0].about_img_loc + "'><br>" +
+                                    "<div id='error'></div>" +
+                                    "<p class='modal_thumb text'>Picture</p><input type='file' id='file' name='file'><br>" +
+                                    "<p class='modal_field_label text'>Bio</p><textarea id='bio' name='bio'>" + info[0].about + "</textarea><br>" +
+                                    "<button type='button' class='submit' id='submit_about'>Submit</button>" +
+                                    "<button type='button' class='cancel' id='cancel_about'>Cancel</button>";
+
+            document.body.appendChild(aboutModal);
+
+            submit = document.getElementById("submit_about");
+            cancel = document.getElementById("cancel_about");
+
+            submit.onclick = function() {
+
+                if ($("#file").prop("files").length > 0) {
+
+                    var fileData = $("#file").prop("files")[0];
+                    var formData = new FormData;
+                    formData.append("file", fileData);
+
+                    $.ajax({
+                        url: "upload",
+                        dataType: "text",
+                        cache: false,
+                        contentType: false,
+                        processData: false,
+                        data: formData,
+                        type: "POST",
+                    }).done(function(res) {
+
+                        submitText(JSON.parse(res).cube);
+
+                    }).catch(function(err) {
+
+                        if (err.status === 400) {
+                            document.getElementById("error").innerHTML = "Internal server error, please try again.</p>";
+                        }
+
+                        else if (err.status === 403) {
+                            document.getElementById("error").innerHTML = "Only png and jpeg files are accepted.";
+                        }
+                    });
+                }
+
+                else submitText();
+            }
+
+            cancel.onclick = function() {
+
+                document.getElementById("shadow").style.display = 'none';
+                document.body.removeChild(document.getElementById("about_modal"));
+            }
+
+            function submitText(cube) {
+
+                if ($("#file").prop("files").length > 0) var path = "https://cloud-cube.s3.amazonaws.com/" + cube + "/public/" + $("#file").prop("files")[0].name;
+                else var path = info[0].about_image_loc;
+                var bio = document.getElementById("bio").value;
+
+                $.ajax({
+                    url: "DBRequest",
+                    type: "POST",
+                    async: false,
+                    data: { data:
+                            JSON.stringify(
+                            { query: "UPDATE basic_info SET about_img_loc = $1, about = $2 WHERE bid = 0",
+                              vars: [path, bio],
+                              type: "update"})}
+                }).done(function(res) {
+                    document.body.removeChild(document.getElementById("about_modal"));
+                    populate();
+                }).catch(function(err) {
+                    document.getElementById("error").innerHTML = "Internal server error, please try again.";
+                });
+            }
+        });
+    }
+    else if (type === "Contact") {
+
+        $.ajax({
+            url: "DBRequest",
+            type: "POST",
+            async: false,
+            data: { data:
+                    JSON.stringify(
+                    { query: "SELECT contact FROM basic_info WHERE bid=0",
+                      vars: [],
+                      type: "get"})}
+        }).done(function(info) {
+
+            var contactModal = document.createElement("div");
+            contactModal.setAttribute("class", "modal");
+            contactModal.setAttribute("id", "contact_modal");
+
+            contactModal.innerHTML =    "<div id='error'></div>" +
+                                        "<p class='modal_field_label text'>Contact Info</p><textarea id='contact' name='contact'>" + info[0].contact + "</textarea><br>" +
+                                        "<button type='button' class='submit' id='submit_contact'>Submit</button>" +
+                                        "<button type='button' class='cancel' id='cancel_contact'>Cancel</button>";
+
+            document.body.appendChild(contactModal);
+
+            submit = document.getElementById("submit_contact");
+            cancel = document.getElementById("cancel_contact");
+
+            submit.onclick = function() {
+
+                contact = document.getElementById("contact").value;
+
+                $.ajax({
+                    url: "DBRequest",
+                    type: "POST",
+                    async: false,
+                    data: { data:
+                            JSON.stringify(
+                            { query: "UPDATE basic_info SET contact = $1 WHERE bid = 0",
+                              vars: [contact],
+                              type: "update"})}
+                }).done(function(res) {
+                    document.body.removeChild(document.getElementById("contact_modal"));
+                    populate();
+                }).catch(function(err) {
+                    document.getElementById("error").innerHTML = "Internal server error, please try again.";
+                });
+            }
+
+            cancel.onclick = function() {
+
+                document.getElementById("shadow").style.display = 'none';
+                document.body.removeChild(document.getElementById("contact_modal"));
+            }
+        });
+    }
+    else if (type === "Purchase") {
+
+        $.ajax({
+            url: "DBRequest",
+            type: "POST",
+            async: false,
+            data: { data:
+                    JSON.stringify(
+                    { query: "SELECT purchase FROM basic_info WHERE bid=0",
+                      vars: [],
+                      type: "get"})}
+        }).done(function(info) {
+
+            var purchaseModal = document.createElement("div");
+            purchaseModal.setAttribute("class", "modal");
+            purchaseModal.setAttribute("id", "purchase_modal");
+
+            purchaseModal.innerHTML =   "<div id='error'></div>" +
+                                        "<p class='modal_field_label text'>Purchase Info</p><textarea id='purchase' name='purchase'>" + info[0].purchase + "</textarea><br>" +
+                                        "<button type='button' class='submit' id='submit_purchase'>Submit</button>" +
+                                        "<button type='button' class='cancel' id='cancel_purchase'>Cancel</button>";
+
+            document.body.appendChild(purchaseModal);
+
+            submit = document.getElementById("submit_purchase");
+            cancel = document.getElementById("cancel_purchase");
+
+            submit.onclick = function() {
+
+                purchase = document.getElementById("purchase").value;
+
+                $.ajax({
+                    url: "DBRequest",
+                    type: "POST",
+                    async: false,
+                    data: { data:
+                            JSON.stringify(
+                            { query: "UPDATE basic_info SET purchase = $1 WHERE bid = 0",
+                              vars: [purchase],
+                              type: "update"})}
+                }).done(function(res) {
+                    document.body.removeChild(document.getElementById("purchase_modal"));
+                    populate();
+                }).catch(function(err) {
+                    document.getElementById("error").innerHTML = "Internal server error, please try again.";
+                });
+            }
+
+            cancel.onclick = function() {
+
+                document.getElementById("shadow").style.display = 'none';
+                document.body.removeChild(document.getElementById("purchase_modal"));
+            }
+        });
+    }
 }

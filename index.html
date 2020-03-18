@@ -4,68 +4,25 @@
         <meta charset="utf-8">
         <title>Morefield Astrophotography</title>
         <script src="Scripts/index.js"></script>
+        <script src="Scripts/jquery-3.4.1.js"></script>
         <link rel="stylesheet" type="text/css" href="Styles/style.css">
+        <link href="https://fonts.googleapis.com/css?family=Lora&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Staatliches&display=swap" rel="stylesheet">
+        <script src="https://kit.fontawesome.com/b58fee9af5.js" crossorigin="anonymous"></script>
     </head>
     <body>
+        <div id="shadow"></div>
         <header>
-            <h1>Kevin Morefield</h1>
+            <h1 class="title">KEVIN MOREFIELD</h1>
+            <ul class="text" id="nav_bar">
+                <li><button class="nav_button" id="home_button">Home</button></li>
+                <li><button class="nav_button" id="gallery_button">Gallery</button></li>
+                <li><button class="nav_button" id="about_button">About</button></li>
+                <li><button class="nav_button" id="contact_button">Contact</button></li>
+                <li><button class="nav_button" id="purchase_button">Purchase</button></li>
+            </ul>
         </header>
-        <div id="content">
-            <div id="bio">
-                <h2>About</h2>
-                <p id="biography">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras
-                    quis lorem ut purus convallis tincidunt. Morbi quam quam,
-                    vulputate vitae mauris sed, finibus rutrum metus. Donec molestie
-                    neque vitae ligula ornare fermentum. Aliquam id arcu non metus
-                    iaculis rutrum. Sed viverra, neque elementum suscipit egestas,
-                    elit leo placerat neque, eu pretium felis ligula in leo.
-                    Pellentesque pharetra accumsan nibh, vitae laoreet massa
-                    lobortis at. Vivamus bibendum porta eros nec vehicula. Curabitur
-                    nulla enim, tempor a dolor id, ultricies malesuada tellus.
-                    Donec dapibus justo urna, non luctus diam tempor eu. Donec vitae
-                    bibendum mauris. Vestibulum ante ipsum primis in faucibus orci
-                    luctus et ultrices posuere cubilia Curae; Nullam fringilla
-                    viverra neque a tristique. Vestibulum aliquet congue eros, in
-                    efficitur lectus gravida sit amet. Nunc nec pharetra dolor.
-                    Aenean porttitor tempor quam ac rhoncus.
-                </p>
-            </div>
-            <div id="collections">
-                <div class="collection">
-                    <h3 class="collection-title">Collection 1</h3>
-                    <div class = "thumbnails">
-                        <img class="thumbnail" src="Images/4 Panel Rosette Mosaic - Caldwell 49.jpg">
-                        <img class="thumbnail" src="Images/California Nebula.jpg">
-                        <img class="thumbnail" src="Images/Core of the Soul in [H]S-ShO-O.jpg">
-                        <img class="thumbnail" src="Images/Eagle Nebula Bi-Color.jpg">
-                        <img class="thumbnail" src="Images/Lagoon Ha for Lumincance.jpg">
-                        <img class="thumbnail" src="Images/M83.jpg">
-                    </div>
-                </div>
-                <div class="collection">
-                    <h3 class="collection-title">Collection 2</h3>
-                    <div class = "thumbnails">
-                        <img class="thumbnail" src="Images/4 Panel Rosette Mosaic - Caldwell 49.jpg">
-                        <img class="thumbnail" src="Images/California Nebula.jpg">
-                        <img class="thumbnail" src="Images/Core of the Soul in [H]S-ShO-O.jpg">
-                        <img class="thumbnail" src="Images/Eagle Nebula Bi-Color.jpg">
-                        <img class="thumbnail" src="Images/Lagoon Ha for Lumincance.jpg">
-                        <img class="thumbnail" src="Images/M83.jpg">
-                    </div>
-                </div>
-                <div class="collection">
-                    <h3 class="collection-title">Collection 3</h3>
-                    <div class = "thumbnails">
-                        <img class="thumbnail" src="Images/4 Panel Rosette Mosaic - Caldwell 49.jpg">
-                        <img class="thumbnail" src="Images/California Nebula.jpg">
-                        <img class="thumbnail" src="Images/Core of the Soul in [H]S-ShO-O.jpg">
-                        <img class="thumbnail" src="Images/Eagle Nebula Bi-Color.jpg">
-                        <img class="thumbnail" src="Images/Lagoon Ha for Lumincance.jpg">
-                        <img class="thumbnail" src="Images/M83.jpg">
-                    </div>
-                </div>
-            </div>
-        </div>
+        <div id="content"></div>
     </body>
 </html>

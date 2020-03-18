@@ -1,22 +1,54 @@
+/*Style sheet for both public and admin pages*/
+
+img {
+    width: 100%;
+}
+
 body {
     background-color: black;
+    margin: 0px;
 }
 
-#bio {
-    display: block;
-    width: 300px;
-    padding-left: 30px;
-    padding-right: 30px;
-}
-
-#content {
-    display: flex;
+.title {
+    font-family: 'Staatliches', cursive;
+    font-weight: 100;
+    color: white;
+    margin: 0px;
+    letter-spacing: 6px;
+    font-size: 22pt;
 }
 
 header {
+    width: 98%;
+    background-color: #262626;
     font-size: 16pt;
+    padding: 10px;
+    padding-left: 1%;
+    padding-right: 1%;
+    display: flex;
+    justify-content: space-between;
+    border: 0px;
+    margin: 0px;
+}
 
-    text-align: center;
+#nav_bar {
+    list-style-type: none;
+    margin: 0px;
+    padding: 0px;
+    width: 372px;
+}
+
+li {
+    display: inline;
+}
+
+.nav_button {
+    height: 37px;
+}
+
+#content, #admin_content {
+    margin-left: 10px;
+    margin-right: 10px;
 }
 
 .collection-title {
@@ -33,7 +65,11 @@ header {
     width: 100%;
 }
 
-.post, .col_container, .add_post {
+#about_thumb {
+    width: 300px;
+}
+
+.post, .col_container, .add_post, .gallery_post {
     display:block;
 
     border-style: solid;
@@ -46,8 +82,8 @@ header {
     border-width: 0 0 1px 0;
 }
 
-.post, .add_post {
-    background-color: #141414;
+.post, .add_post, .gallery_post {
+    background-color: #262626;
 
     border-width: 0px;
     border-radius: 3px;
@@ -58,6 +94,16 @@ header {
     width: 250px;
 }
 
+.gallery_post {
+
+    cursor: pointer;
+
+    transition-property: all;
+    transition-duration: 0.1s;
+    transition-delay: 0s;
+    transition-timing-function: ease-in-out;
+}
+
 .post_container {
     display: flex;
     flex: 1;
@@ -65,7 +111,7 @@ header {
 }
 
 .text {
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Lora', serif;
     color: white;
 }
 
@@ -101,7 +147,7 @@ h3{
     height: auto;
 
     font-size: 60pt;
-    font-family: 'Josefin Sans', sans-serif;
+    font-family: 'Lora', serif;
     color: #e8e8e8;
     text-align: center;
 
@@ -123,7 +169,7 @@ h3{
     cursor: pointer;
 }
 
-.post_modal, .confirm_modal, .col_modal {
+.modal {
     position: fixed;
     left: 50%;
     top: 50%;
@@ -140,6 +186,10 @@ h3{
     padding: 10px;
 }
 
+#post_disp_modal {
+    width: 500px;
+}
+
 #shadow {
     background: black;
     display: none;
@@ -152,39 +202,43 @@ h3{
     z-index: 1;
 }
 
-#post_desc, #col_desc {
+#post_desc, #col_desc, #bio, #contact, #purchase {
     width: 390px;
     height: 100px;
+    padding: 5px;
 }
 
-.modal_title, .modal_desc, .modal_size, .modal_thumb, .confirm_modal_text {
-    font-family: 'Roboto', sans-serif;
+.modal_title, .modal_desc, .modal_size, .modal_field_label, .modal_thumb, .confirm_modal_text {
+
     color: black;
-    font-size: 11pt;
-    font-weight: bold;
     margin-top: 8px;
     margin-bottom: 3px;
 }
 
-.submit, .cancel, .edit_button, .delete_button, #add_col {
+.modal_desc {
 
-    background-color: #141414;
+    font-size: 11pt;
+}
+
+.modal_field_label, .modal_thumb, .confirm_modal_text {
+    font-family: 'Lora', serif;
+    font-size: 11pt;
+    font-weight: bold;
+}
+
+button {
+
+    background-color: #262626;
     color: white;
     font-family: 'Roboto', sans-serif;
     font-size: 11pt;
-    font-weight: bold;
     letter-spacing: 0.8pt;
     text-align: center;
     border-width: 2px;
     border-radius: 9px;
     border-style: solid;
-    border-color: #262626;
+    border-color: #424242;
     cursor: pointer;
-
-    margin-top: 20px;
-    margin-right: 8px;
-    width: 90px;
-    padding: 6px 0px;
 
     transition-property: all;
     transition-duration: 0.1s;
@@ -192,8 +246,16 @@ h3{
     transition-timing-function: ease-in-out;
 }
 
-.cancel:hover, .delete_button:hover, .submit:hover, .edit_button:hover, #add_col:hover {
-    background-color: #262626;
+button:hover, .selected, .gallery_post:hover {
+
+    background-color: #424242;
+}
+
+.submit, .cancel, .edit_button, .delete_button, #add_col {
+    margin-top: 20px;
+    margin-right: 8px;
+    width: 90px;
+    padding: 6px 0px;
 }
 
 #col_header {
@@ -231,5 +293,104 @@ h3{
 }
 
 #error {
+    color: red;
+}
+
+#feat_title {
+
+    font-family: 'Staatliches', cursive;
+    color: white;
+    margin: 0px;
+    font-weight: normal;
+    letter-spacing: 15px;
+    font-size: 45pt;
+    margin-top: 30px;
+    text-align: center;
+}
+
+#feat_desc {
+
+    margin-left: 15%;
+    margin-right: 15%;
+    margin-bottom: 45px;
+    text-align: center;
+    line-height: 24px;
+}
+
+.feat_entry {
+
+    display: flex;
+    align-items: center;
+    margin: 30px 8% 30px 8%;
+}
+
+.feat_entry_img {
+
+    flex: 1.65;
+}
+
+.feat_entry_info {
+
+    flex: 1;
+    height: 40vw;
+    line-height: 2.25vw;
+    overflow: auto;
+    padding: 5px;
+    vertical-align: middle;
+}
+
+.right {
+
+    margin-left: 20px;
+    text-align: left;
+}
+
+.left {
+
+    margin-right: 20px;
+    text-align: right;
+}
+
+.feat_entry_title {
+
+    margin-top: 0px;
+    font-style: bold;
+    font-size: 14pt;
+}
+
+.feat_entry_desc {
+
+    font-size: 11pt;
+    font-style: italic;
+}
+
+::-webkit-scrollbar {
+  width: 2px;
+}
+
+::-webkit-scrollbar-track {
+  background: #262626;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #424242;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+#close {
+    text-align: center;
+    float: right;
+    margin-bottom: 5px;
+    background-color: white;
+    border: 0px;
+    color: #cfcfcf;
+    font-size: 16pt;
+}
+
+#close:hover {
+
     color: red;
 }
