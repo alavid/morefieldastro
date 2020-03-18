@@ -476,7 +476,7 @@ function addCollection() {
             async: false,
             data: { data:
                     JSON.stringify({
-                        query: "INSERT INTO collection(title, description) VALUES($1, $2)",
+                        query: "INSERT INTO collection(title, description, featured) VALUES($1, $2, false)",
                         vars: [title, description],
                         type: "insert"
                     })}
