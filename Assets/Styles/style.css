@@ -38,7 +38,7 @@ header {
     width: 372px;
 }
 
-li {
+.nav_item {
     display: inline;
 }
 
@@ -393,4 +393,16 @@ button:hover, .selected, .gallery_post:hover {
 #close:hover {
 
     color: red;
+}
+
+.block {
+
+    white-space: pre-wrap;
+}
+
+#about, #contact, #purchase {
+
+    margin-top: 50px;
+    margin-left: 30%;
+    margin-right: 30%;
 }

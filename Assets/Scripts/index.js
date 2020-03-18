@@ -167,7 +167,7 @@ window.onload = function() {
                     })}
             }).done(function(info) {
 
-                content.innerHTML += "<div id='contact' class='text'>" + info[0].contact + "</div>";
+                content.innerHTML += "<div id='contact' class='text'><p class='block'>" + info[0].contact + "</p></div>";
 
             }).catch(function(err) {
 
@@ -187,7 +187,7 @@ window.onload = function() {
                     })}
             }).done(function(info) {
 
-                content.innerHTML += "<div id='purchase' class='text'>" + info[0].purchase + "</div>";
+                content.innerHTML += "<div id='purchase' class='text'><p class='block'>" + info[0].purchase + "</p></div>";
 
             }).catch(function(err) {
 
