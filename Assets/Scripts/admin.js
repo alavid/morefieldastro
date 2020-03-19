@@ -111,7 +111,7 @@ function populate() {
                                         "           <button class='delete_button delete_col_button' onClick='deleteCollection(this.id)' id='dc" + response.collections[i].cid + "'>Delete</button>" +
                                         "       </div>" +
                                         "   </div>" +
-                                        "   <div class='post_container' id='pc_" + response.collections[i].cid + "'></div>" +
+                                        "   <ul class='post_container' id='pc_" + response.collections[i].cid + "'></ul>" +
                                         "</div>";
 
                 if (response.collections[i].cid === feat[0].cid) {
@@ -143,7 +143,7 @@ function populate() {
 
                     if (response.posts[n].collection === response.collections[i].cid) {
 
-                        var newPost = document.createElement("div");
+                        var newPost = document.createElement("li");
                         newPost.setAttribute("class", "post");
                         newPost.setAttribute("id", "post" + response.posts[n].pid);
 
@@ -168,6 +168,30 @@ function populate() {
             addColButton.setAttribute("onClick", "addCollection()");
             addColButton.innerHTML = "Add Collection";
             content.appendChild(addColButton);
+
+            var sortable = [];
+            var postLists = document.getElementsByClassName("post_container");
+            for (i = 0; i < postLists.length; i++) {
+
+                sortable[i] = new Sortable(postLists[i], {
+                    onEnd: function(evt) {
+
+                        var split = evt.item.id.split("post");
+                        var pid = split[1];
+
+                        $.ajax({
+                            url: "DBRequest",
+                            type: "POST",
+                            async: false,
+                            data: { data:
+                                    JSON.stringify(
+                                    { query: "UPDATE post SET index = $1 WHERE pid = $2",
+                                      vars: [evt.newIndex, pid],
+                                      type: "update"})}
+                        });
+                    }
+                })
+            }
 
         }).catch(function(err) {
             alert(err.status);

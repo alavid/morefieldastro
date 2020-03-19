@@ -163,7 +163,7 @@ app.post('/getEntries', function(req, res) {
     db.any( 'SELECT * FROM "collection" ORDER BY cid' )
     .then(function(collections) {
 
-        db.any( 'SELECT * FROM "post" ORDER BY pid' )
+        db.any( 'SELECT * FROM "post" ORDER BY index' )
         .then(function(posts) {
 
             var response = {collections: collections, posts: posts};
