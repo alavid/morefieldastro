@@ -57,6 +57,8 @@ const s3 = new AWS.S3({
 let app = express();
 let port = process.env.PORT || 3000;
 
+app.use(secure);
+
 app.use(bodyParser.json());
 app.use(logger('dev'));
 app.use(express.json());
