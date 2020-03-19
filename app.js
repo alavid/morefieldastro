@@ -1,4 +1,5 @@
 let http = require("http");
+let secure = require("express-force-https");
 let fs = require("fs");
 let path = require("path");
 let express = require("express");
@@ -65,6 +66,8 @@ app.use(express.urlencoded({
 app.use(cookieParser());
 app.use(express.static(__dirname + 'Assets'));
 app.use(express.static(path.join(__dirname, 'Assets')));
+
+app.use(secure);
 
 const upload = multer({ dest: "uploads/" });
 
