@@ -257,19 +257,32 @@ app.post("/delete", function(req, res) {
 
     let data = JSON.parse(req.body.data);
 
-    var pathData = data.fileName.split("/");
+    var query = "SELECT pid FROM post WHERE image_loc = '" + data.fileName + "'";
+    var vars = [];
 
-    const params = {
-        Bucket: BUCKET,
-        Key: pathData[3] + "/" + pathData[4] + "/" + pathData[5],
-    }
+    db.any( query, vars ).then(function(result) {
 
-    s3.deleteObject(params, function(err, data) {
-        if (err) {
-            console.log(err);
-            res.status(400).send({message: "Failure: Internal server error"});
-        }
-        else {
+        if (result.length === 0) {
+
+            var pathData = data.fileName.split("/");
+
+            const params = {
+                Bucket: BUCKET,
+                Key: pathData[3] + "/" + pathData[4] + "/" + pathData[5],
+            }
+
+            s3.deleteObject(params, function(err, data) {
+                if (err) {
+                    console.log(err);
+                    res.status(400).send({message: "Failure: Internal server error"});
+                }
+                else {
+                    var response = {message: "Success"};
+                    res.status(200).send(response);
+                }
+            });
+        } else {
+
             var response = {message: "Success"};
             res.status(200).send(response);
         }
