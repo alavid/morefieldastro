@@ -92,9 +92,6 @@ window.onload = function() {
                 content.innerHTML = "";
                 cols = [];
 
-                console.log(JSON.stringify(response.collections));
-                console.log(response.collections.length);
-
                 for (i = 0; i < response.collections.length; i++) {
 
                     if (response.collections[i].featured === false) {

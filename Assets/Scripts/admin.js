@@ -111,7 +111,7 @@ function populate() {
                                         "           <button class='delete_button delete_col_button' onClick='deleteCollection(this.id)' id='dc" + response.collections[i].cid + "'>Delete</button>" +
                                         "       </div>" +
                                         "   </div>" +
-                                        "   <ul class='post_container' id='pc_" + response.collections[i].cid + "'></ul>" +
+                                        "   <ul class='post_container' id='pc" + response.collections[i].cid + "'></ul>" +
                                         "</div>";
 
                 if (response.collections[i].cid === feat[0].cid) {
@@ -137,7 +137,7 @@ function populate() {
                     colButtons.insertBefore(featButton, colButtons.firstChild);
                 }
 
-                cols[i] = document.getElementById("pc_" + response.collections[i].cid);
+                cols[i] = document.getElementById("pc" + response.collections[i].cid);
 
                 for (n = 0; n < response.posts.length; n++) {
 
@@ -185,9 +185,30 @@ function populate() {
                             async: false,
                             data: { data:
                                     JSON.stringify(
-                                    { query: "UPDATE post SET index = $1 WHERE pid = $2",
-                                      vars: [evt.newIndex, pid],
-                                      type: "update"})}
+                                    { query: "SELECT collection FROM post WHERE pid = $1",
+                                      vars: [pid],
+                                      type: "get"})}
+                        }).done(function(data) {
+                            $.ajax({
+                                url: "DBRequest",
+                                type: "POST",
+                                async: false,
+                                data: { data:
+                                        JSON.stringify(
+                                        { query: "UPDATE post SET index = $1 WHERE pid = $2",
+                                          vars: [evt.newIndex, pid],
+                                          type: "update"})}
+                            }).done(function(res) {
+                                $.ajax({
+                                    url: "DBRequest",
+                                    type: "POST",
+                                    async: false,
+                                    data: { data:
+                                            JSON.stringify(
+                                            { query: "UPDATE post SET index = index + 1 WHERE collection = $1 AND index >= $2 AND pid != $3",
+                                              vars: [data[0].collection, evt.newIndex, pid],
+                                              type: "update"})}});
+                            });
                         });
                     }
                 })
@@ -780,9 +801,6 @@ function basicInfo(type) {
                 if ($("#file").prop("files").length > 0) var path = "https://cloud-cube.s3.amazonaws.com/" + cube + "/public/" + $("#file").prop("files")[0].name;
                 else var path = info[0].about_img_loc;
                 var bio = document.getElementById("bio").value;
-
-                console.log(path);
-                console.log()
 
                 $.ajax({
                     url: "DBRequest",

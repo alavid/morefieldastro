@@ -163,7 +163,7 @@ app.post('/getEntries', function(req, res) {
     db.any( 'SELECT * FROM "collection" ORDER BY cid' )
     .then(function(collections) {
 
-        db.any( 'SELECT * FROM "post" ORDER BY index' )
+        db.any( 'SELECT * FROM "post" ORDER BY index ASC' )
         .then(function(posts) {
 
             var response = {collections: collections, posts: posts};
@@ -185,8 +185,6 @@ app.post('/getEntries', function(req, res) {
 //A generic database request for all other purpose. Specify the query and the
 //type of query and returns either requested data or a success/failure message.
 app.post('/DBRequest', function(req, res) {
-
-    console.log(req.body.data);
 
     let data = JSON.parse(req.body.data);
 
