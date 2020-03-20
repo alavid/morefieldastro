@@ -13,6 +13,7 @@ window.onload = function() {
 
     document.getElementById("shadow").style.display = 'none';
 
+
     function populate(page) {
 
         content.innerHTML = "";
@@ -211,6 +212,7 @@ window.onload = function() {
 function openModal(id) {
 
     document.getElementById("shadow").style.display = 'block';
+    document.body.style.overflow = "hidden";
 
     var split = id.split("post");
     var postID = split[1];
@@ -226,21 +228,26 @@ function openModal(id) {
                   type: "get"})}
     }).done(function(response) {
 
-        var modal = document.createElement("div");
+        var modal = document.createElement("Modal");
         modal.setAttribute("class", "modal");
         modal.setAttribute("id", "post_disp_modal");
 
         modal.innerHTML =   "<button type='button' id='close'><i class='fas fa-times'></i></button>" +
-                            "<img class='thumbnail' src='" + response[0].image_loc + "'><br>" +
-                            "<h2 class='modal_title text'>" + response[0].title + "</h2>" +
-                            "<p class='modal_desc text'>" + response[0].description + "</p>" +
-                            "<p class='modal_size text'>Max Size: " + response[0].size + "</p>";
+                            "<div id='modal-content'>" +
+                            "   <img class='thumbnail' src='" + response[0].image_loc + "'><br>" +
+                            "   <div id='modal_info'>" +
+                            "       <h2 class='modal_title text'>" + response[0].title + "</h2>" +
+                            "       <p class='modal_desc text'>" + response[0].description + "</p>" +
+                            "       <p class='modal_size text'>Max Size: " + response[0].size + "</p>" +
+                            "   </div>"
+                            "</div>";
 
         document.body.appendChild(modal);
 
         document.getElementById("close").onclick = function() {
 
             document.getElementById("shadow").style.display = 'none';
+            document.body.style.overflow = "auto";
             document.body.removeChild(document.getElementById("post_disp_modal"));
         }
 
