@@ -1,0 +1,31 @@
+@use "main"
+
+body
+    background-color: main.$background_color
+    margin: 0px
+
+img
+    width: 100%
+
+.text
+    font-family: main.$body_font
+    color: main.$text_color
+
+#content, #admin_content
+    margin-left: 10px
+    margin-right: 10px
+
+#error
+    color: red
+
+::-webkit-scrollbar
+    width: 2px
+
+::-webkit-scrollbar-track
+    background: #262626
+
+::-webkit-scrollbar-thumb
+    background: #424242
+
+::-webkit-scrollbar-thumb:hover
+    background: #555

@@ -1,0 +1,39 @@
+@use "main"
+
+.modal
+    position: fixed
+    left: 50%
+    top: 50%
+    transform: translate(-50%, -50%)
+    z-index: 2000
+    overflow: auto
+    background-color: main.$modal_color
+    border-style: solid
+    border-color: main.$highlight_color
+    border-width: 1px
+    border-radius: 3px
+    width: 400px
+    max-height: 92%
+    padding: 10px
+
+#post_disp_modal
+    width: 60%
+    max-width: 800px
+
+.modal_title, .modal_desc, .modal_size, .modal_field_label, .modal_thumb, .confirm_modal_text
+    color: main.$modal_text_color
+    margin-top: 8px
+    margin-bottom: 3px
+
+#post_desc
+    width: 390px
+    height: 100px
+    padding: 5px
+
+.modal_desc
+    font-size: 11pt
+
+.modal_field_label, .modal_thumb, .confirm_modal_text
+    font-family: main.$body_font
+    font-size: 11pt
+    font-weight: bold

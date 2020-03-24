@@ -13,7 +13,6 @@ window.onload = function() {
 
     document.getElementById("shadow").style.display = 'none';
 
-
     function populate(page) {
 
         content.innerHTML = "";

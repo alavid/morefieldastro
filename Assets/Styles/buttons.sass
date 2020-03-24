@@ -1,0 +1,33 @@
+@use "main"
+
+button
+    background-color: main.$panel_color
+    color: white
+    font-family: main.$button_font
+    font-size: 11pt
+    letter-spacing: 0.8pt
+    text-align: center
+    border-width: 2px
+    border-radius: 9px
+    border-style: solid
+    border-color: main.$highlight_color
+    cursor: pointer
+    transition-property: all
+    transition-duration: 0.1s
+    transition-delay: 0s
+    transition-timing-function: ease-in-out
+
+button:hover, .selected, .gallery_post:hover
+    background-color: main.$highlight_color
+
+#close
+    text-align: center
+    float: right
+    margin-bottom: 5px
+    background-color: white
+    border: 0px
+    color: #cfcfcf
+    font-size: 16pt
+
+#close:hover
+    color: red

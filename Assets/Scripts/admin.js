@@ -220,8 +220,6 @@ function populate() {
     });
 }
 
-
-
 function editPost(id) {
 
     document.getElementById("shadow").style.display = 'block';
@@ -329,8 +327,6 @@ function editPost(id) {
     });
 }
 
-
-
 function addPost(collection) {
 
     document.getElementById("shadow").style.display = 'block';
@@ -416,8 +412,6 @@ function addPost(collection) {
     }
 }
 
-
-
 function deletePost(id) {
 
     document.getElementById("shadow").style.display = 'block';
@@ -489,7 +483,6 @@ function deletePost(id) {
         }
     });
 }
-
 
 function addCollection() {
 
