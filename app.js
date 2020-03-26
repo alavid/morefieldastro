@@ -122,7 +122,7 @@ app.post('/logIn', function(req, res) {
     });
 });
 
-//Inserts submitted login info to database and handles hashword passing.
+//Inserts submitted login info to database and handles password hashing.
 app.post('/signUp', function(req, res) {
 
     var email = req.body.email;
@@ -251,16 +251,26 @@ app.post('/upload', upload.single("file"), function(req, res) {
     });
 })
 
+
+
 app.post("/delete", function(req, res) {
 
     let data = JSON.parse(req.body.data);
 
-    var query = "SELECT pid FROM post WHERE image_loc = '" + data.fileName + "'";
-    var vars = [];
+    if (data.type === "main") {
+
+        var query = "SELECT pid FROM post WHERE image_loc = '" + data.fileName + "'";
+        var vars = [];
+
+    } else {
+
+        var query = "SELECT pid FROM post WHERE thumbnail_loc = '" + data.fileName + "'";
+        var vars = [];
+    }
 
     db.any( query, vars ).then(function(result) {
 
-        if (result.length === 0) {
+        if (result.length === 1) {
 
             var pathData = data.fileName.split("/");
 

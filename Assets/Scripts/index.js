@@ -114,7 +114,7 @@ window.onload = function() {
                                 newPost.setAttribute("id", "post" + response.posts[n].pid);
                                 newPost.setAttribute("onClick", "openModal(this.id)");
 
-                                newPost.innerHTML = "<img class='thumbnail' src='" + response.posts[n].image_loc + "'>" +
+                                newPost.innerHTML = "<img class='thumbnail' src='" + response.posts[n].thumbnail_loc + "'>" +
                                                     "<h3 class='text'>" + response.posts[n].title + "</h3>";
 
                                 cols[i].appendChild(newPost);

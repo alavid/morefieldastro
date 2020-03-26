@@ -147,10 +147,12 @@ function populate() {
                         newPost.setAttribute("class", "post");
                         newPost.setAttribute("id", "post" + response.posts[n].pid);
 
-                        newPost.innerHTML = "<img class='thumbnail' src='" + response.posts[n].image_loc + "'>" +
+                        newPost.innerHTML = "<img class='thumbnail' src='" + response.posts[n].thumbnail_loc + "'>" +
                                             "<h3 class='text'>" + response.posts[n].title + "</h3>" +
                                             "<button class='edit_button' onClick='editPost(this.id)' id='ep" + response.posts[n].pid + "'>Edit</button>" +
                                             "<button class='delete_button' onClick='deletePost(this.id)' id='dp" + response.posts[n].pid + "'>Delete</button>";
+
+                        console.log("Appending " + response.posts[n].pid + " with " + response.posts[n].thumbnail_loc);
 
                         cols[i].appendChild(newPost);
                     }
@@ -277,7 +279,68 @@ function editPost(id) {
                     type: "POST",
                 }).done(function(res) {
 
-                    submitText(JSON.parse(res).cube);
+                    //Create compressed thumbnail of image to store for gallery presentation.
+
+                    var split = fileData.name.split(".");
+                    const fileName = split[0] + "_thumb" + "." + split[1];
+                    console.log(fileName);
+                    const reader = new FileReader();
+                    reader.readAsDataURL(fileData);
+
+                    reader.onload = function(event) {
+
+                        const img = new Image();
+                        img.src = event.target.result;
+
+                        img.onload = function() {
+
+                            const width = 300;
+                            const height = (width / img.width) * img.height;
+                            const canvas = document.createElement("canvas");
+                            canvas.width = width;
+                            canvas.height = height;
+                            const context = canvas.getContext("2d");
+                            context.drawImage(img, 0, 0, width, height);
+
+                            //Create image file from canvas
+
+                            context.canvas.toBlob( function(blob) {
+                                const file = new File([blob], fileName, {
+
+                                type: "image/jpeg",
+                                    lastModified: Date.now()
+                                });
+
+                                //Upload thumbnail.
+
+                                var thumbData = new FormData;
+                                thumbData.append("file", file);
+
+                                $.ajax({
+                                    url: "upload",
+                                    dataType: "text",
+                                    cache: false,
+                                    contentType: false,
+                                    processData: false,
+                                    data: thumbData,
+                                    type: "POST",
+                                }).done(function(res) {
+
+                                    submitText(JSON.parse(res).cube);
+
+                                }).catch(function(err) {
+
+                                    document.getElementById("error").innerHTML = "Internal server error, please try again.</p>";
+                                });
+
+                            }, "image/jpeg", 1);
+
+                            reader.onerror = function(err) {
+
+                                console.log(err);
+                            }
+                        }
+                    }
 
                 }).catch(function(err) {
 
@@ -302,8 +365,17 @@ function editPost(id) {
         //Helper function for submiting text fields
         function submitText(cube) {
 
-            if ($("#file").prop("files").length > 0) var path = "https://cloud-cube.s3.amazonaws.com/" + cube + "/public/" + $("#file").prop("files")[0].name;
-            else var path = response[0].image_loc;
+            if ($("#file").prop("files").length > 0) {
+
+                var split = $("#file").prop("files")[0].name.split(".");
+                var thumbPath = "https://cloud-cube.s3.amazonaws.com/" + cube + "/public/" + split[0] + "_thumb" + "." + split[1];
+                var path = "https://cloud-cube.s3.amazonaws.com/" + cube + "/public/" + $("#file").prop("files")[0].name;
+
+            } else {
+
+                var thumbPath = response[0].thumbnail_loc;
+                var path = response[0].image_loc;
+            }
             var title = document.getElementById("post_title").value;
             var description = document.getElementById("post_desc").value;
             var size = document.getElementById("post_size").value;
@@ -314,8 +386,8 @@ function editPost(id) {
                 async: false,
                 data: { data:
                         JSON.stringify(
-                        { query: "UPDATE post SET title = $1, description = $2, size = $3, image_loc = $5 WHERE pid = $4",
-                          vars: [title, description, size, postID, path],
+                        { query: "UPDATE post SET title = $1, description = $2, size = $3, image_loc = $5, thumbnail_loc = $6 WHERE pid = $4",
+                          vars: [title, description, size, postID, path, thumbPath],
                           type: "update"})}
             }).done(function(res) {
                 document.body.removeChild(document.getElementById("post_edit_modal"));
@@ -353,6 +425,8 @@ function addPost(collection) {
 
     submit.onclick = function() {
 
+        //Upload image.
+
         var fileData = $("#file").prop("files")[0];
         var formData = new FormData;
         formData.append("file", fileData);
@@ -367,7 +441,68 @@ function addPost(collection) {
             type: "POST",
         }).done(function(res) {
 
-            submitText(JSON.parse(res).cube);
+            //Create compressed thumbnail of image to store for gallery presentation.
+
+            var split = fileData.name.split(".");
+            const fileName = split[0] + "_thumb" + "." + split[1];
+            console.log(fileName);
+            const reader = new FileReader();
+            reader.readAsDataURL(fileData);
+
+            reader.onload = function(event) {
+
+                const img = new Image();
+                img.src = event.target.result;
+
+                img.onload = function() {
+
+                    const width = 300;
+                    const height = (width / img.width) * img.height;
+                    const canvas = document.createElement("canvas");
+                    canvas.width = width;
+                    canvas.height = height;
+                    const context = canvas.getContext("2d");
+                    context.drawImage(img, 0, 0, width, height);
+
+                    //Create image file from canvas
+
+                    context.canvas.toBlob( function(blob) {
+                        const file = new File([blob], fileName, {
+
+                            type: "image/jpeg",
+                            lastModified: Date.now()
+                        });
+
+                        //Upload thumbnail.
+
+                        var thumbData = new FormData;
+                        thumbData.append("file", file);
+
+                        $.ajax({
+                            url: "upload",
+                            dataType: "text",
+                            cache: false,
+                            contentType: false,
+                            processData: false,
+                            data: thumbData,
+                            type: "POST",
+                        }).done(function(res) {
+
+                            submitText(JSON.parse(res).cube);
+
+                        }).catch(function(err) {
+
+                            document.getElementById("error").innerHTML = "Internal server error, please try again.</p>";
+                        });
+
+                    }, "image/jpeg", 1);
+
+                    reader.onerror = function(err) {
+
+                        console.log(err);
+                    }
+                }
+            }
 
         }).catch(function(err) {
 
@@ -389,10 +524,16 @@ function addPost(collection) {
 
     function submitText(cube) {
 
+        //Upload text data to database.
+
+        var split = $("#file").prop("files")[0].name.split(".");
+        var thumbPath = "https://cloud-cube.s3.amazonaws.com/" + cube + "/public/" + split[0] + "_thumb" + "." + split[1];
         var path = "https://cloud-cube.s3.amazonaws.com/" + cube + "/public/" + $("#file").prop("files")[0].name;
         var title = document.getElementById("post_title").value;
         var description = document.getElementById("post_desc").value;
         var size = document.getElementById("post_size").value;
+
+        console.log(thumbPath);
 
         $.ajax({
             url: "DBRequest",
@@ -400,8 +541,8 @@ function addPost(collection) {
             async: false,
             data: { data:
                     JSON.stringify(
-                    { query: "INSERT INTO post(image_loc, title, description, collection, size) VALUES($5, $1, $2, $4, $3)",
-                      vars: [title, description, size, colID, path],
+                    { query: "INSERT INTO post(image_loc, title, description, collection, size, thumbnail_loc) VALUES($5, $1, $2, $4, $3, $6)",
+                      vars: [title, description, size, colID, path, thumbPath],
                       type: "insert"})}
         }).done(function(res) {
             document.body.removeChild(document.getElementById("post_add_modal"));
@@ -425,7 +566,7 @@ function deletePost(id) {
         async: false,
         data: { data:
                 JSON.stringify(
-                { query: "SELECT title, image_loc FROM post WHERE pid = $1",
+                { query: "SELECT title, image_loc, thumbnail_loc FROM post WHERE pid = $1",
                   vars: [postID],
                   type: "get"})}
     }).done(function(response) {
@@ -447,24 +588,36 @@ function deletePost(id) {
         submit.onclick = function() {
 
             $.ajax({
-                url: "DBRequest",
+                url: "delete",
                 type: "POST",
-                async: false,
-                data: { data:
-                        JSON.stringify(
-                        { query: "DELETE FROM post WHERE pid = $1",
-                          vars: [postID],
-                          type: "delete"})}
+                data: {data: JSON.stringify({fileName: response[0].image_loc, type: "main"})}
             }).done(function(res) {
 
                 $.ajax({
                     url: "delete",
                     type: "POST",
-                    data: {data: JSON.stringify({fileName: response[0].image_loc})}
+                    data: {data: JSON.stringify({fileName: response[0].thumbnail_loc, type: "thumb"})}
                 }).done(function(res) {
 
-                    document.body.removeChild(document.getElementById("confirm_delete_modal"));
-                    populate();
+                    $.ajax({
+                        url: "DBRequest",
+                        type: "POST",
+                        async: false,
+                        data: { data:
+                                JSON.stringify(
+                                { query: "DELETE FROM post WHERE pid = $1",
+                                  vars: [postID],
+                                  type: "delete"})}
+                    }).done(function(res) {
+
+                        document.body.removeChild(document.getElementById("confirm_delete_modal"));
+                        populate();
+
+                    }).catch(function(err) {
+
+                        document.getElementById("error").innerHTML = "Internal server error, please try again."
+
+                    });
 
                 }).catch(function(err) {
 
