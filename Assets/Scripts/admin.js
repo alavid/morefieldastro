@@ -152,8 +152,6 @@ function populate() {
                                             "<button class='edit_button' onClick='editPost(this.id)' id='ep" + response.posts[n].pid + "'>Edit</button>" +
                                             "<button class='delete_button' onClick='deletePost(this.id)' id='dp" + response.posts[n].pid + "'>Delete</button>";
 
-                        console.log("Appending " + response.posts[n].pid + " with " + response.posts[n].thumbnail_loc);
-
                         cols[i].appendChild(newPost);
                     }
                 }
@@ -283,7 +281,6 @@ function editPost(id) {
 
                     var split = fileData.name.split(".");
                     const fileName = split[0] + "_thumb" + "." + split[1];
-                    console.log(fileName);
                     const reader = new FileReader();
                     reader.readAsDataURL(fileData);
 
@@ -445,7 +442,6 @@ function addPost(collection) {
 
             var split = fileData.name.split(".");
             const fileName = split[0] + "_thumb" + "." + split[1];
-            console.log(fileName);
             const reader = new FileReader();
             reader.readAsDataURL(fileData);
 
@@ -532,8 +528,6 @@ function addPost(collection) {
         var title = document.getElementById("post_title").value;
         var description = document.getElementById("post_desc").value;
         var size = document.getElementById("post_size").value;
-
-        console.log(thumbPath);
 
         $.ajax({
             url: "DBRequest",
