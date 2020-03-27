@@ -65,6 +65,7 @@ function populate() {
     addPostButtons = [];
 
     document.getElementById("shadow").style.display = 'none';
+    document.body.style.overflow = "auto";
 
     content.innerHTML = "";
 
@@ -220,9 +221,70 @@ function populate() {
     });
 }
 
+function resize( fileData, type ) {
+
+    return new Promise( function( resolve, reject ) {
+
+        var fileName;
+        var newWidth;
+
+        if (type === "normal") {
+
+            fileName = fileData.name;
+            newWidth = 1000;
+
+        } else {
+
+            var split = fileData.name.split(".");
+            fileName = split[0] + "_thumb" + "." + split[1];
+            newWidth = 300;
+        }
+
+        const reader = new FileReader();
+        reader.readAsDataURL(fileData);
+
+        reader.onload = function(event) {
+
+            const img = new Image();
+            img.src = event.target.result;
+
+            img.onload = function() {
+
+                const width = newWidth;
+                const height = (width / img.width) * img.height;
+                const canvas = document.createElement("canvas");
+                canvas.width = width;
+                canvas.height = height;
+                const context = canvas.getContext("2d");
+                context.drawImage(img, 0, 0, width, height);
+
+                //Create image file from canvas
+
+                context.canvas.toBlob( function(blob) {
+                    const file = new File([blob], fileName, {
+
+                        type: "image/jpeg",
+                        lastModified: Date.now()
+                    });
+
+                    resolve(file);
+
+                }, "image/jpeg", 1);
+
+                reader.onerror = function(err) {
+
+                    reject(err);
+                }
+            }
+        }
+
+    });
+}
+
 function editPost(id) {
 
     document.getElementById("shadow").style.display = 'block';
+    document.body.style.overflow = "hidden";
 
     var split = id.split("ep");
     var postID = split[1];
@@ -264,91 +326,70 @@ function editPost(id) {
             if ($("#file").prop("files").length > 0) {
 
                 var fileData = $("#file").prop("files")[0];
-                var formData = new FormData;
-                formData.append("file", fileData);
 
-                $.ajax({
-                    url: "upload",
-                    dataType: "text",
-                    cache: false,
-                    contentType: false,
-                    processData: false,
-                    data: formData,
-                    type: "POST",
-                }).done(function(res) {
+                var file = resize(fileData, "normal");
 
-                    //Create compressed thumbnail of image to store for gallery presentation.
+                file.then(function(file) {
 
-                    var split = fileData.name.split(".");
-                    const fileName = split[0] + "_thumb" + "." + split[1];
-                    const reader = new FileReader();
-                    reader.readAsDataURL(fileData);
+                    var formData = new FormData;
+                    formData.append("file", file);
 
-                    reader.onload = function(event) {
+                    $.ajax({
+                        url: "upload",
+                        dataType: "text",
+                        cache: false,
+                        contentType: false,
+                        processData: false,
+                        data: formData,
+                        type: "POST",
+                    }).done(function(res) {
 
-                        const img = new Image();
-                        img.src = event.target.result;
+                        var thumb = resize(fileData, "thumbnail")
 
-                        img.onload = function() {
+                        thumb.then(function(file) {
 
-                            const width = 300;
-                            const height = (width / img.width) * img.height;
-                            const canvas = document.createElement("canvas");
-                            canvas.width = width;
-                            canvas.height = height;
-                            const context = canvas.getContext("2d");
-                            context.drawImage(img, 0, 0, width, height);
+                            var thumbData = new FormData;
+                            thumbData.append("file", file);
 
-                            //Create image file from canvas
+                            $.ajax({
+                                url: "upload",
+                                dataType: "text",
+                                cache: false,
+                                contentType: false,
+                                processData: false,
+                                data: thumbData,
+                                type: "POST",
+                            }).done(function(res) {
 
-                            context.canvas.toBlob( function(blob) {
-                                const file = new File([blob], fileName, {
+                                submitText(JSON.parse(res).cube);
 
-                                type: "image/jpeg",
-                                    lastModified: Date.now()
-                                });
+                            }).catch(function(err) {
 
-                                //Upload thumbnail.
+                                document.getElementById("error").innerHTML = "Internal server error, please try again.</p>";
+                            });
+                        })
 
-                                var thumbData = new FormData;
-                                thumbData.append("file", file);
+                        thumb.catch(function(err) {
 
-                                $.ajax({
-                                    url: "upload",
-                                    dataType: "text",
-                                    cache: false,
-                                    contentType: false,
-                                    processData: false,
-                                    data: thumbData,
-                                    type: "POST",
-                                }).done(function(res) {
+                            document.getElementById("error").innerHTML = "Internal server error, please try again.</p>";
+                        });
 
-                                    submitText(JSON.parse(res).cube);
+                    }).catch(function(err) {
 
-                                }).catch(function(err) {
-
-                                    document.getElementById("error").innerHTML = "Internal server error, please try again.</p>";
-                                });
-
-                            }, "image/jpeg", 1);
-
-                            reader.onerror = function(err) {
-
-                                console.log(err);
-                            }
+                        if (err.status === 400) {
+                            document.getElementById("error").innerHTML = "Internal server error, please try again.</p>";
                         }
-                    }
 
-                }).catch(function(err) {
-
-                    if (err.status === 400) {
-                        document.getElementById("error").innerHTML = "Internal server error, please try again.</p>";
-                    }
-
-                    else if (err.status === 403) {
-                        document.getElementById("error").innerHTML = "Only png and jpeg files are accepted.";
-                    }
+                        else if (err.status === 403) {
+                            document.getElementById("error").innerHTML = "Only png and jpeg files are accepted.";
+                        }
+                    });
                 });
+
+                file.catch(function(err) {
+
+                    document.getElementById("error").innerHTML = "Internal server error, please try again.</p>";
+                })
 
             } else submitText();
         }
@@ -356,6 +397,7 @@ function editPost(id) {
         cancel.onclick = function() {
 
             document.getElementById("shadow").style.display = 'none';
+            document.body.style.overflow = "auto";
             document.body.removeChild(document.getElementById("post_edit_modal"));
         }
 
@@ -399,6 +441,7 @@ function editPost(id) {
 function addPost(collection) {
 
     document.getElementById("shadow").style.display = 'block';
+    document.body.style.overflow = "hidden";
 
     var split = collection.split("ap");
     var colID = split[1];
@@ -425,96 +468,77 @@ function addPost(collection) {
         //Upload image.
 
         var fileData = $("#file").prop("files")[0];
-        var formData = new FormData;
-        formData.append("file", fileData);
 
-        $.ajax({
-            url: "upload",
-            dataType: "text",
-            cache: false,
-            contentType: false,
-            processData: false,
-            data: formData,
-            type: "POST",
-        }).done(function(res) {
+        var image = resize(fileData, "normal");
 
-            //Create compressed thumbnail of image to store for gallery presentation.
+        image.then(function(file) {
 
-            var split = fileData.name.split(".");
-            const fileName = split[0] + "_thumb" + "." + split[1];
-            const reader = new FileReader();
-            reader.readAsDataURL(fileData);
+            var formData = new FormData;
+            formData.append("file", file);
 
-            reader.onload = function(event) {
+            $.ajax({
+                url: "upload",
+                dataType: "text",
+                cache: false,
+                contentType: false,
+                processData: false,
+                data: formData,
+                type: "POST",
+            }).done(function(res) {
 
-                const img = new Image();
-                img.src = event.target.result;
+                var thumb = resize(fileData, "thumbnail");
 
-                img.onload = function() {
+                thumb.then(function(file) {
 
-                    const width = 300;
-                    const height = (width / img.width) * img.height;
-                    const canvas = document.createElement("canvas");
-                    canvas.width = width;
-                    canvas.height = height;
-                    const context = canvas.getContext("2d");
-                    context.drawImage(img, 0, 0, width, height);
+                    var thumbData = new FormData;
+                    thumbData.append("file", file);
 
-                    //Create image file from canvas
+                    $.ajax({
+                        url: "upload",
+                        dataType: "text",
+                        cache: false,
+                        contentType: false,
+                        processData: false,
+                        data: thumbData,
+                        type: "POST",
+                    }).done(function(res) {
 
-                    context.canvas.toBlob( function(blob) {
-                        const file = new File([blob], fileName, {
+                        submitText(JSON.parse(res).cube);
 
-                            type: "image/jpeg",
-                            lastModified: Date.now()
-                        });
+                    }).catch(function(err) {
 
-                        //Upload thumbnail.
+                        document.getElementById("error").innerHTML = "Internal server error, please try again.</p>";
+                    });
+                });
 
-                        var thumbData = new FormData;
-                        thumbData.append("file", file);
+                thumb.catch(function(err) {
 
-                        $.ajax({
-                            url: "upload",
-                            dataType: "text",
-                            cache: false,
-                            contentType: false,
-                            processData: false,
-                            data: thumbData,
-                            type: "POST",
-                        }).done(function(res) {
+                    document.getElementById("error").innerHTML = "Internal server error, please try again.</p>";
 
-                            submitText(JSON.parse(res).cube);
+                });
 
-                        }).catch(function(err) {
+            }).catch(function(err) {
 
-                            document.getElementById("error").innerHTML = "Internal server error, please try again.</p>";
-                        });
-
-                    }, "image/jpeg", 1);
-
-                    reader.onerror = function(err) {
-
-                        console.log(err);
-                    }
+                if (err.status === 400) {
+                    document.getElementById("error").innerHTML = "Internal server error, please try again.</p>";
                 }
-            }
 
-        }).catch(function(err) {
+                else if (err.status === 403) {
+                    document.getElementById("error").innerHTML = "Only png and jpeg files are accepted.";
+                }
+            });
+        })
 
-            if (err.status === 400) {
-                document.getElementById("error").innerHTML = "Internal server error, please try again.</p>";
-            }
+        image.catch(function(err) {
 
-            else if (err.status === 403) {
-                document.getElementById("error").innerHTML = "Only png and jpeg files are accepted.";
-            }
-        });
+            document.getElementById("error").innerHTML = "Internal server error, please try again.</p>";
+        })
     }
 
     cancel.onclick = function() {
 
         document.getElementById("shadow").style.display = 'none';
+        document.body.style.overflow = "auto";
         document.body.removeChild(document.getElementById("post_add_modal"));
     }
 
@@ -550,6 +574,7 @@ function addPost(collection) {
 function deletePost(id) {
 
     document.getElementById("shadow").style.display = 'block';
+    document.body.style.overflow = "hidden";
 
     var split = id.split("dp");
     var postID = split[1];
@@ -626,6 +651,7 @@ function deletePost(id) {
         cancel.onclick = function() {
 
             document.getElementById("shadow").style.display = 'none';
+            document.body.style.overflow = "auto";
             document.body.removeChild(document.getElementById("confirm_delete_modal"));
         }
     });
@@ -634,6 +660,7 @@ function deletePost(id) {
 function addCollection() {
 
     document.getElementById("shadow").style.display = "block";
+    document.body.style.overflow = "hidden";
 
     var addModal = document.createElement("div");
     addModal.setAttribute("class", "modal");
@@ -676,6 +703,7 @@ function addCollection() {
     cancel.onclick = function() {
 
         document.getElementById("shadow").style.display = 'none';
+        document.body.style.overflow = "auto";
         document.body.removeChild(document.getElementById("col_add_modal"));
     }
 }
@@ -683,6 +711,7 @@ function addCollection() {
 function editCollection(id) {
 
     document.getElementById("shadow").style.display = "block";
+    document.body.style.overflow = "hidden";
 
     var split = id.split("ec");
     var colID = split[1];
@@ -739,6 +768,7 @@ function editCollection(id) {
         cancel.onclick = function() {
 
             document.getElementById("shadow").style.display = 'none';
+            document.body.style.overflow = "auto";
             document.body.removeChild(document.getElementById("col_edit_modal"));
         }
     });
@@ -747,6 +777,7 @@ function editCollection(id) {
 function deleteCollection(id) {
 
     document.getElementById("shadow").style.display = "block";
+    document.body.style.overflow = "hidden";
 
     var split = id.split("dc");
     var colID = split[1];
@@ -818,6 +849,7 @@ function deleteCollection(id) {
         cancel.onclick = function() {
 
             document.getElementById("shadow").style.display = 'none';
+            document.body.style.overflow = "auto";
             document.body.removeChild(document.getElementById("confirm_delete_modal"));
         }
     })
@@ -865,6 +897,7 @@ function feature(id) {
 function basicInfo(type) {
 
     document.getElementById("shadow").style.display = "block";
+    document.body.style.overflow = "hidden";
 
     if (type === "About") {
 
@@ -933,6 +966,7 @@ function basicInfo(type) {
             cancel.onclick = function() {
 
                 document.getElementById("shadow").style.display = 'none';
+                document.body.style.overflow = "auto";
                 document.body.removeChild(document.getElementById("about_modal"));
             }
 
@@ -1011,6 +1045,7 @@ function basicInfo(type) {
             cancel.onclick = function() {
 
                 document.getElementById("shadow").style.display = 'none';
+                document.body.style.overflow = "auto";
                 document.body.removeChild(document.getElementById("contact_modal"));
             }
         });
@@ -1066,6 +1101,7 @@ function basicInfo(type) {
             cancel.onclick = function() {
 
                 document.getElementById("shadow").style.display = 'none';
+                document.body.style.overflow = "auto";
                 document.body.removeChild(document.getElementById("purchase_modal"));
             }
         });
