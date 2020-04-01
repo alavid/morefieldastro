@@ -233,11 +233,15 @@ function resize( fileData, type ) {
             fileName = fileData.name;
             newWidth = 1000;
 
-        } else {
+        } else if (type === "thumbnail") {
 
             var split = fileData.name.split(".");
             fileName = split[0] + "_thumb" + "." + split[1];
             newWidth = 300;
+
+        } else {
+
+            reject("Invalid resize type.");
         }
 
         const reader = new FileReader();
@@ -267,7 +271,7 @@ function resize( fileData, type ) {
                         lastModified: Date.now()
                     });
 
-                    resolve(file);
+                    resolve({image: file, originalSize: [img.width, img.height]});
 
                 }, "image/jpeg", 1);
 
@@ -327,12 +331,14 @@ function editPost(id) {
 
                 var fileData = $("#file").prop("files")[0];
 
-                var file = resize(fileData, "normal");
+                var imageData = resize(fileData, "normal");
 
-                file.then(function(file) {
+                imageData.then(function(data) {
+
+                    var originalSize = data.originalSize[0] + "x" + data.originalSize[1];
 
                     var formData = new FormData;
-                    formData.append("file", file);
+                    formData.append("file", data.image);
 
                     $.ajax({
                         url: "upload",
@@ -344,12 +350,12 @@ function editPost(id) {
                         type: "POST",
                     }).done(function(res) {
 
-                        var thumb = resize(fileData, "thumbnail")
+                        var thumbData = resize(fileData, "thumbnail")
 
-                        thumb.then(function(file) {
+                        thumbData.then(function(data) {
 
                             var thumbData = new FormData;
-                            thumbData.append("file", file);
+                            thumbData.append("file", data.image);
 
                             $.ajax({
                                 url: "upload",
@@ -361,7 +367,7 @@ function editPost(id) {
                                 type: "POST",
                             }).done(function(res) {
 
-                                submitText(JSON.parse(res).cube);
+                                submitText(JSON.parse(res).cube, originalSize);
 
                             }).catch(function(err) {
 
@@ -369,7 +375,7 @@ function editPost(id) {
                             });
                         })
 
-                        thumb.catch(function(err) {
+                        thumbData.catch(function(err) {
 
                             document.getElementById("error").innerHTML = "Internal server error, please try again.</p>";
                         });
@@ -386,7 +392,7 @@ function editPost(id) {
                     });
                 });
 
-                file.catch(function(err) {
+                imageData.catch(function(err) {
 
                     document.getElementById("error").innerHTML = "Internal server error, please try again.</p>";
                 })
@@ -402,18 +408,20 @@ function editPost(id) {
         }
 
         //Helper function for submiting text fields
-        function submitText(cube) {
+        function submitText(cube, originalSize) {
 
             if ($("#file").prop("files").length > 0) {
 
                 var split = $("#file").prop("files")[0].name.split(".");
                 var thumbPath = "https://cloud-cube.s3.amazonaws.com/" + cube + "/public/" + split[0] + "_thumb" + "." + split[1];
                 var path = "https://cloud-cube.s3.amazonaws.com/" + cube + "/public/" + $("#file").prop("files")[0].name;
+                var oSize = originalSize;
 
             } else {
 
                 var thumbPath = response[0].thumbnail_loc;
                 var path = response[0].image_loc;
+                var oSize = response[0].original_size;
             }
             var title = document.getElementById("post_title").value;
             var description = document.getElementById("post_desc").value;
@@ -425,8 +433,8 @@ function editPost(id) {
                 async: false,
                 data: { data:
                         JSON.stringify(
-                        { query: "UPDATE post SET title = $1, description = $2, size = $3, image_loc = $5, thumbnail_loc = $6 WHERE pid = $4",
-                          vars: [title, description, size, postID, path, thumbPath],
+                        { query: "UPDATE post SET title = $1, description = $2, size = $3, image_loc = $5, thumbnail_loc = $6, original_size = $7 WHERE pid = $4",
+                          vars: [title, description, size, postID, path, thumbPath, oSize],
                           type: "update"})}
             }).done(function(res) {
                 document.body.removeChild(document.getElementById("post_edit_modal"));
@@ -469,12 +477,15 @@ function addPost(collection) {
 
         var fileData = $("#file").prop("files")[0];
 
-        var image = resize(fileData, "normal");
 
-        image.then(function(file) {
+        var imageData = resize(fileData, "normal");
+
+        imageData.then(function(data) {
+
+            var originalSize = data.originalSize[0] + "x" + data.originalSize[1];
 
             var formData = new FormData;
-            formData.append("file", file);
+            formData.append("file", data.image);
 
             $.ajax({
                 url: "upload",
@@ -486,12 +497,12 @@ function addPost(collection) {
                 type: "POST",
             }).done(function(res) {
 
-                var thumb = resize(fileData, "thumbnail");
+                var thumbData = resize(fileData, "thumbnail");
 
-                thumb.then(function(file) {
+                thumbData.then(function(data) {
 
                     var thumbData = new FormData;
-                    thumbData.append("file", file);
+                    thumbData.append("file", data.image);
 
                     $.ajax({
                         url: "upload",
@@ -503,7 +514,7 @@ function addPost(collection) {
                         type: "POST",
                     }).done(function(res) {
 
-                        submitText(JSON.parse(res).cube);
+                        submitText(JSON.parse(res).cube, originalSize);
 
                     }).catch(function(err) {
 
@@ -511,7 +522,7 @@ function addPost(collection) {
                     });
                 });
 
-                thumb.catch(function(err) {
+                thumbData.catch(function(err) {
 
                     document.getElementById("error").innerHTML = "Internal server error, please try again.</p>";
 
@@ -529,7 +540,7 @@ function addPost(collection) {
             });
         })
 
-        image.catch(function(err) {
+        imageData.catch(function(err) {
 
             document.getElementById("error").innerHTML = "Internal server error, please try again.</p>";
         })
@@ -542,7 +553,7 @@ function addPost(collection) {
         document.body.removeChild(document.getElementById("post_add_modal"));
     }
 
-    function submitText(cube) {
+    function submitText(cube, originalSize) {
 
         //Upload text data to database.
 
@@ -559,8 +570,8 @@ function addPost(collection) {
             async: false,
             data: { data:
                     JSON.stringify(
-                    { query: "INSERT INTO post(image_loc, title, description, collection, size, thumbnail_loc) VALUES($5, $1, $2, $4, $3, $6)",
-                      vars: [title, description, size, colID, path, thumbPath],
+                    { query: "INSERT INTO post(image_loc, title, description, collection, size, thumbnail_loc, original_size) VALUES($5, $1, $2, $4, $3, $6, $7)",
+                      vars: [title, description, size, colID, path, thumbPath, originalSize],
                       type: "insert"})}
         }).done(function(res) {
             document.body.removeChild(document.getElementById("post_add_modal"));
