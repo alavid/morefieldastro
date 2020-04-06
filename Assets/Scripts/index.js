@@ -224,27 +224,42 @@ function openModal(id) {
                   type: "get"})}
     }).done(function(response) {
 
-        var modal = document.createElement("Modal");
-        modal.setAttribute("class", "modal");
-        modal.setAttribute("id", "post_disp_modal");
+        var image = new Image();
+        image.src = response[0].image_loc;
+        image.setAttribute("class", "thumbnail");
 
-        modal.innerHTML =   "<button type='button' id='close'><i class='fas fa-times'></i></button>" +
-                            "<div id='modal-content'>" +
-                            "   <img class='thumbnail' src='" + response[0].image_loc + "'><br>" +
-                            "   <div id='modal_info'>" +
-                            "       <h2 class='modal_title text'>" + response[0].title + "</h2>" +
-                            "       <p class='modal_desc text'>" + response[0].description + "</p>" +
-                            "       <p class='modal_size text'>Max Size: " + response[0].size + "</p>" +
-                            "   </div>"
-                            "</div>";
+        image.onload = function() {
 
-        document.body.appendChild(modal);
+            var oHeight = image.height;
+            var oWidth = image.width;
+            var width;
 
-        document.getElementById("close").onclick = function() {
+            if (oHeight > 700) width = 700 * (oWidth / oHeight);
+            else width = oWidth;
 
-            document.getElementById("shadow").style.display = 'none';
-            document.body.style.overflow = "auto";
-            document.body.removeChild(document.getElementById("post_disp_modal"));
+            var modal = document.createElement("Modal");
+            modal.setAttribute("id", "post_disp_modal");
+
+            modal.innerHTML =   "<div id='close'><i class='fas fa-times' id='close_button'></i></div>" +
+                                "<div id='modal_content'>" +
+                                "   <div id='modal_thumb'></div>" +
+                                "   <div id='modal_info'>" +
+                                "       <h2 class='modal_title text'>" + response[0].title + "</h2>" +
+                                "       <p class='modal_desc text'>" + response[0].description + "</p>" +
+                                "       <p class='modal_size text'>Max Size: " + response[0].size + "</p>" +
+                                "   </div>"
+                                "</div>";
+
+            document.body.appendChild(modal);
+            document.getElementById("modal_thumb").appendChild(image);
+            document.getElementById("modal_thumb").style.maxWidth = width + "px";
+
+            document.getElementById("close_button").onclick = function() {
+
+                document.getElementById("shadow").style.display = 'none';
+                document.body.style.overflow = "auto";
+                document.body.removeChild(document.getElementById("post_disp_modal"));
+            }
         }
 
     }).catch(function(err) {

@@ -17,10 +17,53 @@
     padding: 10px
 
 #post_disp_modal
-    width: 60%
-    max-width: 800px
+    position: fixed
+    top: 5%
+    left: 5%
+    right: 5%
+    z-index: 2000
+    overflow: auto
+    background-color: main.$modal_color
+    padding: 10px
+    border-radius: 3px
 
-.modal_title, .modal_desc, .modal_size, .modal_field_label, .modal_thumb, .confirm_modal_text
+#modal_content
+    display: flex
+    flex-direction: row
+
+#modal_thumb
+    flex: 3
+
+#modal_info
+    padding-left: 10px
+    padding-top: 0px
+    flex: 1
+
+#close
+    text-align: right
+    width: 100%
+    margin-bottom: 5px
+    background-color: white
+    border: 0px
+    color: #cfcfcf
+    font-size: 16pt
+
+@media screen and (max-aspect-ratio: "1/1")
+
+    #modal_content
+        flex-direction: column
+        align-items: center
+
+    #modal_info
+        padding-left: 0px
+        padding-top: 10px
+
+.modal_title
+    color: main.$modal_text_color
+    margin-bottom: 3px
+    margin-top: 0px
+
+.modal_desc, .modal_size, .modal_field_label, .modal_thumb, .confirm_modal_text
     color: main.$modal_text_color
     margin-top: 8px
     margin-bottom: 3px
