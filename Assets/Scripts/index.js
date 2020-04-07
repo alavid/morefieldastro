@@ -38,7 +38,7 @@ window.onload = function() {
 
                 $.ajax({url: "DBRequest", type: "POST", async: false,
                     data: {data: JSON.stringify({
-                        query: "SELECT title, description, image_loc FROM post WHERE collection = $1",
+                        query: "SELECT pid, title, description, image_loc FROM post WHERE collection = $1",
                         vars: [collection[0].cid],
                         type: "get"
                     })}
@@ -48,20 +48,24 @@ window.onload = function() {
 
                         if ((i + 1) % 2 === 1) {
                             content.innerHTML +=    "<div class='feat_entry'>" +
-                                                    "   <div class='feat_entry_img'><img class='feat_thumb' src='" + posts[i].image_loc + "'></div>" +
-                                                    "   <div class='feat_entry_info right'>" +
-                                                    "       <h4 class='feat_entry_title text'>" + posts[i].title + "</h4>" +
-                                                    "       <p class='feat_entry_desc text block'>" + posts[i].description + "</p>"
+                                                    "   <div class='feat_entry_img' id='feat_entry_img-" + posts[i].pid + "'><img class='feat_thumb' src='" + posts[i].image_loc + "'></div>" +
+                                                    "   <div class='feat_entry_info right' id='feat_entry_info-" + posts[i].pid + "'>" +
+                                                    "       <div class='feat_entry_info_block'>" +
+                                                    "           <h4 class='feat_entry_title text'>" + posts[i].title + "</h4>" +
+                                                    "           <p class='feat_entry_desc text block'>" + posts[i].description + "</p>"
+                                                    "       </div>" +
                                                     "   </div>" +
                                                     "</div>";
                         }
                         else {
                             content.innerHTML +=    "<div class='feat_entry'>" +
-                                                    "   <div class='feat_entry_info left'>" +
-                                                    "       <h4 class='feat_entry_title text'>" + posts[i].title + "</h4>" +
-                                                    "       <p class='feat_entry_desc text block'>" + posts[i].description + "</p>" +
+                                                    "   <div class='feat_entry_info left' id='feat_entry_info-" + posts[i].pid + "'>" +
+                                                    "       <div class='feat_entry_info_block'>" +
+                                                    "           <h4 class='feat_entry_title text'>" + posts[i].title + "</h4>" +
+                                                    "           <p class='feat_entry_desc text block'>" + posts[i].description + "</p>" +
+                                                    "       </div>" +
                                                     "   </div>" +
-                                                    "   <div class='feat_entry_img'><img class='feat_thumb' src='" + posts[i].image_loc + "'></div>" +
+                                                    "   <div class='feat_entry_img' id='feat_entry_img-" + posts[i].pid + "'><img class='feat_thumb' src='" + posts[i].image_loc + "'></div>" +
                                                     "</div>";
                         }
                     }

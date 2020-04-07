@@ -20,19 +20,30 @@
 
 .feat_entry
     display: flex
-    align-items: center
+    align-items: stretch
     margin: 30px 8% 30px 8%
 
 .feat_entry_img
     flex: 1.65
 
 .feat_entry_info
+    position: relative
     flex: 1
-    height: 40vw
     line-height: 2.25vw
     overflow: auto
     padding: 5px
     vertical-align: middle
+
+@media screen and (max-width : 900px)
+    .feat_entry_info
+        line-height: normal
+
+.feat_entry_info_block
+    position: absolute
+    top: 0px
+    left: 0px
+    width: 100%
+    height: 100%
 
 .right
     margin-left: 20px
