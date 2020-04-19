@@ -20,6 +20,8 @@ window.onload = function() {
 
         content.innerHTML = "<div class='error'></div>";
 
+        window.scrollTo(0,0);
+
         if (page === "Home") {
 
             home.classList.add("selected");
@@ -33,8 +35,10 @@ window.onload = function() {
                     })}
             }).done(function(collection) {
 
-                content.innerHTML +=    "<h3 id='feat_title' class='text'>" + collection[0].title + "</h3>" +
-                                        "<p id='feat_desc' class='text'>" + collection[0].description + "</p>";
+                content.innerHTML +=    "<div id='title_block'>" +
+                                        "   <h3 id='feat_title' class='text'>" + collection[0].title + "</h3>" +
+                                        "   <p id='feat_desc' class='text'>" + collection[0].description + "</p>" +
+                                        "</div>";
 
                 $.ajax({url: "DBRequest", type: "POST", async: false,
                     data: {data: JSON.stringify({
@@ -68,6 +72,12 @@ window.onload = function() {
                                                     "   <div class='feat_entry_img' id='feat_entry_img-" + posts[i].pid + "'><img class='feat_thumb' src='" + posts[i].image_loc + "'></div>" +
                                                     "</div>";
                         }
+                    }
+
+                    content.innerHTML +=    "<button type='button' id='see_more'>See More</button>";
+                    document.getElementById("see_more").onclick = function() {
+
+                        populate("Gallery");
                     }
 
                 }).catch(function(err) {

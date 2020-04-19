@@ -1,5 +1,15 @@
 @use "main"
 
+#title_block
+    width: 100%
+    background-image: url("../Images/Pleiades.jpg")
+    background-size: cover
+    background-position: center
+    padding-top: 50px
+    padding-bottom: 50px
+    box-shadow: 0px -140px 120px main.$background_color inset
+    text-shadow: 0 1px 4px main.$background_color
+
 #feat_title
     font-family: main.$title_font
     color: main.$text_color
@@ -7,7 +17,6 @@
     font-weight: normal
     letter-spacing: 15px
     font-size: 45pt
-    margin-top: 30px
     text-align: center
 
 #feat_desc
@@ -17,14 +26,16 @@
     text-align: center
     line-height: 24px
     white-space: pre-wrap
+    font-weight: bold
 
 .feat_entry
     display: flex
     align-items: stretch
-    margin: 30px 8% 30px 8%
+    margin: 0px 8% 90px 8%
 
 .feat_entry_img
-    flex: 1.65
+    flex: 2
+    max-width: 1000px
 
 .feat_entry_info
     position: relative
@@ -61,3 +72,14 @@
 .feat_entry_desc
     font-size: 11pt
     font-style: italic
+
+#see_more
+    margin-left: 38%
+    margin-right: 38%
+    margin-bottom: 60px
+    padding: 20px
+    width: 24%
+    font-family: main.$body_font
+    font-weight: bold
+    font-size: 16pt
+    border: 0px
