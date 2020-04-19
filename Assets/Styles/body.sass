@@ -11,6 +11,9 @@ img
     font-family: main.$body_font
     color: main.$text_color
 
+h1, h2, h3, button, .text
+    font-display: fallback
+
 #shadow
     position: fixed
     top: 0px
@@ -28,13 +31,13 @@ img
     color: red
 
 ::-webkit-scrollbar
-    width: 2px
+    width: 10px
 
 ::-webkit-scrollbar-track
-    background: #262626
+    background: main.$background_color
 
 ::-webkit-scrollbar-thumb
-    background: #424242
+    background: main.$highlight_color
 
 ::-webkit-scrollbar-thumb:hover
     background: #555
