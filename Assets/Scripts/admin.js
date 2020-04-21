@@ -16,17 +16,18 @@ window.onload = function() {
 
     //populate();
 
-    content.innerHTML +=    "<p>Log into and an account with admin access to continue.</p>" +
-                            "<p id='error' class='text'></p>" +
-                            "<form id='login' class='text'>" +
-                            "   Email Address:<br>" +
-                            "   <input type='text' id='email' name='Email'><br>" +
-                            "   Password:<br>" +
-                            "   <input type='password' id='password' name='Email'><br>" +
-                            "   <button type='button' id='LogIn'>Log In</button>" +
-                            "</form>";
+    content.innerHTML +=    "<div id='login_container'>" +
+                            "   <div id='error' class='text'></div>" +
+                            "   <form id='login' class='text'>" +
+                            "       <p class='text login_label'>Email Address:</p>" +
+                            "       <input type='text' id='email' name='Email'><br>" +
+                            "       <p class='text login_label'>Password:</p>" +
+                            "       <input type='password' id='password' name='Email'><br>" +
+                            "       <button type='button' id='login_button'>Log In</button>" +
+                            "   </form>" +
+                            "</div>";
 
-    let logInButton = document.getElementById("LogIn");
+    let logInButton = document.getElementById("login_button");
     let emailField = document.getElementById("email");
     let passwordField = document.getElementById("password");
 
@@ -51,6 +52,8 @@ window.onload = function() {
 
                 document.getElementById("error").innerHTML = error;
             });
+        } else {
+            document.getElementById("error").innerHTML = "Failure: Both fields required";
         }
     }
 }
@@ -930,7 +933,7 @@ function basicInfo(type) {
             aboutModal.innerHTML =  "<img class='thumbnail' src='" + info[0].about_img_loc + "'><br>" +
                                     "<div id='error'></div>" +
                                     "<p class='modal_thumb text'>Picture</p><input type='file' id='file' name='file'><br>" +
-                                    "<p class='modal_field_label text'>Bio</p><textarea id='bio' name='bio'>" + info[0].about + "</textarea><br>" +
+                                    "<p class='modal_field_label text'>Bio</p><textarea id='bio_field' class='info_field' name='bio'>" + info[0].about + "</textarea><br>" +
                                     "<button type='button' class='submit' id='submit_about'>Submit</button>" +
                                     "<button type='button' class='cancel' id='cancel_about'>Cancel</button>";
 
@@ -1023,7 +1026,7 @@ function basicInfo(type) {
             contactModal.setAttribute("id", "contact_modal");
 
             contactModal.innerHTML =    "<div id='error'></div>" +
-                                        "<p class='modal_field_label text'>Contact Info</p><textarea id='contact' name='contact'>" + info[0].contact + "</textarea><br>" +
+                                        "<p class='modal_field_label text'>Contact Info</p><textarea id='contact_field' class='info_field' name='contact'>" + info[0].contact + "</textarea><br>" +
                                         "<button type='button' class='submit' id='submit_contact'>Submit</button>" +
                                         "<button type='button' class='cancel' id='cancel_contact'>Cancel</button>";
 
@@ -1079,7 +1082,7 @@ function basicInfo(type) {
             purchaseModal.setAttribute("id", "purchase_modal");
 
             purchaseModal.innerHTML =   "<div id='error'></div>" +
-                                        "<p class='modal_field_label text'>Purchase Info</p><textarea id='purchase' name='purchase'>" + info[0].purchase + "</textarea><br>" +
+                                        "<p class='modal_field_label text'>Purchase Info</p><textarea id='purchase_field' class='info_field' name='purchase'>" + info[0].purchase + "</textarea><br>" +
                                         "<button type='button' class='submit' id='submit_purchase'>Submit</button>" +
                                         "<button type='button' class='cancel' id='cancel_purchase'>Cancel</button>";
 
