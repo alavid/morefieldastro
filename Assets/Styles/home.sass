@@ -60,12 +60,17 @@
     height: 100%
 
 .right
-    margin-left: 20px
     text-align: left
 
+    .feat_entry_info
+        margin-left: 20px
+
 .left
-    margin-right: 20px
     text-align: right
+    flex-direction: row-reverse
+
+    .feat_entry_info
+        margin-right: 20px
 
 .feat_entry_title
     margin-top: 0px
@@ -77,11 +82,11 @@
     font-style: italic
 
 #see_more
-    margin-left: 38%
-    margin-right: 38%
+    display: block
+    margin:  0px auto
     margin-bottom: 60px
     padding: 20px
-    width: 24%
+    width: 200px
     font-family: main.$body_font
     font-weight: bold
     font-size: 16pt
