@@ -10,6 +10,38 @@
 // | - Argument "collection": The collection the post is being inserted into  //
 ////////////////////////////////////////////////////////////////////////////////
 
+/*class Modal {
+
+     constructor(HTMLclass, HTMLid, fields, submitType) {
+
+         this.class = HTMLclass;
+         this.id = HTMLid;
+         this.fields = fields;
+         this.submitType = submitType;
+     }
+
+     html() {
+
+         var modal = document.create("div");
+         modal.setAttribute("class", this.class);
+         modal.setAttribute("id", this.id);
+
+         modal.innerHTML = "<div id='error'></div>"
+
+         for (var i = 0; i < fields.length; i++) {
+
+             if (this.fields[i].type === "thumbnail") modal.innerHTML += `<img class='thumbnail' src='${this.fields[i].value}'></br>`
+
+             else {
+
+                 modal.innerHTML += `<p class='modal_field_label text'>${this.fields[i].name}</p>`
+
+                 if (this.fields[i].type === "text") modal.innerHTML += `<p class='modal_field_label text'>${this.fields[i].name}</p>`
+             }
+         }
+     }
+}*/
+
 window.onload = function() {
 
     let content = document.getElementById("admin-content");
@@ -988,7 +1020,7 @@ function basicInfo(type) {
 
                 if ($("#file").prop("files").length > 0) var path = "https://cloud-cube.s3.amazonaws.com/" + cube + "/public/" + $("#file").prop("files")[0].name;
                 else var path = info[0].about_img_loc;
-                var bio = document.getElementById("bio").value;
+                var bio = document.getElementById("bio_field").value;
 
                 $.ajax({
                     url: "DBRequest",
@@ -1037,7 +1069,7 @@ function basicInfo(type) {
 
             submit.onclick = function() {
 
-                contact = document.getElementById("contact").value;
+                contact = document.getElementById("contact_field").value;
 
                 $.ajax({
                     url: "DBRequest",
@@ -1093,7 +1125,7 @@ function basicInfo(type) {
 
             submit.onclick = function() {
 
-                purchase = document.getElementById("purchase").value;
+                purchase = document.getElementById("purchase_field").value;
 
                 $.ajax({
                     url: "DBRequest",
