@@ -10,7 +10,7 @@
     box-shadow: 0px -140px 120px main.$background_color inset
     text-shadow: 0 1px 4px main.$background_color
 
-#feat_title
+#title
     font-family: main.$title_font
     color: main.$text_color
     margin: 0px
@@ -19,7 +19,7 @@
     font-size: 45pt
     text-align: center
 
-#feat_desc
+#intro
     margin-left: 15%
     margin-right: 15%
     margin-bottom: 45px
@@ -28,58 +28,38 @@
     white-space: pre-wrap
     font-weight: bold
 
-.feat_entry
+#collections
     display: flex
-    align-items: stretch
-    margin: 0px 8% 90px 8%
+    flex-wrap: wrap
+    justify-content: center
+    padding-left: 10px
+    padding-right: 10px
 
-.feat_entry_img
-    flex: 2
-    max-width: 1000px
+.thumb
+    width: 475px
+    height: 475px
+    background-position: center
+    background-size: cover
+    margin: 10px
+    box-shadow: 0 0 8px main.$shadow_color
 
-    img
-        box-shadow: 0 1px 15px main.$shadow_color
+@media screen and (min-width: 700px)
+    @media screen and (max-width: 1100px)
 
-.feat_entry_info
+        .thumb
+            width: 45vw
+            height: 45vw
+
+.thumbButton
     position: relative
-    flex: 1
-    line-height: 2.25vw
-    overflow: auto
-    padding: 5px
-    vertical-align: middle
-
-@media screen and (max-width : 900px)
-    .feat_entry_info
-        line-height: normal
-
-.feat_entry_info_block
-    position: absolute
-    top: 0px
-    left: 0px
-    width: 100%
-    height: 100%
-
-.right
-    text-align: left
-
-    .feat_entry_info
-        margin-left: 20px
-
-.left
-    text-align: right
-    flex-direction: row-reverse
-
-    .feat_entry_info
-        margin-right: 20px
-
-.feat_entry_title
-    margin-top: 0px
-    font-style: bold
-    font-size: 14pt
-
-.feat_entry_desc
-    font-size: 11pt
-    font-style: italic
+    height: 160px
+    width: 160px
+    font-size: 16pt
+    left: 50%
+    top: 50%
+    -webkit-transform: translate(-50%, -50%)
+    transform: translate(-50%, -50%)
+    background-color: rgba(48, 48, 48, 0.6)
 
 #see_more
     display: block

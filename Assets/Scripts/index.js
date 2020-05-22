@@ -1,222 +1,218 @@
+var isHome = false;
+
+window.onpopstate = function(e) {
+
+    if (e.state) {
+
+        document.title = e.state.title;
+        document.body.innerHTML = e.state.state;
+    }
+}
+
 window.onload = function() {
 
     let home = document.getElementById("home_button");
-    let gallery = document.getElementById("gallery_button");
     let about = document.getElementById("about_button");
     let contact = document.getElementById("contact_button");
     let purchase = document.getElementById("purchase_button");
-    let nav = [home, gallery, about, contact, purchase];
-
-    let content = document.getElementById("content");
-
-    var selected = 0;
 
     document.getElementById("shadow").style.display = 'none';
 
-    function populate(page) {
+    loadHome();
 
-        content.innerHTML = "";
-        nav[selected].classList.remove("selected");
+    home.onclick = () => {
 
-        content.innerHTML = "<div class='error'></div>";
-
-        window.scrollTo(0,0);
-
-        if (page === "Home") {
-
-            home.classList.add("selected");
-            selected = 0;
-
-            $.ajax({url: "DBRequest", type: "POST", async: false,
-                    data: {data: JSON.stringify({
-                        query: "SELECT cid, title, description FROM collection WHERE cid = (SELECT cid FROM collection WHERE featured = true)",
-                        vars: [],
-                        type: "get"
-                    })}
-            }).done(function(collection) {
-
-                content.innerHTML +=    "<div id='title_block'>" +
-                                        "   <h3 id='feat_title' class='text'>" + collection[0].title + "</h3>" +
-                                        "   <p id='feat_desc' class='text'>" + collection[0].description + "</p>" +
-                                        "</div>";
-
-                $.ajax({url: "DBRequest", type: "POST", async: false,
-                    data: {data: JSON.stringify({
-                        query: "SELECT pid, title, description, image_loc FROM post WHERE collection = $1",
-                        vars: [collection[0].cid],
-                        type: "get"
-                    })}
-                }).done(function(posts) {
-
-                    for (i = 0; i < posts.length; i++) {
-
-                        if ((i + 1) % 2 === 1) {
-                            content.innerHTML +=    "<div class='feat_entry right'>" +
-                                                    "   <div class='feat_entry_img' id='feat_entry_img-" + posts[i].pid + "'><img class='feat_thumb' src='" + posts[i].image_loc + "'></div>" +
-                                                    "   <div class='feat_entry_info' id='feat_entry_info-" + posts[i].pid + "'>" +
-                                                    "       <div class='feat_entry_info_block'>" +
-                                                    "           <h4 class='feat_entry_title text'>" + posts[i].title + "</h4>" +
-                                                    "           <p class='feat_entry_desc text block'>" + posts[i].description + "</p>"
-                                                    "       </div>" +
-                                                    "   </div>" +
-                                                    "</div>";
-                        }
-                        else {
-                            content.innerHTML +=    "<div class='feat_entry left'>" +
-                                                    "   <div class='feat_entry_img' id='feat_entry_img-" + posts[i].pid + "'><img class='feat_thumb' src='" + posts[i].image_loc + "'></div>" +
-                                                    "   <div class='feat_entry_info' id='feat_entry_info-" + posts[i].pid + "'>" +
-                                                    "       <div class='feat_entry_info_block'>" +
-                                                    "           <h4 class='feat_entry_title text'>" + posts[i].title + "</h4>" +
-                                                    "           <p class='feat_entry_desc text block'>" + posts[i].description + "</p>" +
-                                                    "       </div>" +
-                                                    "   </div>" +
-                                                    "</div>";
-                        }
-                    }
-
-                    content.innerHTML +=    "<button type='button' id='see_more'>See More</button>";
-                    document.getElementById("see_more").onclick = function() {
-
-                        populate("Gallery");
-                    }
-
-                }).catch(function(err) {
-
-                    document.getElementById("error").innerHTML = "Internal server error. Please reload the page.";
-                });
-
-            }).catch(function(err) {
-
-                document.getElementById("error").innerHTML = "Internal server error. Please reload the page.";
-            });
-        }
-        else if (page === "Gallery") {
-
-            gallery.classList.add("selected");
-            selected = 1;
-
-            $.ajax({
-                url: "getEntries",
-                type: "POST",
-                async: false,
-                data: {}
-            }).done(function(response) {
-
-                content.innerHTML = "";
-                cols = [];
-
-                for (i = 0; i < response.collections.length; i++) {
-
-                    if (response.collections[i].featured === false) {
-
-                        content.innerHTML +=    "<div class='col_container' id='" + response.collections[i].cid + "'>" +
-                                                "   <div id='col_info'>" +
-                                                "       <h2 class='text'>" + response.collections[i].title + "</h2>" +
-                                                "       <p class='text col_desc'>" + response.collections[i].description + "</p>" +
-                                                "   </div>" +
-                                                "   <div class='post_container' id='pc_" + response.collections[i].cid + "'></div>" +
-                                                "</div>";
-
-                        cols[i] = document.getElementById("pc_" + response.collections[i].cid);
-
-                        for (n = 0; n < response.posts.length; n++) {
-
-                            if (response.posts[n].collection === response.collections[i].cid) {
-
-                                var newPost = document.createElement("div");
-                                newPost.setAttribute("class", "gallery_post");
-                                newPost.setAttribute("id", "post" + response.posts[n].pid);
-                                newPost.setAttribute("onClick", "openModal(this.id)");
-
-                                newPost.innerHTML = "<img class='thumbnail' src='" + response.posts[n].thumbnail_loc + "'>" +
-                                                    "<h3 class='text gallery_post_title'>" + response.posts[n].title + "</h3>";
-
-                                cols[i].appendChild(newPost);
-                            }
-                        }
-                    }
-                }
-            }).catch(function(err) {
-
-                document.getElementById("error").innerHTML = "Internal server error. Please reload the page.";
-            });
-        }
-        else if (page === "About") {
-
-            about.classList.add("selected");
-            selected = 2;
-
-            $.ajax({url: "DBRequest", type: "POST", async: false,
-                    data: {data: JSON.stringify({
-                        query: "SELECT about_img_loc, about FROM basic_info WHERE bid = 0",
-                        vars: [],
-                        type: "get"
-                    })}
-            }).done(function(info) {
-
-                content.innerHTML += "<div id='about'>" +
-                                    "   <div id='about_photo'>" +
-                                    "       <img id='about_thumb' src='" + info[0].about_img_loc + "'>" +
-                                    "   </div>" +
-                                    "   <div id='about_text'>" +
-                                    "       <p id=bio_text class='text'>" + info[0].about + "</p>" +
-                                    "   </div>" +
-                                    "</div>";
-
-            }).catch(function(err) {
-
-                document.getElementById("error").innerHTML = "Internal server error. Please reload the page.";
-            });
-        }
-        else if (page === "Contact") {
-
-            contact.classList.add("selected");
-            selected = 3;
-
-            $.ajax({url: "DBRequest", type: "POST", async: false,
-                    data: {data: JSON.stringify({
-                        query: "SELECT contact FROM basic_info WHERE bid = 0",
-                        vars: [],
-                        type: "get"
-                    })}
-            }).done(function(info) {
-
-                content.innerHTML += "<div id='contact' class='text'><p class='block'>" + info[0].contact + "</p></div>";
-
-            }).catch(function(err) {
-
-                document.getElementById("error").innerHTML = "Internal server error. Please reload the page.";
-            });
-        }
-        else if (page === "Purchase") {
-
-            purchase.classList.add("selected");
-            selected = 4;
-
-            $.ajax({url: "DBRequest", type: "POST", async: false,
-                    data: {data: JSON.stringify({
-                        query: "SELECT purchase FROM basic_info WHERE bid = 0",
-                        vars: [],
-                        type: "get"
-                    })}
-            }).done(function(info) {
-
-                content.innerHTML += "<div id='purchase' class='text'><p class='block'>" + info[0].purchase + "</p></div>";
-
-            }).catch(function(err) {
-
-                document.getElementById("error").innerHTML = "Internal server error. Please reload the page.";
-            });
-        }
+        if (!isHome) loadHome();
+        window.scrollTo(0);
     }
 
-    home.onclick = () => populate("Home");
-    gallery.onclick = () => populate("Gallery");
-    about.onclick = () => populate("About");
-    contact.onclick = () => populate("Contact");
-    purchase.onclick = () => populate("Purchase");
+    about.onclick = () => {
 
-    populate("Home");
+        if (!isHome) loadHome();
+        document.getElementById("about").scrollIntoView();
+    }
+
+    contact.onclick = () => {
+
+        if (!isHome) loadHome();
+        document.getElementById("contact").scrollIntoView();
+    }
+
+    purchase.onclick = () => {
+
+        if (!isHome) loadHome();
+        document.getElementById("purchase").scrollIntoView();
+    }
+}
+
+function loadHome() {
+
+    isHome = true;
+
+    let content = document.getElementById("content");
+    content.innerHTML = "";
+
+    $.ajax({url: "DBRequest", type: "POST", async: false,
+            data: {data: JSON.stringify({
+                query: `SELECT title, intro FROM basic_info`,
+                vars: [],
+                type: "get"
+            })}
+    }).done(function(title) {
+
+        content.innerHTML += `<div id='title_block'>
+                                <h3 id='title' class='text'>${title[0].title}</h3>
+                                <p id='intro' class='text'>${title[0].intro}"</p>
+                              </div>`;
+
+        var collections = document.createElement("div");
+        collections.setAttribute("id", "collections");
+
+        $.ajax({url: "DBRequest", type: "POST", async: false,
+            data: {data: JSON.stringify({
+                   query: `SELECT collection.cid, collection.title, collection.description, post.image_loc
+                           FROM post, collection
+                           WHERE post.index = 0 AND collection.cid = post.collection`,
+                   vars: [],
+                   type: "get"
+            })}
+        }).done(function(res) {
+
+            for (var i = 0; i < res.length; i++) {
+
+                var thumb = document.createElement("div");
+                thumb.setAttribute("id", `thumb${res[i].pid}`);
+                thumb.setAttribute("class", "thumb");
+                thumb.style.backgroundImage = `url("${res[i].image_loc}")`;
+
+                var thumbButton = document.createElement("button");
+                thumbButton.setAttribute("id", `thumbButton${res[i].pid}`);
+                thumbButton.setAttribute("class", "thumbButton");
+                thumbButton.setAttribute("onClick", `loadGallery(${res[i].cid})`);
+                thumbButton.innerHTML = `${res[i].title}`;
+
+                thumb.appendChild(thumbButton);
+                collections.appendChild(thumb);
+            }
+
+            content.appendChild(collections);
+
+            $.ajax({url: "DBRequest", type: "POST", async: false,
+                    data: {data: JSON.stringify({
+                            query: `SELECT * FROM basic_info`,
+                            vars: [],
+                            type: "get"
+                    })}
+            }).done(function(info) {
+
+                content.innerHTML += `<div id='about'>
+                                        <div id='about_photo'>"
+                                            <img id='about_thumb' src='${info[0].about_img_loc}'>
+                                        </div>
+                                        <div id='about_text'>
+                                            <p id=bio_text class='text'>${info[0].about}</p>
+                                        </div>
+                                       </div>`;
+
+                content.innerHTML += `<div id='contact' class='text'>
+                                        <p class='block'>${info[0].contact}</p>
+                                      </div>`;
+
+                content.innerHTML += `<div id='purchase' class='text'>
+                                        <p class='block'>${info[0].purchase}</p>
+                                      </div>`;
+
+                history.pushState({
+                    title: document.title,
+                    state: document.body.innerHTML
+                }, document.title);
+
+            }).catch(function() {
+
+                var error = createElement("div");
+                error.setAttribute("id", "error");
+                error.innerHTML = "Internal server error. Please reload the page.";
+
+                content.appendChild(error);
+                return;
+            });
+
+        }).catch(function(err) {
+
+            var error = createElement("div");
+            error.setAttribute("id", "error");
+            error.innerHTML = "Internal server error. Please reload the page.";
+
+            content.appendChild(error);
+            return;
+        });
+
+    }).catch(function(err) {
+
+        var error = createElement("div");
+        error.setAttribute("id", "error");
+        error.innerHTML = "Internal server error. Please reload the page.";
+
+        content.appendChild(error);
+        return;
+    });
+}
+
+function loadGallery(col) {
+
+    isHome = false;
+
+    let content = document.getElementById("content");
+    content.innerHTML = "";
+
+    var collection = document.createElement("div");
+    collection.setAttribute("class", "col_container");
+
+    var postContainer = document.createElement("div");
+    postContainer.setAttribute("class", "post_container");
+
+    $.ajax({url: "DBRequest", type: "POST", async: false,
+            data: {data: JSON.stringify({
+                query: `SELECT post.title AS post_title, * FROM post, collection WHERE post.collection = $1 AND collection.cid = $1 ORDER BY post.index`,
+                vars: [col],
+                type: "get"
+            })}
+    }).done(function(res) {
+
+        collection.innerHTML += `<div id="col_info">
+                                    <h2 class="text">${res[0].title}</h2>
+                                    <p class="text">${res[0].description}</p>
+                                 </div>`;
+
+        for (i = 0; i < res.length; i++) {
+
+            var newPost = document.createElement("div");
+            newPost.setAttribute("class", "gallery_post");
+            newPost.setAttribute("id", `post${res[i].pid}`);
+            newPost.setAttribute("onClick", "openModal(this.id)");
+
+            newPost.innerHTML = `<img class="thumbnail" src="${res[i].thumbnail_loc}">
+                                 <h3 class="text gallery_post_title">${res[i].post_title}</h3>`;
+
+            postContainer.appendChild(newPost);
+        }
+
+        collection.appendChild(postContainer);
+        content.appendChild(collection);
+
+        history.pushState({
+            title: document.title,
+            state: document.body.innerHTML
+        }, document.title);
+
+    }).catch(function(err) {
+
+        var error = createElement("div");
+        error.setAttribute("id", "error");
+        error.innerHTML = "Internal server error. Please reload the page.";
+
+        content.appendChild(error);
+    });
 }
 
 function openModal(id) {
