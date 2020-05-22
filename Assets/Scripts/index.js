@@ -5,20 +5,38 @@ window.onpopstate = function(e) {
     if (e.state) {
 
         document.title = e.state.title;
-        document.body.innerHTML = e.state.state;
+        document.body.innerHTML = e.state.state.content;
+
+        if (e.state.state.page === "home") isHome = true;
+        else isHome = false;
+
+        setNav();
+    }
+    else {
+
+        var error = createElement("div");
+        error.setAttribute("id", "error");
+        error.innerHTML = "Browser error. Please reload the page.";
+
+        document.body.appendChild(error);
     }
 }
 
 window.onload = function() {
 
+    document.getElementById("shadow").style.display = 'none';
+
+    setNav();
+
+    loadHome();
+}
+
+function setNav() {
+
     let home = document.getElementById("home_button");
     let about = document.getElementById("about_button");
     let contact = document.getElementById("contact_button");
     let purchase = document.getElementById("purchase_button");
-
-    document.getElementById("shadow").style.display = 'none';
-
-    loadHome();
 
     home.onclick = () => {
 
@@ -81,12 +99,12 @@ function loadHome() {
             for (var i = 0; i < res.length; i++) {
 
                 var thumb = document.createElement("div");
-                thumb.setAttribute("id", `thumb${res[i].pid}`);
+                thumb.setAttribute("id", `thumb${res[i].cid}`);
                 thumb.setAttribute("class", "thumb");
                 thumb.style.backgroundImage = `url("${res[i].image_loc}")`;
 
                 var thumbButton = document.createElement("button");
-                thumbButton.setAttribute("id", `thumbButton${res[i].pid}`);
+                thumbButton.setAttribute("id", `thumbButton${res[i].cid}`);
                 thumbButton.setAttribute("class", "thumbButton");
                 thumbButton.setAttribute("onClick", `loadGallery(${res[i].cid})`);
                 thumbButton.innerHTML = `${res[i].title}`;
@@ -124,7 +142,7 @@ function loadHome() {
 
                 history.pushState({
                     title: document.title,
-                    state: document.body.innerHTML
+                    state: {page: "home", content: document.body.innerHTML}
                 }, document.title);
 
             }).catch(function() {
@@ -202,7 +220,7 @@ function loadGallery(col) {
 
         history.pushState({
             title: document.title,
-            state: document.body.innerHTML
+            state: {page: "gallery", content: document.body.innerHTML}
         }, document.title);
 
     }).catch(function(err) {
