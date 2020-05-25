@@ -78,9 +78,11 @@ function loadHome() {
             })}
     }).done(function(title) {
 
+        console.log(title[0].intro);
+
         content.innerHTML += `<div id='title_block'>
                                 <h3 id='title' class='text'>${title[0].title}</h3>
-                                <p id='intro' class='text'>${title[0].intro}"</p>
+                                <p id='intro' class='text'>${title[0].intro}</p>
                               </div>`;
 
         var collections = document.createElement("div");
@@ -90,7 +92,11 @@ function loadHome() {
             data: {data: JSON.stringify({
                    query: `SELECT collection.cid, collection.title, collection.description, post.image_loc
                            FROM post, collection
-                           WHERE post.index = 0 AND collection.cid = post.collection`,
+                           WHERE collection.cid = post.collection AND post.index = (
+                               SELECT MIN(post.index)
+                               FROM post, collection
+                               WHERE post.collection = collection.cid
+                           )`,
                    vars: [],
                    type: "get"
             })}
