@@ -88,6 +88,8 @@ function loadHome() {
         var collections = document.createElement("div");
         collections.setAttribute("id", "collections");
 
+        content.innerHTML += `<h3 id="cols_title" class="text">Collections</h3>`;
+
         $.ajax({url: "DBRequest", type: "POST", async: false,
             data: {data: JSON.stringify({
                    query: `SELECT collection.cid, collection.title, collection.description, post.image_loc
