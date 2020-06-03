@@ -78,8 +78,6 @@ function loadHome() {
             })}
     }).done(function(title) {
 
-        console.log(title[0].intro);
-
         content.innerHTML += `<div id='title_block'>
                                 <h3 id='title' class='text'>${title[0].title}</h3>
                                 <p id='intro' class='text'>${title[0].intro}</p>
@@ -131,22 +129,32 @@ function loadHome() {
                     })}
             }).done(function(info) {
 
-                content.innerHTML += `<div id='about'>
-                                        <div id='about_photo'>"
+                var footer = document.createElement("div");
+                footer.setAttribute("id", "footer");
+
+                var about = document.createElement("div");
+                about.setAttribute("id", "about");
+                about.innerHTML =   `<div id='about_photo'>
                                             <img id='about_thumb' src='${info[0].about_img_loc}'>
-                                        </div>
-                                        <div id='about_text'>
-                                            <p id=bio_text class='text'>${info[0].about}</p>
-                                        </div>
-                                       </div>`;
+                                        </div>`;
 
-                content.innerHTML += `<div id='contact' class='text'>
-                                        <p class='block'>${info[0].contact}</p>
-                                      </div>`;
+                var otherInfo = document.createElement("div");
+                otherInfo.setAttribute("id", "otherInfo");
+                otherInfo.innerHTML =    `  <div id='about_text'>
+                                                <p id=bio_text class='text'>${info[0].about}</p>
+                                            </div>
+                                            <div id='purchase' class='text'>
+                                                <p class='block'>${info[0].purchase}</p>
+                                            </div>
+                                            <div id='contact' class='text'>
+                                                <p class='block'>${info[0].contact}</p>
+                                            </div>
+                                            <p class='text'>© Kevin Morefield 2020</p>`;
 
-                content.innerHTML += `<div id='purchase' class='text'>
-                                        <p class='block'>${info[0].purchase}</p>
-                                      </div>`;
+                footer.appendChild(about);
+                footer.appendChild(otherInfo);
+
+                content.appendChild(footer);
 
                 history.pushState({
                     title: document.title,
