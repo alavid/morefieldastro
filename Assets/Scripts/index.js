@@ -1,9 +1,11 @@
-var isHome = false;
+var isHome = false; //Keeps track of whether we're on the home page.
 
+//This function controls what happens when the back/forward buttons are pressed.
 window.onpopstate = function(e) {
 
     if (e.state) {
 
+        //We set the current page HTML to the last stored page state.
         document.title = e.state.title;
         document.body.innerHTML = e.state.state.content;
 
@@ -22,6 +24,7 @@ window.onpopstate = function(e) {
     }
 }
 
+//Otherwise, on a normal page load, we run this function.
 window.onload = function() {
 
     document.getElementById("shadow").style.display = 'none';
@@ -31,6 +34,7 @@ window.onload = function() {
     loadHome();
 }
 
+//This function sets up the functionality of the nav bar.
 function setNav() {
 
     let home = document.getElementById("home_button");
@@ -41,7 +45,7 @@ function setNav() {
     home.onclick = () => {
 
         if (!isHome) loadHome();
-        window.scrollTo(0);
+        window.scrollTo(0,0);
     }
 
     about.onclick = () => {
@@ -63,13 +67,17 @@ function setNav() {
     }
 }
 
+//This function generates the home page.
 function loadHome() {
+
+    window.scrollTo(0,0);
 
     isHome = true;
 
     let content = document.getElementById("content");
     content.innerHTML = "";
 
+    //First, we request title info from the server and construct the title block.
     $.ajax({url: "DBRequest", type: "POST", async: false,
             data: {data: JSON.stringify({
                 query: `SELECT title, intro FROM basic_info`,
@@ -88,6 +96,7 @@ function loadHome() {
 
         content.innerHTML += `<h3 id="cols_title" class="text">Collections</h3>`;
 
+        //Then, we get info for all of the collections to display.
         $.ajax({url: "DBRequest", type: "POST", async: false,
             data: {data: JSON.stringify({
                    query: `SELECT collection.cid, collection.title, collection.description, post.image_loc
@@ -121,6 +130,7 @@ function loadHome() {
 
             content.appendChild(collections);
 
+            //Last, we get the info for the footer.
             $.ajax({url: "DBRequest", type: "POST", async: false,
                     data: {data: JSON.stringify({
                             query: `SELECT * FROM basic_info`,
@@ -192,7 +202,10 @@ function loadHome() {
     });
 }
 
+//This function generates a gallery for a selected collection.
 function loadGallery(col) {
+
+    window.scrollTo(0,0);
 
     isHome = false;
 
@@ -214,8 +227,8 @@ function loadGallery(col) {
     }).done(function(res) {
 
         collection.innerHTML += `<div id="col_info">
-                                    <h2 class="text">${res[0].title}</h2>
-                                    <p class="text">${res[0].description}</p>
+                                    <h2 class="text gall_title">${res[0].title}</h2>
+                                    <p class="text gall_desc">${res[0].description}</p>
                                  </div>`;
 
         for (i = 0; i < res.length; i++) {
@@ -225,8 +238,15 @@ function loadGallery(col) {
             newPost.setAttribute("id", `post${res[i].pid}`);
             newPost.setAttribute("onClick", "openModal(this.id)");
 
-            newPost.innerHTML = `<img class="thumbnail" src="${res[i].thumbnail_loc}">
-                                 <h3 class="text gallery_post_title">${res[i].post_title}</h3>`;
+            var thumb = document.createElement("div");
+            thumb.setAttribute("class", "gall_thumb");
+            thumb.style.backgroundImage = `url("${res[i].thumbnail_loc}")`;
+
+            newPost.appendChild(thumb);
+            newPost.innerHTML += `<h3 class="text gallery_post_title">${res[i].post_title}</h3>`;
+
+            //newPost.innerHTML = `<img class="thumbnail" src="${res[i].thumbnail_loc}">
+            //                     <h3 class="text gallery_post_title">${res[i].post_title}</h3>`;
 
             postContainer.appendChild(newPost);
         }
@@ -249,6 +269,7 @@ function loadGallery(col) {
     });
 }
 
+//This function generates a modal for a selected post.
 function openModal(id) {
 
     document.getElementById("shadow").style.display = 'block';

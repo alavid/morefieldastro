@@ -99,9 +99,10 @@ function populate() {
                                     "       <div class='col_buttons' id='cb" + response.collections[i].cid + "'>" +
                                     "           <button class='edit_button edit_col_button' onClick='editCollection(this.id)' id='ec" + response.collections[i].cid + "'>Edit</button>" +
                                     "           <button class='delete_button delete_col_button' onClick='deleteCollection(this.id)' id='dc" + response.collections[i].cid + "'>Delete</button>" +
+                                    "           <button class='expand_button' onclick='toggleExpand(this.id)' id='exp" + response.collections[i].cid + "'>Expand</button>" +
                                     "       </div>" +
                                     "   </div>" +
-                                    "   <ul class='post_container' id='pc" + response.collections[i].cid + "'></ul>" +
+                                    "   <ul class='admin_post_container' id='pc" + response.collections[i].cid + "'></ul>" +
                                     "</div>";
 
             cols[i] = document.getElementById("pc" + response.collections[i].cid);
@@ -128,6 +129,8 @@ function populate() {
             addPostButton.setAttribute("onClick", "addPost(this.id)");
             addPostButton.innerHTML = "+";
             cols[i].appendChild(addPostButton);
+
+            cols[i].style.display = "none";
         }
 
         var addColButton = document.createElement("button");
@@ -184,6 +187,25 @@ function populate() {
     }).catch(function(err) {
         alert(err.status);
     });
+}
+
+function toggleExpand(id) {
+
+    var split = id.split("exp");
+    var colID = split[1];
+
+    if (document.getElementById("pc" + colID).style.display === "none") {
+
+        document.getElementById("pc" + colID).style.display = "flex";
+        document.getElementById("pc" + colID).style.flex = 1;
+        document.getElementById("pc" + colID).style.flexWrap = "wrap";
+        document.getElementById(id).innerHTML = "Hide"
+    }
+    else {
+
+        document.getElementById("pc" + colID).style.display = "none";
+        document.getElementById(id).innerHTML = "Expand"
+    }
 }
 
 function resize( fileData, type ) {
