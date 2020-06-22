@@ -218,13 +218,13 @@ function resize( fileData, type ) {
         if (type === "normal") {
 
             fileName = fileData.name;
-            newWidth = 1000;
+            newWidth = 1200;
 
         } else if (type === "thumbnail") {
 
             var split = fileData.name.split(".");
             fileName = split[0] + "_thumb" + "." + split[1];
-            newWidth = 300;
+            newWidth = 320;
 
         } else {
 
