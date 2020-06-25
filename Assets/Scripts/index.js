@@ -236,7 +236,7 @@ function loadGallery(col) {
             var newPost = document.createElement("div");
             newPost.setAttribute("class", "gallery_post");
             newPost.setAttribute("id", `post${res[i].pid}`);
-            newPost.setAttribute("onClick", "openModal(this.id)");
+            newPost.setAttribute("onClick", `openModal(${res[i].pid})`);
 
             var thumb = document.createElement("div");
             thumb.setAttribute("class", "gall_thumb");
@@ -253,6 +253,11 @@ function loadGallery(col) {
 
         collection.appendChild(postContainer);
         content.appendChild(collection);
+
+        var footer = document.createElement("div");
+        footer.setAttribute("id", "footer");
+        footer.innerHTML = `<p class='text'>© Kevin Morefield 2020</p>`;
+        content.appendChild(footer);
 
         history.pushState({
             title: document.title,
@@ -275,22 +280,55 @@ function openModal(id) {
     document.getElementById("shadow").style.display = 'block';
     document.body.style.overflow = "hidden";
 
-    var split = id.split("post");
-    var postID = split[1];
-
     $.ajax({
         url: "DBRequest",
         type: "POST",
         async: false,
         data: { data:
                 JSON.stringify(
-                { query: "SELECT * FROM post WHERE pid = $1",
-                  vars: [postID],
+                { query: `  SELECT * FROM post
+                            WHERE collection = (SELECT collection FROM post WHERE pid = $1)
+                            ORDER BY index`,
+                  vars: [id],
                   type: "get"})}
     }).done(function(response) {
 
+        var prev, cur, next;
+
+        for (var i = 0; i < response.length; i++) {
+
+            if (response[i].pid == id) {
+
+                if (response.length === 1) {
+
+                    prev = null;
+                    cur = response[i];
+                    next = null;
+                }
+                else if (i === 0) {
+
+                    prev = null;
+                    cur = response[i];
+                    next = response[i + 1];
+                }
+                else if (i === response.length - 1) {
+
+                    prev = response[i-1];
+                    cur = response[i];
+                    next = null;
+                }
+                else {
+
+                    prev = response[i-1];
+                    cur = response[i];
+                    next = response[i + 1];
+                }
+                break;
+            }
+        }
+
         var image = new Image();
-        image.src = response[0].image_loc;
+        image.src = cur.image_loc;
         image.setAttribute("class", "thumbnail");
 
         image.onload = function() {
@@ -305,19 +343,40 @@ function openModal(id) {
             var modal = document.createElement("Modal");
             modal.setAttribute("id", "post_disp_modal");
 
-            modal.innerHTML =   "<div id='close'><i class='fas fa-times' id='close_button'></i></div>" +
-                                "<div id='modal_content'>" +
-                                "   <div id='modal_thumb'></div>" +
-                                "   <div id='modal_info'>" +
-                                "       <h2 class='modal_title text'>" + response[0].title + "</h2>" +
-                                "       <p class='modal_desc text'>" + response[0].description + "</p>" +
-                                "       <p class='modal_size text'>Max Size: " + response[0].size + "</p>" +
-                                "   </div>"
-                                "</div>";
+            modal.innerHTML =   `<div id='close'><i class='fas fa-times' id='close_button'></i></div>
+                                <div id='modal_content'>
+                                   <div id='modal_thumb'></div>
+                                   <div id='modal_info'>
+                                       <h2 class='modal_title text'>${cur.title}</h2>
+                                       <p class='modal_desc text'>${cur.description}</p>
+                                       <p class='modal_size text'>Max Size: ${cur.size}</p>
+                                   </div>
+                                </div>
+                                <div id='modal_buttons'></div>`;
 
             document.body.appendChild(modal);
+
             document.getElementById("modal_thumb").appendChild(image);
             document.getElementById("modal_thumb").style.maxWidth = width + "px";
+
+            if (prev !== null) {
+
+                var prevButton = document.createElement("button");
+                prevButton.innerHTML = "Previous";
+                prevButton.setAttribute("id", "prev");
+                prevButton.setAttribute("class", "modal_button");
+                prevButton.setAttribute("onClick", `refreshModal(${prev.pid})`);
+                document.getElementById("modal_buttons").appendChild(prevButton);
+            }
+            if (next !== null) {
+
+                var nextButton = document.createElement("button");
+                nextButton.innerHTML = "Next";
+                nextButton.setAttribute("id", "next");
+                nextButton.setAttribute("class", "modal_button");
+                nextButton.setAttribute("onClick", `refreshModal(${next.pid})`);
+                document.getElementById("modal_buttons").appendChild(nextButton);
+            }
 
             document.getElementById("close_button").onclick = function() {
 
@@ -330,4 +389,10 @@ function openModal(id) {
     }).catch(function(err) {
 
     });
+}
+
+function refreshModal(id) {
+
+    document.body.removeChild(document.getElementById("post_disp_modal"));
+    openModal(id);
 }
