@@ -113,7 +113,7 @@ app.get('/:gallery/:post?', function(req, res) {
 
         db.one("SELECT cid, title, description FROM collection WHERE title = $1", [name] ).then(function(collection) {
 
-            db.any("SELECT pid, title, thumbnail_loc FROM post WHERE collection = $1", [collection.cid]).then(function(posts) {
+            db.any("SELECT pid, title, thumbnail_loc FROM post WHERE collection = $1 ORDER BY index", [collection.cid]).then(function(posts) {
 
                 res.render("gallery", {title: collection.title, description: collection.description, posts: posts});
 
