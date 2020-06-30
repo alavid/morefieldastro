@@ -73,6 +73,7 @@ app.use(express.static(path.join(__dirname, 'Assets')));
 app.use(secure);
 
 app.set("view engine", "pug");
+app.set("views", path.join(__dirname, "/Views"));
 
 const upload = multer({ dest: "uploads/" });
 
