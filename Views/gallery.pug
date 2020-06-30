@@ -1,0 +1,34 @@
+doctype html
+html(lang = "en")
+    head
+        title Morefield Astrophotography
+        meta(charset = "utf-8")
+        meta(content = "width=device-width, initial-scale=1", name = "viewport")
+        link(rel = "stylesheet", type = "text/css", href = "../Styles/style.css")
+        script(src = "../Scripts/jquery-3.4.1.js")
+        script(src = "../Scripts/fontAwesome.js")
+    body
+        header
+            h1.title KEVIN MOREFIELD
+            ul.text#nav_bar
+                li.nav_item
+                    button(onClick = `location.href="/"`).nav_button#home_button Home
+                li.nav_item
+                    button(onClick = `location.href="/?sect=about"`).nav_button#about_button About
+                li.nav_item
+                    button(onClick = `location.href="/?sect=contact"`).nav_button#contact_button Contact
+                li.nav_item
+                    button(onClick = `location.href="/?sect=purchase"`).nav_button#purchase_button Purchase
+        div#content
+            div.col_container
+                div#col_info
+                    h2.text.gall_title #{title}
+                    p.text.gall_desc #{description}
+                div.post_container
+                    each post in posts
+                        a(href = `/${encodeURIComponent(title)}/${encodeURIComponent(post.title)}`).gallery_post
+                            div(style = `background-image:url("${post.thumbnail_loc}")`).gall_thumb
+                            h3.text.gallery_post_title #{post.title}
+            div#footer
+                p.text © Kevin Morefield 2020
+                            

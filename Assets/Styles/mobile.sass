@@ -1,6 +1,6 @@
 @use "main"
 
-@media screen and (max-width: 700px)
+@media screen and (max-width: 660px)
 
     //Header
 
@@ -10,10 +10,11 @@
 
     #nav_bar
         width: 99%
-        justify-content: space-around
+        justify-content: center
 
     .nav_item
-        margin-left: 0px
+        margin-left: 1vw
+        margin-right: 1vw
 
     .nav_button
         font-size: 3.9vw
@@ -57,10 +58,6 @@
         border-radius: 0px
         width: 96%
 
-    .gall_thumb
-        width: 96vw
-        height: 60vw
-
     //Info Pages
 
     #footer
@@ -87,8 +84,15 @@
         border-radius: 0px
         width: 96%
 
-@media screen and (max-width: 500px)
+@media screen and (max-width: 570px)
+
+    .post_container
+        align-items: center
+        flex-direction: column
 
     .gallery_post
-        width: auto
+        width: 90%
         max-width: 320px
+
+    .gall_thumb
+        width: 100%

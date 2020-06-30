@@ -1,0 +1,45 @@
+doctype html
+html(lang = "en")
+    head
+        title Morefield Astrophotography
+        meta(charset = "utf-8")
+        meta(content = "width=device-width, initial-scale=1", name = "viewport")
+        meta(name = "keywords", content = "astro, photography, astrophotography, astro-photography, prints, print, store, gallery, art, artwork, astronomy, eclipse, nebulae, nebula, galaxies, galaxy, space, stars")
+        link(rel = "stylesheet", type = "text/css", href = "../Styles/style.css")
+        script(src = "../Scripts/jquery-3.4.1.js")
+        script(src = "../Scripts/fontAwesome.js")
+        script(src = "../Scripts/home.js")
+    body
+        header
+            h1.title KEVIN MOREFIELD
+            ul.text#nav_bar
+                li.nav_item
+                    button.nav_button#home_button Home
+                li.nav_item
+                    button.nav_button#about_button About
+                li.nav_item
+                    button.nav_button#contact_button Contact
+                li.nav_item
+                    button.nav_button#purchase_button Purchase
+        div#content
+            div#title_block
+                h3.text#title #{info.title}
+                p.text#intro #{info.intro}
+            div#collections
+                h3.text#cols_title Collections
+                each collection in collections
+                    div(style = `background-image:url("${collection.image_loc}")`).thumb
+                        button(onClick = `location.href="/${encodeURIComponent(collection.title)}"`).thumbButton #{collection.title}
+            div#footer
+                div#about
+                    div#about_photo
+                        img(src = `${info.about_img_loc}`)#about_thumb
+                div#otherInfo
+                    div#about_text
+                        p.text#bio_text #{info.about}
+                    div.text#purchase
+                        p.block !{info.purchase}
+                    div.text#contact
+                        p.block !{info.contact}
+                    p.text © Kevin Morefield 2020
+                

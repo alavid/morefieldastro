@@ -12,6 +12,7 @@ let multer = require("multer");
 let AWS = require("aws-sdk");
 let pgp = require("pg-promise")({promiseLib: promise});
 let sanitize = require("sanitize");
+let pug = require("pug");
 
 
 //Establish database connection
@@ -71,16 +72,116 @@ app.use(express.static(path.join(__dirname, 'Assets')));
 
 app.use(secure);
 
+app.set("view engine", "pug");
+
 const upload = multer({ dest: "uploads/" });
 
 //Web Pages
 
 app.get('/', function(req, res) {
-    res.sendFile(path.join(__dirname, '/index.html'));
+
+    db.one("SELECT * FROM basic_info", []).then(function(info) {
+
+        db.any(`SELECT collection.cid, collection.title, collection.description, post.image_loc
+                FROM post, collection
+                WHERE collection.cid = post.collection AND post.index = (
+                    SELECT MIN(post.index)
+                    FROM post, collection
+                    WHERE post.collection = collection.cid
+                )`, []).then(function(collections) {
+
+                    res.render("home", {collections: collections, info: info});
+
+                }).catch(function(err) {
+
+                    console.log(JSON.stringify(err));
+                    res.status(400).send({message: "Failure: Internal server error"});
+                });
+    }).catch(function(err) {
+
+        console.log(JSON.stringify(err));
+        res.status(400).send({message: "Failure: Internal server error"});
+    });
+});
+
+app.get('/:gallery/:post?', function(req, res) {
+
+    if (typeof req.params.post === "undefined") {
+
+        var name = req.params.gallery;
+
+        db.one("SELECT cid, title, description FROM collection WHERE title = $1", [name] ).then(function(collection) {
+
+            db.any("SELECT pid, title, thumbnail_loc FROM post WHERE collection = $1", [collection.cid]).then(function(posts) {
+
+                res.render("gallery", {title: collection.title, description: collection.description, posts: posts});
+
+            }).catch(function(err) {
+
+                console.log(JSON.stringify(err));
+                res.status(404).render("404", {message: "This collection does not exist."});
+            });
+        }).catch(function(err) {
+
+            console.log(JSON.stringify(err));
+            res.status(404).render("404", {message: "This collection does not exist."});
+        });
+    }
+    else {
+        var galleryName = req.params.gallery;
+        var postName = req.params.post;
+
+        db.one("SELECT cid, description FROM collection WHERE title = $1", [galleryName]).then(function(collection) {
+
+            db.any("SELECT * FROM post WHERE collection = $1 ORDER BY index", [collection.cid]).then(function(posts) {
+
+                var cur;
+                var prev = null;
+                var next = null;
+
+                for (var i = 0; i < posts.length; i++) {
+
+                    if (posts[i].title == postName) {
+
+                        cur = posts[i];
+
+                        if (i > 0 && i < (posts.length-1)) {
+
+                            prev = posts[i-1];
+                            next = posts[i+1];
+                        }
+                        else if (i > 0) prev = posts[i-1];
+                        else if (i < (posts.length - 1)) next = posts[i + 1];
+
+                        break;
+                    }
+                    else if (i === posts.length - 1) {
+
+                        res.status(404).render("404", {message: "This image does not exist."});
+                    }
+                }
+
+                res.render("post", {prev: prev, cur: cur, next: next, gallery: galleryName, desc: collection.description, posts: posts});
+
+            }).catch(function(err) {
+
+                console.log(JSON.stringify(err));
+                res.status(404).render("404", {message: "This collection does not exist."});
+            });
+        }).catch(function(err) {
+
+            console.log(JSON.stringify(err));
+            res.status(404).render("404", {message: "This collection does not exist."});
+        });
+    }
 });
 
 app.get('/admin', function(req, res) {
     res.sendFile(path.join(__dirname, '/admin.html'));
+});
+
+app.get("*", function(req, res) {
+    res.render("404", {message: "This page does not exist"});
 });
 
 //////////////////////////////////////////////////////////////////////////////
