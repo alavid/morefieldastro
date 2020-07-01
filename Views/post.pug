@@ -1,55 +1,23 @@
-doctype html
-html(lang = "en")
-    head
-        title Morefield Astrophotography
-        meta(charset = "utf-8")
-        meta(content = "width=device-width, initial-scale=1", name = "viewport")
-        link(rel = "stylesheet", type = "text/css", href = "../Styles/style.css")
-        script(src = "../Scripts/jquery-3.4.1.js")
-        script(src = "../Scripts/fontAwesome.js")
-        script(src = "../Scripts/post.js")
-    body(style = `overflow: hidden`)
-        div#shadow
-        header
-            h1.title KEVIN MOREFIELD
-            ul.text#nav_bar
-                li.nav_item
-                    button(onClick = `location.href="/"`).nav_button#home_button Home
-                li.nav_item
-                    button(onClick = `location.href="/?sect=about"`).nav_button#about_button About
-                li.nav_item
-                    button(onClick = `location.href="/?sect=contact"`).nav_button#contact_button Contact
-                li.nav_item
-                    button(onClick = `location.href="/?sect=purchase"`).nav_button#purchase_button Purchase
-        div#content
-            div.col_container
-                div#col_info
-                    h2.text.gall_title #{gallery}
-                    if desc !== "null"
-                        p.text.gall_desc #{desc}
-                div.post_container
-                    each post in posts
-                        a(href = `/${encodeURIComponent(title)}/${encodeURIComponent(post.title)}`).gallery_post
-                            div(style = `background-image:url("${post.thumbnail_loc}")`).gall_thumb
-                            h3.text.gallery_post_title #{post.title}
-            div#footer
-                p.text © Kevin Morefield 2020
-            modal#post_disp_modal
-                div#close
-                    i(onClick = `location.href="/${encodeURIComponent(gallery)}"`).fas.fa-times#close_button
-                div#modal_content
-                    div#modal_thumb
-                        img(src = `${cur.image_loc}`).thumbnail
-                    div#modal_info
-                        h2.modal_title.text #{cur.title}
-                        if cur.description !== "null"
-                            p.modal_desc.text #{cur.description}
-                        if cur.original_size !== null
-                            p.modal_size.text Size: #{cur.original_size}
-                div#modal_buttons
-                    if prev !== null
-                        button(onClick = `location.href="/${encodeURIComponent(gallery)}/${encodeURIComponent(prev.title)}"`).modal_button#prev Previous
-                    if next !== null
-                        button(onClick = `location.href="/${encodeURIComponent(gallery)}/${encodeURIComponent(next.title)}"`).modal_button#next Next
-            div#footer
-                p.text © Kevin Morefield 2020
+extends gallery.pug
+
+block modalScript
+    script(src = "../Scripts/post.js")
+
+block modal    
+    modal#post_disp_modal
+        div#close
+            i(onClick = `location.href="/${encodeURIComponent(gallery)}"`).fas.fa-times#close_button
+        div#modal_content
+            div#modal_thumb
+                img(src = `${cur.image_loc}`).thumbnail
+            div#modal_info
+                h2.modal_title.text #{cur.title}
+                if cur.description !== "null"
+                    p.modal_desc.text #{cur.description}
+                if cur.original_size !== null
+                    p.modal_size.text Size: #{cur.original_size}
+        div#modal_buttons
+            if prev !== null
+                button(onClick = `location.href="/${encodeURIComponent(gallery)}/${encodeURIComponent(prev.title)}"`).modal_button#prev Previous
+            if next !== null
+                button(onClick = `location.href="/${encodeURIComponent(gallery)}/${encodeURIComponent(next.title)}"`).modal_button#next Next
