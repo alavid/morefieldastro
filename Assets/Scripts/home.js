@@ -2,8 +2,6 @@ window.onload = () => {
 
     let queryString = window.location.search;
 
-    console.log(queryString);
-
     if (queryString === "?sect=about") {
         console.log("A");
         document.getElementById("about").scrollIntoView();

@@ -1,5 +1,7 @@
 window.onload = () => {
 
+    document.body.style.overflow = "hidden";
+
     $(".thumbnail").each(function() {
 
         var width;

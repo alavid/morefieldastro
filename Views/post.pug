@@ -3,7 +3,8 @@ extends gallery.pug
 block modalScript
     script(src = "../Scripts/post.js")
 
-block modal    
+block modal
+    div#shadow
     modal#post_disp_modal
         div#close
             i(onClick = `location.href="/${encodeURIComponent(gallery)}"`).fas.fa-times#close_button

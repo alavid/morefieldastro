@@ -1,0 +1,26 @@
+extends admin.pug
+
+block modalScript
+    script(src = "../Scripts/editPost.js")
+    script(src = "../Scripts/resize.js")
+ 
+block modal
+    div#shadow
+    modal.modal#post_edit_modal
+        img(src = `${post.image_loc}`).thumbnail
+        br
+        div#error
+        p.text.modal_thumb Thumbnail
+        input(name = "file", type = "file")#file
+        br
+        p.text.modal_field_label Title
+        input(name = "title", type = "text", value = `${post.title}`)#post_title
+        br
+        p.text.modal_field_label Description
+        textarea(name = "description")#post_desc #{post.description}
+        br
+        p.text.modal_field_label Size
+        input(name = "size", type = "text" value = `${post.size}`)#post_size
+        br
+        button(type = "button").submit#submit_post_edit Submit
+        button(type = "button").cancel#cancel_post_edit Cancel

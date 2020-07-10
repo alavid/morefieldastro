@@ -1,0 +1,59 @@
+doctype html
+html(lang = "en")
+    head
+        title Morefield Astrophotography Admin Tools
+        meta(charset = "utf-8")
+        meta(content = "width=device-width, initial-scale=1", name = "viewport")
+        base(href = "/")
+        link(rel = "stylesheet", type = "text/css", href = "Styles/style.css")
+        script(src = "Scripts/jquery-3.4.1.js")
+        script(src = "Scripts/sortable.js")
+        script(src = "Scripts/js.cookie-2.2.1.min.js")
+        script(src = "Scripts/scrollTracking.js")
+        if authorized === false
+            script(src = "Scripts/login.js")
+        block modalScript
+    body
+        header
+            h1.title ADMIN TOOLS
+        div#admin-content
+            if authorized === false
+                div#login_container
+                    div#error
+                    form(action = "/admin", method = "get").text#login
+                        p.text.login_label Email Address:
+                        input(name = "email", type = "text")#email
+                        p.text.login_label Password:
+                        input(name = "password", type = "password")#password
+                        button(type = "button")#login_button Log In
+            else
+                div#basic_info_buttons
+                    button(onClick = `location.href = "/admin/info/about"`).basic_info_button#about_button About Info
+                    button(onClick = `location.href = "/admin/info/contact"`).basic_info_button#contact_button Contact Info
+                    button(onClick = `location.href = "/admin/info/purchase"`).basic_info_button#purchase_button Purchase Info
+                    button(onClick = `location.href = "/admin/info/title"`).basic_info_button#title_button Title Info
+                each row in data
+                    div.col_container
+                        div.col_header
+                            div.col_info
+                                h2.text #{row.collection.title}
+                                p.text.col_desc #{row.collection.description}
+                            div.col_buttons
+                                button(onClick = `location.href = "/admin/editCollection/${encodeURIComponent(row.collection.cid)}"`).edit_button.edit_col_button Edit
+                                button(onClick = `location.href = "/admin/deleteCollection/${encodeURIComponent(row.collection.cid)}"`).edit_button.edit_col_button Delete
+                        ul.admin_post_container
+                            each post in row.posts
+                                li.post
+                                    img(src = `${post.thumbnail_loc}`).thumbnail
+                                    h3.text #{post.title}
+                                    button(onClick = `location.href = "/admin/editPost/${encodeURIComponent(post.pid)}"`).edit_button Edit
+                                    button(onClick = `location.href = "/admin/deletePost/${encodeURIComponent(post.pid)}"`).delete_button Delete
+                            button(onClick = `location.href = "/admin/addPost/${encodeURIComponent(row.collection.cid)}"`).add_post +
+                button(onClick = `location.href = "/admin/addCollection"`) Add Collection
+                block modal
+
+                                
+                    
+
+                    
+            

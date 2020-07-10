@@ -13,7 +13,7 @@ let AWS = require("aws-sdk");
 let pgp = require("pg-promise")({promiseLib: promise});
 let sanitize = require("sanitize");
 let pug = require("pug");
-
+let session = require("express-session");
 
 //Establish database connection
 //NOTE: IF RUNNING LOCALLY, process.env will only work if you copy the heroku config vars to a .env file.
@@ -36,7 +36,6 @@ const cn = {
 
 let db = pgp(cn);
 
-
 //Configuring S3 cube
 
 var url = process.env.CLOUDCUBE_URL;
@@ -58,6 +57,7 @@ const s3 = new AWS.S3({
 let app = express();
 let port = process.env.PORT || 3000;
 
+//Forcing HTTPS
 app.use(secure);
 
 app.use(bodyParser.json());
@@ -70,15 +70,27 @@ app.use(cookieParser());
 app.use(express.static(__dirname + 'Assets'));
 app.use(express.static(path.join(__dirname, 'Assets')));
 
-app.use(secure);
-
+//Configuring Pug as the view engine
 app.set("view engine", "pug");
 app.set("views", path.join(__dirname, "/Views"));
 
+//Configuring sessions
+app.use(session({
+    secret: "secret",
+    resave: true,
+    saveUninitialized: true
+}));
+app.use(bodyParser.urlencoded({extended : true}));
+app.use(bodyParser.json());
+
+//Establishing temp directory for image uploads
 const upload = multer({ dest: "uploads/" });
 
-//Web Pages
+////////////////////////////////////////////////////////////////////////////////
+//Web Pages/////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
+//Renders client home page
 app.get('/', function(req, res) {
 
     db.one("SELECT * FROM basic_info", []).then(function(info) {
@@ -105,6 +117,70 @@ app.get('/', function(req, res) {
     });
 });
 
+//Renders admin site
+app.get('/admin/:modal?/:id?', function(req, res) {
+
+    if (req.session.loggedin) {
+
+        db.any("SELECT cid, title, description FROM collection ORDER BY cid", []).then(function(collections) {
+
+            db.any("SELECT pid, title, thumbnail_loc, collection FROM post ORDER BY index", []).then(function(posts) {
+
+                var data = [];
+
+                collections.forEach((collection) => {
+
+                    var collPosts = [];
+
+                    posts.forEach((post) => {
+
+                        if (post.collection === collection.cid) collPosts.push(post);
+                    });
+
+                    data.push({collection: collection,  posts: collPosts});
+                });
+
+                if (typeof req.params.modal === "undefined")
+                    res.render("admin", {authorized: true, data: data});
+                else if (req.params.modal === "addPost")
+                    res.render("addPost", {authorzied: true, data: data});
+                else if (req.params.modal === "editPost" || req.params.modal === "deletePost") {
+
+                    db.one("SELECT pid, title, description, size, image_loc FROM post WHERE pid = $1", [req.params.id])
+                    .then(function(post) {
+
+                        if (req.params.modal === "editPost") res.render("editPost", {authorized: true, data: data, post: post});
+                        else res.render("deletePost", {authorized: true, data: data, post: post});
+
+                    })
+                }
+                else if (req.params.modal === "addCollection")
+                    res.render("addCollection", {authorized: true, data: data});
+                else if (req.params.modal === "editCollection" || req.params.modal === "deleteCollection") {
+
+                    db.one("SELECT cid, title, description FROM collection WHERE cid = $1", [req.params.id])
+                    .then(function(col) {
+
+                        if (req.params.modal === "editCollection") res.render("editCollection", {authorized: true, data: data, col: col});
+                        else res.render("deleteCollection", {authorized: true, data: data, col: col});
+
+                    }).catch(function(err) {
+
+                            console.log(err);
+                            res.status(400).send({message: "Internal server error."});
+                    });
+                }
+                else res.render("admin", {authorized: true, data: data});
+            })
+        })
+    }
+    else {
+
+        res.render("admin", {authorized: false});
+    }
+});
+
+//Renders client galleries and post modals.
 app.get('/:gallery/:post?', function(req, res) {
 
     if (typeof req.params.post === "undefined") {
@@ -177,10 +253,7 @@ app.get('/:gallery/:post?', function(req, res) {
     }
 });
 
-app.get('/admin', function(req, res) {
-    res.sendFile(path.join(__dirname, '/admin.html'));
-});
-
+//Renders 404 page
 app.get("*", function(req, res) {
     res.render("404", {message: "This page does not exist"});
 });
@@ -209,8 +282,13 @@ app.post('/logIn', function(req, res) {
 
             if (result) {
 
-                if (data.admin_status) var response = {message: "Success", authorize: true};
-                else var response = {message: "Success", authorize: false};
+                if (data.admin_status) {
+
+                    req.session.loggedin = true;
+                    req.session.email = email;
+                    var response = {message: "Success", authorized: true};
+                }
+                else var response = {message: "Failure: Amin access not authorized", authorize: true};
             }
             else var response = {message: "Failure: Incorrect password", authorize: false};
 
@@ -220,12 +298,13 @@ app.post('/logIn', function(req, res) {
     }).catch(function(err) {
 
         console.log(JSON.stringify(err));
-        res.status(400).send({message: "Failure: account not found", authorize: "No"});
+        res.status(200).send({message: "Failure: account not found", authorize: false});
     });
 });
 
 //Inserts submitted login info to database and handles password hashing.
-app.post('/signUp', function(req, res) {
+//Currently not accepted, so commented out.
+/*app.post('/signUp', function(req, res) {
 
     var email = req.body.email;
     var password = req.body.password;
@@ -257,81 +336,318 @@ app.post('/signUp', function(req, res) {
         });
 
     });
-});
+});*/
 
-//Returns all content for intitally rendering the page.
-app.post('/getEntries', function(req, res) {
+//Submits DB query to insert a new collection.
+app.post("/addCollection", function(req, res) {
 
-    db.any( 'SELECT * FROM "collection" ORDER BY cid' )
-    .then(function(collections) {
+    if (req.session.loggedin === false) res.status(400).send({message: "Unauthorized for database access."});
 
-        db.any( 'SELECT * FROM "post" ORDER BY index ASC' )
-        .then(function(posts) {
+    let title = req.body.title;
+    let description = req.body.description;
 
-            var response = {collections: collections, posts: posts};
-            res.status(200).send(response);
+    db.none("INSERT INTO collection(title, description) VALUES($1, $2)", [title, description])
+    .then(function(result) { res.status(200).send({message: "Success"}); })
+    .catch(function(err) {
 
-        }).catch(function(err) {
-
-            res.status(400).send({message: "Failure: Internal server error"});
-        });
-    }).catch(function(data) {
-
+        console.log(err);
         res.status(400).send({message: "Failure: Internal server error"});
 
     });
 });
 
+//Submits DB query to edit a collections information.
+app.post("/editCollection", function(req, res) {
+
+    if (req.session.loggedin === false) res.status(400).send({message: "Unauthorized for database access."});
+
+    let cid = req.body.cid;
+    let title = req.body.title;
+    let description = req.body.description;
+
+    db.none("UPDATE collection SET title = $1, description = $2 WHERE cid = $3", [title, description, cid])
+    .then(function(result) { res.status(200).send({message: "Success"}); })
+    .catch(function(err) {
+
+        console.log(err);
+        res.status(400).send({message: "Failure: Internal server error"});
+
+    });
+});
+
+//Deletes a collection.
+//Submits AWS requests to delete all images referenced by posts in the collection,
+//then submits DB queries to delete all of the posts and the collection.
+app.post("/deleteCollection", function(req, res) {
+
+    if (req.session.loggedin === false) res.status(400).send({message: "Unauthorized for database access."});
+
+    let cid = req.body.cid;
+
+    db.any("SELECT image_loc, thumbnail_loc FROM post WHERE collection = $1", [cid])
+    .then(function(posts) {
+
+        posts.forEach(function(post) {
+
+            var pathData = post.image_loc.split("/");
+
+            const params = {
+                Bucket: BUCKET,
+                Key: pathData[3] + "/" + pathData[4] + "/" + pathData[5],
+            }
+
+            s3.deleteObject(params, function(err, data) {
+                if (err) {
+                    db.none("DELETE FROM post WHERE pid = $1", [pid])
+                    .then(function(result) {
+
+                        var response = {message: "Success"};
+                        res.status(200).send(response);
+
+                    }).catch(function(err) {
+
+                        console.log(err);
+                        res.status(400).send({message: "Failure: Internal server error"});
+                    });
+                }
+                else {
+
+                    pathData = post.thumbnail_loc.split("/");
+
+                    const params = {
+                        Bucket: BUCKET,
+                        Key: pathData[3] + "/" + pathData[4] + "/" + pathData[5],
+                    }
+
+                    s3.deleteObject(params, function(err, data) {
+                        if (err) { console.log(err); }
+                    });
+                }
+            });
+        });
+
+        db.none("DELETE FROM post WHERE collection = $1", [cid])
+        .then(function(result) {
+
+            db.none("DELETE FROM collection WHERE cid = $1", [cid])
+            .then(function(result) { res.status(200).send({message: "Success"}); })
+            .catch(function(err) {
+
+                console.log(err);
+                res.status(400).send({message: "Failure: Internal server error"});
+
+            });
+        }).catch(function(err) {
+
+            console.log(err);
+            res.status(400).send({message: "Failure: Internal server error"});
+        });
+    });
+});
+
+//Submits DB query to add a new post.
+app.post("/addPost", function(req, res) {
+
+    if (req.session.loggedin === false) res.status(400).send({message: "Unauthorized for database access."});
+
+    let title = req.body.title;
+    let description = req.body.description;
+    let size = req.body.size;
+    let collection = req.body.collection;
+    let path = req.body.path;
+    let thumbPath = req.body.thumbPath;
+    let originalSize = req.body.originalSize;
+
+    db.none("INSERT INTO post(title, description, size, collection, image_loc, thumbnail_loc, original_size) VALUES($1, $2, $3, $4, $5, $6, $7)",
+            [title, description, size, collection, path, thumbPath, originalSize])
+    .then(function(result) { res.status(200).send({message: "Success"}); })
+    .catch(function(err) {
+
+        console.log(err);
+        res.status(400).send({message: "Failure: Internal server error"});
+
+    });
+});
+
+//Submits AWS requests to delete image referenced by the post, the submits DB
+//request to delete the post.
+app.post("/deletePost", function(req, res) {
+
+    if (req.session.loggedin === false) res.status(400).send({message: "Unauthorized for database access."});
+
+    let pid = req.body.pid;
+
+    db.one("SELECT image_loc, thumbnail_loc FROM post WHERE pid = $1", [pid])
+    .then(function(path) {
+
+        var pathData = path.image_loc.split("/");
+
+        const params = {
+            Bucket: BUCKET,
+            Key: pathData[3] + "/" + pathData[4] + "/" + pathData[5],
+        }
+
+        s3.deleteObject(params, function(err, data) {
+            if (err) {
+                db.none("DELETE FROM post WHERE pid = $1", [pid])
+                .then(function(result) {
+
+                    var response = {message: "Success"};
+                    res.status(200).send(response);
+
+                }).catch(function(err) {
+
+                    console.log(err);
+                    res.status(400).send({message: "Failure: Internal server error"});
+                });
+            }
+            else {
+
+                pathData = path.thumbnail_loc.split("/");
+
+                const params = {
+                    Bucket: BUCKET,
+                    Key: pathData[3] + "/" + pathData[4] + "/" + pathData[5],
+                }
+
+                s3.deleteObject(params, function(err, data) {
+                    if (err) {
+                        console.log(err);
+                        res.status(400).send({message: "Failure: Internal server error"});
+                    }
+                    else {
+
+                        db.none("DELETE FROM post WHERE pid = $1", [pid])
+                        .then(function(result) {
+
+                            var response = {message: "Success"};
+                            res.status(200).send(response);
+
+                        }).catch(function(err) {
+
+                            console.log(err);
+                            res.status(400).send({message: "Failure: Internal server error"});
+                        });
+                    }
+                });
+            }
+        });
+
+    }).catch(function(err) {
+
+        console.log(err);
+        res.status(400).send({message: "Failure: Internal server error"});
+
+    });
 
 
-//A generic database request for all other purpose. Specify the query and the
-//type of query and returns either requested data or a success/failure message.
-app.post('/DBRequest', function(req, res) {
+});
 
-    let data = JSON.parse(req.body.data);
+//Submits DB query to edit a post.
+//If the image reference was changed, submits AWS requests to delete the old ones.
+app.post("/editPost", function(req, res) {
 
-    let query = data.query;
-    let vars = data.vars;
-    let type = data.type;
+    if (req.session.loggedin === false) res.status(400).send({message: "Unauthorized for database access."});
 
-    for (i = 0; i < vars.length; i++) {
+    let title = req.body.title;
+    let description = req.body.description;
+    let size = req.body.size;
+    let pid = req.body.pid;
 
-        if (vars[i] === "") vars[i] = null;
-    }
+    if (typeof req.body.path === "undefined") {
 
-    if (type === "get") {
+        db.none("UPDATE post SET title = $1, description = $2, size = $3 WHERE pid = $4",
+        [title, description, size, pid])
+        .then(function(result) {
 
-        db.any( query, vars ).then(function(data) {
-
-            var response = data;
+            var response = {message: "Success"};
             res.status(200).send(response);
 
         }).catch(function(err) {
 
-            console.log(JSON.stringify(err));
+            console.log(err);
             res.status(400).send({message: "Failure: Internal server error"});
-
         });
     }
-    else if (type === "update" || type === "insert" || type === "delete") {
+    else {
 
-        db.none( query, vars ).then(function(data) {
+        let newPath = req.body.path;
+        let newThumbPath = req.body.thumbPath;
+        let originalSize = req.body.oSize;
 
-            res.status(200).send({message: "Success"});
+        db.one("SELECT image_loc, thumbnail_loc FROM post WHERE pid = $1", [pid])
+        .then(function(path) {
+
+            var pathData = path.image_loc.split("/");
+
+            const params = {
+                Bucket: BUCKET,
+                Key: pathData[3] + "/" + pathData[4] + "/" + pathData[5],
+            }
+
+            s3.deleteObject(params, function(err, data) {
+                if (err) {
+                    db.none("DELETE FROM post WHERE pid = $1", [pid])
+                    .then(function(result) {
+
+                        var response = {message: "Success"};
+                        res.status(200).send(response);
+
+                    }).catch(function(err) {
+
+                        console.log(err);
+                        res.status(400).send({message: "Failure: Internal server error"});
+                    });
+                }
+                else {
+
+                    pathData = path.thumbnail_loc.split("/");
+
+                    const params = {
+                        Bucket: BUCKET,
+                        Key: pathData[3] + "/" + pathData[4] + "/" + pathData[5],
+                    }
+
+                    s3.deleteObject(params, function(err, data) {
+                        if (err) {
+                            console.log(err);
+                            res.status(400).send({message: "Failure: Internal server error"});
+                        }
+                        else {
+
+                            db.none("UPDATE post SET title = $1, description = $2, size = $3, image_loc = $4, thumbnail_loc = $5, original_size = $6 WHERE pid = $7",
+                            [title, description, size, newPath, newThumbPath, originalSize, pid])
+                            .then(function(result) {
+
+                                var response = {message: "Success"};
+                                res.status(200).send(response);
+
+                            }).catch(function(err) {
+
+                                console.log(err);
+                                res.status(400).send({message: "Failure: Internal server error"});
+                            });
+                        }
+                    });
+                }
+            });
 
         }).catch(function(err) {
 
-            console.log(JSON.stringify(err));
+            console.log(err);
             res.status(400).send({message: "Failure: Internal server error"});
 
         });
     }
-    else res.status(404).send({message: "Failure: Unknown type."});
 });
 
-
-
+//Handles file uploads
 app.post('/upload', upload.single("file"), function(req, res) {
+
+    if (req.session.loggedin === false) res.status(400).send({message: "Unauthorized for database access."});
+
+    let fileType = path.extname(req.file.originalname).toLowerCase();
+    if (fileType !== ".jpg" && fileType !== ".png") res.status(403).send({message: "Only jpgs and pngs allowed."});
 
     const content = fs.readFileSync(req.file.path);
 
@@ -356,6 +672,8 @@ app.post('/upload', upload.single("file"), function(req, res) {
 
 
 app.post("/delete", function(req, res) {
+
+    if (req.session.loggedin === false) res.status(400).send({message: "Unauthorized for database access."});
 
     let data = JSON.parse(req.body.data);
 
