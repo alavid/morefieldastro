@@ -636,9 +636,34 @@ app.post("/editPost", function(req, res) {
 
             console.log(err);
             res.status(400).send({message: "Failure: Internal server error"});
-
         });
     }
+});
+
+app.post("/reorder", function(req, res) {
+
+    if (req.session.loggedin === false) res.status(400).send({message: "Unauthorized for database access."});
+
+    let post = req.body.pid;
+    let collection = req.body.cid;
+    let index = req.body.newIndex;
+
+    db.none("UPDATE post SET index = $1 WHERE pid = $2", [index, post])
+    .then(function(result) {
+
+        db.none("UPDATE post SET index = index + 1 WHERE collection = $1 AND index >= $2 AND pid != $3", [collection, index, post])
+        .then(function(result) { res.status(200).send({message: "Success"}); })
+        .catch(function(err) {
+
+            console.log(err);
+            res.status(400).send({message: "Failure: Internal server error"});
+        });
+    })
+    .catch(function(err) {
+
+        console.log(err);
+        res.status(400).send({message: "Failure: Internal server error"});
+    });
 });
 
 //Handles file uploads
@@ -664,54 +689,6 @@ app.post('/upload', upload.single("file"), function(req, res) {
         }
         else {
             var response = {message: "Success", cube: CUBE};
-            res.status(200).send(response);
-        }
-    });
-})
-
-
-
-app.post("/delete", function(req, res) {
-
-    if (req.session.loggedin === false) res.status(400).send({message: "Unauthorized for database access."});
-
-    let data = JSON.parse(req.body.data);
-
-    if (data.type === "main") {
-
-        var query = "SELECT pid FROM post WHERE image_loc = '" + data.fileName + "'";
-        var vars = [];
-
-    } else {
-
-        var query = "SELECT pid FROM post WHERE thumbnail_loc = '" + data.fileName + "'";
-        var vars = [];
-    }
-
-    db.any( query, vars ).then(function(result) {
-
-        if (result.length === 1) {
-
-            var pathData = data.fileName.split("/");
-
-            const params = {
-                Bucket: BUCKET,
-                Key: pathData[3] + "/" + pathData[4] + "/" + pathData[5],
-            }
-
-            s3.deleteObject(params, function(err, data) {
-                if (err) {
-                    console.log(err);
-                    res.status(400).send({message: "Failure: Internal server error"});
-                }
-                else {
-                    var response = {message: "Success"};
-                    res.status(200).send(response);
-                }
-            });
-        } else {
-
-            var response = {message: "Success"};
             res.status(200).send(response);
         }
     });

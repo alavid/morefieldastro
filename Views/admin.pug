@@ -9,7 +9,7 @@ html(lang = "en")
         script(src = "Scripts/jquery-3.4.1.js")
         script(src = "Scripts/sortable.js")
         script(src = "Scripts/js.cookie-2.2.1.min.js")
-        script(src = "Scripts/scrollTracking.js")
+        script(src = "Scripts/admin.js")
         if authorized === false
             script(src = "Scripts/login.js")
         block modalScript
@@ -41,9 +41,9 @@ html(lang = "en")
                             div.col_buttons
                                 button(onClick = `location.href = "/admin/editCollection/${encodeURIComponent(row.collection.cid)}"`).edit_button.edit_col_button Edit
                                 button(onClick = `location.href = "/admin/deleteCollection/${encodeURIComponent(row.collection.cid)}"`).edit_button.edit_col_button Delete
-                        ul.admin_post_container
+                        ul(id = `cid-${row.collection.cid}`).admin_post_container
                             each post in row.posts
-                                li.post
+                                li(id = `pid-${post.pid}`).post
                                     img(src = `${post.thumbnail_loc}`).thumbnail
                                     h3.text #{post.title}
                                     button(onClick = `location.href = "/admin/editPost/${encodeURIComponent(post.pid)}"`).edit_button Edit
