@@ -14,6 +14,7 @@ let pgp = require("pg-promise")({promiseLib: promise});
 let sanitize = require("sanitize");
 let pug = require("pug");
 let session = require("express-session");
+let MemoryStore = require("memorystore")(session);
 let helmet = require("helmet");
 
 //Establish database connection
@@ -81,6 +82,8 @@ app.set("views", path.join(__dirname, "/Views"));
 
 //Configuring sessions
 app.use(session({
+    cookie: { maxAge: 86400000 },
+    store: new MemoryStore({ checkPeriod: 86400000 }),
     secret: "secret",
     resave: true,
     saveUninitialized: true
