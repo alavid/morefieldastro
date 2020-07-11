@@ -5,9 +5,10 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "run-script-os",
-    "start:win32": "sass Assets/Styles/input.sass Assets/Styles/style.css --style compressed && SET NODE_ENV=production && node app.js",
-    "start:default": "sass Assets/Styles/input.sass Assets/Styles/style.css --style compressed && export NODE_ENV=production && node app.js"
+    "start": "sass Assets/Styles/input.sass Assets/Styles/style.css --style compressed && node app.js",
+    "start-production": "run-script-os",
+    "start-production:win32": "sass Assets/Styles/input.sass Assets/Styles/style.css --style compressed && SET NODE_ENV=production && node app.js",
+    "start-production:default": "sass Assets/Styles/input.sass Assets/Styles/style.css --style compressed && export NODE_ENV=production && node app.js"
   },
   "repository": {
     "type": "git",
