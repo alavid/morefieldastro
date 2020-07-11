@@ -16,10 +16,6 @@ let pug = require("pug");
 let session = require("express-session");
 let helmet = require("helmet");
 
-//Activate Helmet, which configures HTTP headers to prevent common security vulnerabilities.
-
-app.use(helmet());
-
 //Establish database connection
 //NOTE: IF RUNNING LOCALLY, process.env will only work if you copy the heroku config vars to a .env file.
 //  Check all config vars with command "heroku config -a morefield-astro"
@@ -61,6 +57,10 @@ const s3 = new AWS.S3({
 
 let app = express();
 let port = process.env.PORT || 3000;
+
+//Activate Helmet, which configures HTTP headers to prevent common security vulnerabilities.
+
+app.use(helmet());
 
 //Forcing HTTPS
 app.use(secure);
