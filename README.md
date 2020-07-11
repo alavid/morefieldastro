@@ -1,2 +1,2 @@
 # Astro Photography Gallery and Print Sale Web Application
-This is a web application built for [Morefield Astro Photography](https://www.instagram.com/morefield/), and is currently in pre-alpha development.
+This is an online catalog and print sale site built for [Morefield Astro Photography](https://www.instagram.com/morefield/), and is currently up and running ad www.kevinmorefield.com.
