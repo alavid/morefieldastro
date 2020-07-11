@@ -14,6 +14,11 @@ let pgp = require("pg-promise")({promiseLib: promise});
 let sanitize = require("sanitize");
 let pug = require("pug");
 let session = require("express-session");
+let helmet = require("helmet");
+
+//Activate Helmet, which configures HTTP headers to prevent common security vulnerabilities.
+
+app.use(helmet());
 
 //Establish database connection
 //NOTE: IF RUNNING LOCALLY, process.env will only work if you copy the heroku config vars to a .env file.
