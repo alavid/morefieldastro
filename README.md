@@ -13,9 +13,9 @@ The application follows a loosely MVC architecture, and uses Pug as a view engin
 
 ### Start scripts:
 
-**"start":** Starts a development server.
+**npm start:** Starts a development server.
 
-**"start-production"**: Starts a production server, using either the Windows or Unix command syntax depending on your OS.
+**npm start-production**: Starts a production server, using either the Windows or Unix command syntax depending on your OS.
 
 *Note: I've had inconsistent results with the package I use to detect the OS, so if you want to run a production server best to write your own external script wherever you're hosting the server, similarly to how I've written the Heroku Procfiles here.*
 
