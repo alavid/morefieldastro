@@ -19,8 +19,8 @@ let helmet = require("helmet");
 
 //Establish database connection
 //NOTE: IF RUNNING LOCALLY, process.env will only work if you copy the heroku config vars to a .env file.
-//  Check all config vars with command "heroku config -a morefield-astro"
-//  Add each variable to .env with command "heroku config:get <varname> -a morefield-astro -s >> .env"
+//  Check all config vars with command "heroku config -a <project>"
+//  Add each variable to .env with command "heroku config:get <varname> -a <project> -s >> .env"
 //  Database credentials are rotated occasionally, so if the connection is failing make sure the .env still contains the right var.
 
 var conString = process.env.DATABASE_URL;
