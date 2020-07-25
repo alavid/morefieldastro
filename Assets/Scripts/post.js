@@ -16,7 +16,7 @@ window.onload = () => {
             height = img.naturalHeight;
             width = img.naturalWidth;
 
-            if (height > 700) newWidth = 700 * (width / height);
+            if (height > 650) newWidth = 650 * (width / height);
             else newWidth = width;
 
             $("#modal_thumb").css("max-width", newWidth);
