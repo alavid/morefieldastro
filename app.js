@@ -54,6 +54,24 @@ const s3 = new AWS.S3({
     secretAccessKey: SECRET
 });
 
+//Helper function for deleteing from the cube.
+function deleteImage( path ) {
+
+    return new Promise( function( resolve, reject ) {
+
+        var pathData = path.split("/");
+
+        const params = { Bucket: BUCKET,
+                         Key: pathData[3] + "/" + pathData[4] + "/" + pathData[5] }
+
+        s3.deleteObject( params, function( err, data ) {
+
+            if (err) reject(err);
+            else resolve(data);
+        });
+    });
+}
+
 //Configuring server
 
 let app = express();
@@ -178,6 +196,22 @@ app.get('/admin/:modal?/:id?', function(req, res) {
                             res.status(400).send({message: "Internal server error."});
                     });
                 }
+                else if (req.params.modal === "info") {
+
+                    db.one("SELECT * FROM basic_info WHERE bid = 0")
+                    .then(function(info) {
+
+                        if (req.params.id === "about") res.render("info", {type: "about", info: info, authorized: true, data: data});
+                        else if (req.params.id === "contact") res.render("info", {type: "contact", info: info, authorized: true, data: data});
+                        else if (req.params.id === "purchase") res.render("info", {type: "purchase", info: info, authorized: true, data: data});
+                        else if (req.params.id === "title") res.render("info", {type: "title", info: info, authorized: true, data: data});
+
+                    }).catch(function(err) {
+
+                        console.log(err);
+                        res.status(400).send({message: "Internal server error."});
+                    });
+                }
                 else res.render("admin", {authorized: true, data: data});
             })
         })
@@ -270,6 +304,18 @@ app.get("*", function(req, res) {
 //DATABASE REQUESTS///////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
+//Helper functions for generic http responses to POST requests
+function success( res ) {
+
+    res.status(200).send({message: "Success"});
+}
+
+function error( err, res ) {
+
+    console.log(err);
+    res.status(400).send({message: "Failure: Internal server error"});
+}
+
 //Checks submitted email and password with database entries and either allows
 //or disallows access.
 app.post('/logIn', function(req, res) {
@@ -305,7 +351,7 @@ app.post('/logIn', function(req, res) {
 
     }).catch(function(err) {
 
-        console.log(JSON.stringify(err));
+        console.log(err);
         res.status(200).send({message: "Failure: account not found", authorize: false});
     });
 });
@@ -320,27 +366,21 @@ app.post('/logIn', function(req, res) {
     bcrypt.genSalt(10, function(err, salt) {
 
         if (err) {
-            res.status(400).send({message: "Failure: Internal server error", authorize: false});
+            error(err, res);
             return;
         }
 
         bcrypt.hash(password, salt, function(err, hash) {
 
             if (err) {
-                res.status(400).send({message: "Failure: Internal server error"});
+                error(err, res);
                 return;
             }
 
             db.none('INSERT INTO "user"("email", "password", "admin_status")' +
                     'VALUES($1, $2, false)', [email, hash])
-            .then(function(data) {
-
-                res.status(200).send({message: "Success"});
-
-            }).catch(function(data) {
-
-                res.status(400).send({message: "Failure: Internal server error"});
-            })
+            .then(function(data) { success(res); })
+            .catch(function(data) { error(err, res); })
         });
 
     });
@@ -355,13 +395,8 @@ app.post("/addCollection", function(req, res) {
     let description = req.body.description;
 
     db.none("INSERT INTO collection(title, description) VALUES($1, $2)", [title, description])
-    .then(function(result) { res.status(200).send({message: "Success"}); })
-    .catch(function(err) {
-
-        console.log(err);
-        res.status(400).send({message: "Failure: Internal server error"});
-
-    });
+    .then(function(result) { success(res); })
+    .catch(function(err) { error(err, res) });
 });
 
 //Submits DB query to edit a collections information.
@@ -374,13 +409,8 @@ app.post("/editCollection", function(req, res) {
     let description = req.body.description;
 
     db.none("UPDATE collection SET title = $1, description = $2 WHERE cid = $3", [title, description, cid])
-    .then(function(result) { res.status(200).send({message: "Success"}); })
-    .catch(function(err) {
-
-        console.log(err);
-        res.status(400).send({message: "Failure: Internal server error"});
-
-    });
+    .then(function(result) { success(res); })
+    .catch(function(err) { error(err, res) });
 });
 
 //Deletes a collection.
@@ -395,60 +425,34 @@ app.post("/deleteCollection", function(req, res) {
     db.any("SELECT image_loc, thumbnail_loc FROM post WHERE collection = $1", [cid])
     .then(function(posts) {
 
-        posts.forEach(function(post) {
+        posts.forEach(function(post, i) {
 
-            var pathData = post.image_loc.split("/");
+            deleteImage(post.image_loc)
+            .then(function(result) {
 
-            const params = {
-                Bucket: BUCKET,
-                Key: pathData[3] + "/" + pathData[4] + "/" + pathData[5],
-            }
+                deleteImage(post.thumbnail_loc)
+                .then(function(result) {
 
-            s3.deleteObject(params, function(err, data) {
-                if (err) {
-                    db.none("DELETE FROM post WHERE pid = $1", [pid])
+                    db.none("DELETE FROM post WHERE pid = $1", [post.pid])
                     .then(function(result) {
 
-                        var response = {message: "Success"};
-                        res.status(200).send(response);
+                        if (i === posts.length - 1) {
 
-                    }).catch(function(err) {
+                            db.none("DELETE FROM post WHERE collection = $1", [cid])
+                            .then(function(result) {
 
-                        console.log(err);
-                        res.status(400).send({message: "Failure: Internal server error"});
-                    });
-                }
-                else {
+                                db.none("DELETE FROM collection WHERE cid = $1", [cid])
+                                .then(function(result) { success(res); })
+                                .catch(function(err) { error(err, res); });
 
-                    pathData = post.thumbnail_loc.split("/");
+                            }).catch(function(err) { error(err, res); });
+                        }
 
-                    const params = {
-                        Bucket: BUCKET,
-                        Key: pathData[3] + "/" + pathData[4] + "/" + pathData[5],
-                    }
+                    }).catch(function(err) { error(err, res); });
 
-                    s3.deleteObject(params, function(err, data) {
-                        if (err) { console.log(err); }
-                    });
-                }
-            });
-        });
+                }).catch(function(err) { error(err, res); })
 
-        db.none("DELETE FROM post WHERE collection = $1", [cid])
-        .then(function(result) {
-
-            db.none("DELETE FROM collection WHERE cid = $1", [cid])
-            .then(function(result) { res.status(200).send({message: "Success"}); })
-            .catch(function(err) {
-
-                console.log(err);
-                res.status(400).send({message: "Failure: Internal server error"});
-
-            });
-        }).catch(function(err) {
-
-            console.log(err);
-            res.status(400).send({message: "Failure: Internal server error"});
+            }).catch(function(err) { error(err, res); })
         });
     });
 });
@@ -468,13 +472,8 @@ app.post("/addPost", function(req, res) {
 
     db.none("INSERT INTO post(title, description, size, collection, image_loc, thumbnail_loc, original_size) VALUES($1, $2, $3, $4, $5, $6, $7)",
             [title, description, size, collection, path, thumbPath, originalSize])
-    .then(function(result) { res.status(200).send({message: "Success"}); })
-    .catch(function(err) {
-
-        console.log(err);
-        res.status(400).send({message: "Failure: Internal server error"});
-
-    });
+    .then(function(result) { success(res); })
+    .catch(function(err) { error(err, res); });
 });
 
 //Submits AWS requests to delete image referenced by the post, the submits DB
@@ -488,67 +487,21 @@ app.post("/deletePost", function(req, res) {
     db.one("SELECT image_loc, thumbnail_loc FROM post WHERE pid = $1", [pid])
     .then(function(path) {
 
-        var pathData = path.image_loc.split("/");
+        deleteImage(path.image_loc)
+        .then(function(result) {
 
-        const params = {
-            Bucket: BUCKET,
-            Key: pathData[3] + "/" + pathData[4] + "/" + pathData[5],
-        }
+            deleteImage(path.thumbnail_loc)
+            .then(function(result) {
 
-        s3.deleteObject(params, function(err, data) {
-            if (err) {
                 db.none("DELETE FROM post WHERE pid = $1", [pid])
-                .then(function(result) {
+                .then(function(result) { success(res); })
+                .catch(function(err) { error(err, res); });
 
-                    var response = {message: "Success"};
-                    res.status(200).send(response);
+            }).catch(function(err) { error(err, res); });
 
-                }).catch(function(err) {
+        }).catch(function(err) { error(err, res); });
 
-                    console.log(err);
-                    res.status(400).send({message: "Failure: Internal server error"});
-                });
-            }
-            else {
-
-                pathData = path.thumbnail_loc.split("/");
-
-                const params = {
-                    Bucket: BUCKET,
-                    Key: pathData[3] + "/" + pathData[4] + "/" + pathData[5],
-                }
-
-                s3.deleteObject(params, function(err, data) {
-                    if (err) {
-                        console.log(err);
-                        res.status(400).send({message: "Failure: Internal server error"});
-                    }
-                    else {
-
-                        db.none("DELETE FROM post WHERE pid = $1", [pid])
-                        .then(function(result) {
-
-                            var response = {message: "Success"};
-                            res.status(200).send(response);
-
-                        }).catch(function(err) {
-
-                            console.log(err);
-                            res.status(400).send({message: "Failure: Internal server error"});
-                        });
-                    }
-                });
-            }
-        });
-
-    }).catch(function(err) {
-
-        console.log(err);
-        res.status(400).send({message: "Failure: Internal server error"});
-
-    });
-
-
+    }).catch(function(err) { error(err, res); });
 });
 
 //Submits DB query to edit a post.
@@ -566,16 +519,8 @@ app.post("/editPost", function(req, res) {
 
         db.none("UPDATE post SET title = $1, description = $2, size = $3 WHERE pid = $4",
         [title, description, size, pid])
-        .then(function(result) {
-
-            var response = {message: "Success"};
-            res.status(200).send(response);
-
-        }).catch(function(err) {
-
-            console.log(err);
-            res.status(400).send({message: "Failure: Internal server error"});
-        });
+        .then(function(result) { success(res); })
+        .catch(function(err) { error(err, res); });
     }
     else {
 
@@ -586,66 +531,68 @@ app.post("/editPost", function(req, res) {
         db.one("SELECT image_loc, thumbnail_loc FROM post WHERE pid = $1", [pid])
         .then(function(path) {
 
-            var pathData = path.image_loc.split("/");
+            deleteImage(path.image_loc)
+            .then(function(result) {
 
-            const params = {
-                Bucket: BUCKET,
-                Key: pathData[3] + "/" + pathData[4] + "/" + pathData[5],
-            }
+                deleteImage(path.thumbnail_loc)
+                .then(function(result) {
 
-            s3.deleteObject(params, function(err, data) {
-                if (err) {
-                    db.none("DELETE FROM post WHERE pid = $1", [pid])
-                    .then(function(result) {
+                    db.none("UPDATE post SET title = $1, description = $2, size = $3, image_loc = $4, thumbnail_loc = $5, original_size = $6 WHERE pid = $7",
+                    [title, description, size, newPath, newThumbPath, originalSize, pid])
+                    .then(function(result) { success(res); })
+                    .catch(function(err) { error(err, res); });
 
-                        var response = {message: "Success"};
-                        res.status(200).send(response);
+                }).catch(function(err) { error(err, res); });
 
-                    }).catch(function(err) {
+            }).catch(function(err) { error(err, res); });
 
-                        console.log(err);
-                        res.status(400).send({message: "Failure: Internal server error"});
-                    });
-                }
-                else {
-
-                    pathData = path.thumbnail_loc.split("/");
-
-                    const params = {
-                        Bucket: BUCKET,
-                        Key: pathData[3] + "/" + pathData[4] + "/" + pathData[5],
-                    }
-
-                    s3.deleteObject(params, function(err, data) {
-                        if (err) {
-                            console.log(err);
-                            res.status(400).send({message: "Failure: Internal server error"});
-                        }
-                        else {
-
-                            db.none("UPDATE post SET title = $1, description = $2, size = $3, image_loc = $4, thumbnail_loc = $5, original_size = $6 WHERE pid = $7",
-                            [title, description, size, newPath, newThumbPath, originalSize, pid])
-                            .then(function(result) {
-
-                                var response = {message: "Success"};
-                                res.status(200).send(response);
-
-                            }).catch(function(err) {
-
-                                console.log(err);
-                                res.status(400).send({message: "Failure: Internal server error"});
-                            });
-                        }
-                    });
-                }
-            });
-
-        }).catch(function(err) {
-
-            console.log(err);
-            res.status(400).send({message: "Failure: Internal server error"});
-        });
+        }).catch(function(err) { error(err, res); });
     }
+});
+
+app.post("/updateInfo", function(req, res) {
+
+    if (req.session.loggedin === false) res.status(400).send({message: "Unauthorized for database access."});
+
+    let type = req.body.type;
+
+    if (type === "about") {
+
+        let bio = req.body.bio;
+
+        if (typeof req.body.path !== "undefined")  {
+
+            let path = req.body.path;
+
+            db.none("UPDATE basic_info SET about_img_loc = $1, about = $2", [path, bio])
+            .then(function(result) { success(res); })
+            .catch(function(err) { error(err, res); });
+        }
+        else {
+
+            db.none("UPDATE basic_info SET about = $1", [bio])
+            .then(function(result) { success(res); })
+            .catch(function(err) { error(err, res); });
+        }
+    }
+    else if (type === "contact" || type === "purchase") {
+
+        let info = req.body.info;
+
+        db.none("UPDATE basic_info SET " + type + " = $1", [info])
+        .then(function(result) { success(res); })
+        .catch(function(err) { error(err, res); });
+    }
+    else if (type === "title") {
+
+        let title = req.body.title;
+        let intro = req.body.intro;
+
+        db.none("UPDATE basic_info SET title = $1, intro = $2", [title, intro])
+        .then(function(result) { success(res); })
+        .catch(function(err) { error(err); });
+    }
+    else error("Unknown information type", res);
 });
 
 app.post("/reorder", function(req, res) {
@@ -656,22 +603,14 @@ app.post("/reorder", function(req, res) {
     let collection = req.body.cid;
     let index = req.body.newIndex;
 
-    db.none("UPDATE post SET index = $1 WHERE pid = $2", [index, post])
+    db.none("UPDATE post SET index = $1 WHERE pid = $1", [index, post])
     .then(function(result) {
 
         db.none("UPDATE post SET index = index + 1 WHERE collection = $1 AND index >= $2 AND pid != $3", [collection, index, post])
-        .then(function(result) { res.status(200).send({message: "Success"}); })
-        .catch(function(err) {
-
-            console.log(err);
-            res.status(400).send({message: "Failure: Internal server error"});
-        });
+        .then(function(result) { success(res); })
+        .catch(function(err) { error(err, res); });
     })
-    .catch(function(err) {
-
-        console.log(err);
-        res.status(400).send({message: "Failure: Internal server error"});
-    });
+    .catch(function(err) { error(err, res); });
 });
 
 //Handles file uploads
@@ -691,14 +630,8 @@ app.post('/upload', upload.single("file"), function(req, res) {
     }
 
     s3.upload(params, function(err, data) {
-        if (err) {
-            console.log(err);
-            res.status(400).send({message: "Failure: Internal server error"});
-        }
-        else {
-            var response = {message: "Success", cube: CUBE};
-            res.status(200).send(response);
-        }
+        if (err) error(err, res);
+        else res.status(200).send({message: "Success", cube: CUBE});
     });
 })
 

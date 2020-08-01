@@ -1,0 +1,39 @@
+extends admin.pug
+
+block modalScript
+    if type === "about"
+        script(src = "Scripts/about.js")
+    if type === "contact"
+        script(src = "Scripts/contact.js")
+    if type === "purchase"
+        script(src = "Scripts/purchase.js")
+    if type === "title"
+        script(src = "Scripts/title.js")
+        
+block modal
+    div#shadow
+    modal.modal
+        div#error
+        if type === "about"
+            img(src = `${info.about_img_loc}`).thumbnail
+            br
+            p.text.modal_thumb Picture
+            input(type = "file", name = "file")#file
+            br
+            p.text.modal_field_label Bio
+            textarea(name = "bio").info_field#bio_field #{info.about}
+        if type === "contact"
+            p.text.modal_field_label Contact Info
+            textarea(name = "contact").info_field#contact_field #{info.contact}
+        if type === "purchase"
+            p.text.modal_field_label Purchase Info
+            textarea(name = "purchase").info_field#purchase_field #{info.purchase}
+        if type === "title"
+            p.text.modal_field_label Title
+            input(type = "text", name = "title", value = `${info.title}`)#title_field
+            br
+            p.text.modal_field_label Intro
+            textarea(name = "intro").info_field#intro_field #{info.intro}
+        br   
+        button(type = "button")#submit Submit
+        button(type = "button")#cancel Cancel
