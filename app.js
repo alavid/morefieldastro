@@ -122,12 +122,15 @@ app.get('/', function(req, res) {
     db.one("SELECT * FROM basic_info", []).then(function(info) {
 
         db.any(`SELECT collection.cid, collection.title, collection.description, post.image_loc
-                FROM post, collection
-                WHERE collection.cid = post.collection AND post.index = (
-                    SELECT MIN(post.index)
-                    FROM post, collection
-                    WHERE post.collection = collection.cid
-                )`, []).then(function(collections) {
+                FROM post, collection,
+                     (SELECT collection.cid, MIN(post.index)
+                      FROM collection, post
+                      WHERE collection.cid = post.collection
+                      GROUP BY collection.cid) AS mins
+                WHERE collection.cid = post.collection
+                      AND collection.cid = mins.cid
+                      AND post.index = mins.min`
+                , []).then(function(collections) {
 
                     res.render("home", {collections: collections, info: info});
 
@@ -274,13 +277,10 @@ app.get('/:gallery/:post?', function(req, res) {
 
                         break;
                     }
-                    else if (i === posts.length - 1) {
-
-                        res.status(404).render("404", {message: "This image does not exist."});
-                    }
                 }
 
-                res.render("post", {prev: prev, cur: cur, next: next, gallery: galleryName, desc: collection.description, posts: posts});
+                if (typeof cur === "undefined") res.status(404).render("404", {message: "This image does not exist."});
+                else res.render("post", {prev: prev, cur: cur, next: next, gallery: galleryName, desc: collection.description, posts: posts});
 
             }).catch(function(err) {
 
