@@ -17,8 +17,8 @@ block modal
                     p.modal_desc.text #{cur.description}
                 if cur.original_size !== null
                     p.modal_size.text Full size: #{cur.original_size}
-                p(style = `font-weight: "bold"`).modal_desc.text Print options:
-                div#getPrint
+                //-p(style = `font-weight: "bold"`).modal_desc.text Print options:
+                //-div#getPrint
                     select.sizes.modal_button
                         option.order_width #{"width: "}
                             p.price price
@@ -28,7 +28,7 @@ block modal
                             p.price price
                         option.order_width #{"width: "}
                             p.price price
-                    button.modal_button#add_to_cart Add to Cart
+                    button.modal_button#add_to_cart Add to Cart 
         div#modal_buttons
             if prev !== null
                 button(onClick = `location.href="/${encodeURIComponent(gallery)}/${encodeURIComponent(prev.title)}"`).modal_button#prev Previous
