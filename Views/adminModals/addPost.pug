@@ -1,0 +1,25 @@
+extends ../admin.pug
+
+block modalScript
+    script(src = "../Scripts/modal.js")
+    script(src = "../Scripts/resize.js")
+    script(src = "../Scripts/upload.js")
+ 
+block modal
+    div#shadow
+    modal(name = "addPost")#modal
+        div#error
+        p.text.modal_thumb Thumbnail
+        input(name = "file", type = "file").modal_file
+        br
+        p.text.modal_field_label Title
+        input(name = "title", type = "text").modal_field
+        br
+        p.text.modal_field_label Description
+        textarea(name = "description").modal_field
+        br
+        p.text.modal_field_label Size
+        input(name = "size", type = "text").modal_field
+        br
+        button(type = "button").submit#submit Submit
+        button(type = "button").cancel#cancel Cancel

@@ -1,0 +1,27 @@
+doctype html
+html(lang = "en")
+    head
+        title Morefield Astrophotography
+        meta(charset = "utf-8")
+        meta(content = "width=device-width, initial-scale=1", name = "viewport")
+        link(rel = "stylesheet", type = "text/css", href = "../Styles/style.css")
+        script(src = "../Scripts/jquery-3.4.1.js")
+        script(src = "../Scripts/fontAwesome.js")
+    body
+        header
+            h1.title KEVIN MOREFIELD
+            ul.text#nav_bar
+                li.nav_item
+                    button(onClick = `location.href="/"`).nav_button#home_button Home
+                li.nav_item
+                    button(onClick = `location.href="/?sect=about"`).nav_button#about_button About
+                li.nav_item
+                    button(onClick = `location.href="/?sect=contact"`).nav_button#contact_button Contact
+                li.nav_item
+                    button(onClick = `location.href="/?sect=purchase"`).nav_button#purchase_button Purchase
+        div#content
+            div#fourohfour_container
+                h3#fourohfour 400
+                p.text#message There was an internal server error, please refresh the page.
+            
+        

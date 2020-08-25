@@ -1,0 +1,17 @@
+extends ../admin.pug
+
+block modalScript
+    script(src = "../Scripts/modal.js")
+ 
+block modal
+    div#shadow
+    modal(name = "addCollection")#modal
+        div#error
+        p.text.modal_field_label Title
+        input(name = "title", type = "text").modal_field
+        br
+        p.text.modal_field_label Description
+        textarea(name = "description").modal_field
+        br
+        button(type = "button").submit#submit Submit
+        button(type = "button").cancel#cancel Cancel

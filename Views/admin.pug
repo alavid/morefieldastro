@@ -32,12 +32,12 @@ html(lang = "en")
                     button(onClick = `location.href = "/admin/info/contact"`).basic_info_button#contact_button Contact Info
                     button(onClick = `location.href = "/admin/info/purchase"`).basic_info_button#purchase_button Purchase Info
                     button(onClick = `location.href = "/admin/info/title"`).basic_info_button#title_button Title Info
-                    button(onClick = `location.href = "/admin/info/pricing"`).basic_info_button#title_button Pricing Info
+                    button(onClick = `location.href = "/admin/pricing"`).basic_info_button#pricing_button Pricing Page
                 each row in data
                     div.col_container
                         div.col_header
                             div.col_info
-                                h2.text #{row.collection.title}
+                                h2.text.admin-header #{row.collection.title}
                                 p.text.col_desc #{row.collection.description}
                             div.col_buttons
                                 button(onClick = `location.href = "/admin/editCollection/${encodeURIComponent(row.collection.cid)}"`).edit_button.edit_col_button Edit
@@ -50,7 +50,7 @@ html(lang = "en")
                                     button(onClick = `location.href = "/admin/editPost/${encodeURIComponent(post.pid)}"`).edit_button Edit
                                     button(onClick = `location.href = "/admin/deletePost/${encodeURIComponent(post.pid)}"`).delete_button Delete
                             button(onClick = `location.href = "/admin/addPost/${encodeURIComponent(row.collection.cid)}"`).add_post +
-                button(onClick = `location.href = "/admin/addCollection"`) Add Collection
+                button(onClick = `location.href = "/admin/addCollection"`).add_button Add Collection
                 block modal
 
                                 

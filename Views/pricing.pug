@@ -1,0 +1,53 @@
+doctype html
+html(lang = "en")
+    head
+        title Morefield Astrophotography Admin Tools
+        meta(charset = "utf-8")
+        meta(content = "width=device-width, initial-scale=1", name = "viewport")
+        base(href = "/")
+        link(rel = "stylesheet", type = "text/css", href = "Styles/style.css")
+        script(src = "Scripts/jquery-3.4.1.js")
+        script(src = "Scripts/pricing.js")
+        block modalScript
+    body
+        header
+            h1.title ADMIN TOOLS
+        div#pricing_content
+            div#basic_info_buttons
+                button(onClick = `location.href = "/admin"`).basic_info_button#back_button Back
+                button(onClick = `location.href = "/admin/pricing/trueSize"`).basic_info_button#title_button Truesize Pricing
+            div#print_options
+                div#error
+                div#stand_sizes
+                    h2.text.admin-header Standard Sizes
+                    table.pricing_table
+                        tr
+                            th.stand_width Width
+                            th.stand_height Height
+                            th.stand_price Price
+                            th.stand_buttons
+                        each row in sizes
+                            tr
+                                td.stand_width #{row.width} in.
+                                td.stand_height #{row.height} in.
+                                td.stand_price $#{row.price}
+                                td.stand_size_buttons
+                                    button(onClick = `location.href = "/admin/pricing/editSize/${encodeURIComponent(row.sid)}"`).edit_button Edit
+                                    button(id = `delete_${row.sid}`).delete_size Delete
+                    button(onClick = `location.href = "/admin/pricing/addSize"`).add_button Add Size
+                div#printTypes
+                    h2.text.admin-header Print Types
+                    table.pricingTable
+                        tr
+                            th.printType Type
+                            th.printPrice Price Modifier
+                            th.printButtons
+                        each row in printTypes
+                            tr
+                                td.type_name #{row.name}
+                                td.type_mult +#{row.mult}%
+                                td.print_type_buttons
+                                    button(onClick = `location.href = "/admin/pricing/editType/${encodeURIComponent(row.ptid)}"`).edit_button Edit
+                                    button(id = `delete_${row.ptid}`).delete_type Delete
+                    button(onClick = `location.href = "/admin/pricing/addType"`).add_button Add Type
+                    block modal

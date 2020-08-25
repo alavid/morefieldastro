@@ -1,0 +1,20 @@
+extends ../pricing.pug
+
+block modalScript
+    script(src = "../Scripts/modal.js")
+    
+block modal
+    div#shadow
+    modal(name = "addSize")#modal
+        div#error
+        p.text.modal_field_label Width (inches)
+        input(name = "width", type = "text").modal_field
+        br
+        p.text.modal_field_label Height (inches)
+        input(name = "height", type = "text").modal_field
+        br
+        p.text.modal_field_label Price
+        input(name = "price", type = "text").modal_field
+        br
+        button(type = "button").submit#submit Submit
+        button(type = "button").cancel#cancel Cancel

@@ -1,0 +1,20 @@
+extends ../pricing.pug
+
+block modalScript
+    script(src = "../Scripts/modal.js")
+    
+block modal
+    div#shadow
+    modal(name = `editSize-sid-${size.sid}`)#modal
+        div#error
+        p.text.modal_field_label Width (inches)
+        input(name = "width", type = "text", value = `${size.width}`).modal_field
+        br
+        p.text.modal_field_label Height (inches)
+        input(name = "height", type = "text", value = `${size.height}`).modal_field
+        br
+        p.text.modal_field_label Price
+        input(name = "price", type = "text", value = `${size.price}`).modal_field
+        br
+        button(type = "button").submit#submit Submit
+        button(type = "button").cancel#cancel Cancel

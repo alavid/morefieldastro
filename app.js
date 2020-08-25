@@ -146,6 +146,82 @@ app.get('/', function(req, res) {
     });
 });
 
+app.get("/admin/pricing/:modal?/:id?", function(req, res) {
+
+    if (req.session.loggedin) {
+
+        db.any("SELECT * FROM sizes ORDER BY width, height, price", []).then(function(sizes) {
+
+            db.any("SELECT * FROM print_types ORDER BY mult", []).then(function(printTypes) {
+
+                if (typeof req.params.modal === "undefined") res.render("pricing", {sizes: sizes, printTypes: printTypes});
+                else if (req.params.modal === "trueSize") {
+
+                    db.one("SELECT truesize_price, aspect_ratio_mult FROM basic_info WHERE bid = 0", [])
+                    .then(function(data) { res.status(200).render("adminModals/trueSize", {data: data, sizes: sizes, printTypes: printTypes}); })
+                    .catch(function(err) { console.log(err); res.status(400).render("400"); });
+                }
+                else if (req.params.modal === "addSize") res.render("adminModals/addSize", {sizes: sizes, printTypes: printTypes});
+                else if (req.params.modal === "editSize") {
+
+                    if (typeof req.params.id === "undefined") res.status(400).render("400");
+                    else {
+
+                        var id = parseInt(req.params.id);
+                        var selected;
+
+                        for (var i = 0; i < sizes.length; i++) {
+
+                            if (sizes[i].sid === id) {
+
+                                selected = sizes[i];
+                                break;
+                            }
+                        }
+
+                        if (typeof selected === "undefined") res.status(400).render("400");
+                        else res.status(200).render("adminModals/editSize", {size: selected, sizes: sizes, printTypes: printTypes});
+                    }
+                }
+                else if (req.params.modal === "addType") res.render("adminModals/addType", {sizes: sizes, printTypes: printTypes});
+                else if (req.params.modal === "editType") {
+
+                    if (typeof req.params.id === "undefined") res.status(400).render("400");
+                    else {
+
+                        var id = parseInt(req.params.id);
+                        var selected;
+
+                        for (var i = 0; i < printTypes.length; i++) {
+
+                            if (printTypes[i].ptid === id) {
+
+                                selected = printTypes[i];
+                                break;
+                            }
+                        }
+
+                        if (typeof selected === "undefined") res.status(400).render("400");
+                        else res.status(200).render("adminModals/editType", {printType: selected, sizes: sizes, printTypes: printTypes});
+                    }
+                }
+                else res.render("pricing", {sizes: sizes, printTypes: printTypes});
+
+            }).catch(function(err) {
+
+                console.log(err);
+                res.status(400).render("400");
+            });
+
+        }).catch(function(err) {
+
+            console.log(err);
+            res.status(400).render("400");
+        });
+    }
+    else { res.render("admin", {authorized: false}); }
+});
+
 //Renders admin site
 app.get('/admin/:modal?/:id?', function(req, res) {
 
@@ -172,26 +248,26 @@ app.get('/admin/:modal?/:id?', function(req, res) {
                 if (typeof req.params.modal === "undefined")
                     res.render("admin", {authorized: true, data: data});
                 else if (req.params.modal === "addPost")
-                    res.render("addPost", {authorzied: true, data: data});
+                    res.render("adminModals/addPost", {authorzied: true, data: data});
                 else if (req.params.modal === "editPost" || req.params.modal === "deletePost") {
 
                     db.one("SELECT pid, title, description, size, image_loc FROM post WHERE pid = $1", [req.params.id])
                     .then(function(post) {
 
-                        if (req.params.modal === "editPost") res.render("editPost", {authorized: true, data: data, post: post});
-                        else res.render("deletePost", {authorized: true, data: data, post: post});
+                        if (req.params.modal === "editPost") res.render("adminModals/editPost", {authorized: true, data: data, post: post});
+                        else res.render("adminModals/deletePost", {authorized: true, data: data, post: post});
 
                     })
                 }
                 else if (req.params.modal === "addCollection")
-                    res.render("addCollection", {authorized: true, data: data});
+                    res.render("adminModals/addCollection", {authorized: true, data: data});
                 else if (req.params.modal === "editCollection" || req.params.modal === "deleteCollection") {
 
                     db.one("SELECT cid, title, description FROM collection WHERE cid = $1", [req.params.id])
                     .then(function(col) {
 
-                        if (req.params.modal === "editCollection") res.render("editCollection", {authorized: true, data: data, col: col});
-                        else res.render("deleteCollection", {authorized: true, data: data, col: col});
+                        if (req.params.modal === "editCollection") res.render("adminModals/editCollection", {authorized: true, data: data, col: col});
+                        else res.render("adminModals/deleteCollection", {authorized: true, data: data, col: col});
 
                     }).catch(function(err) {
 
@@ -204,10 +280,10 @@ app.get('/admin/:modal?/:id?', function(req, res) {
                     db.one("SELECT * FROM basic_info WHERE bid = 0")
                     .then(function(info) {
 
-                        if (req.params.id === "about") res.render("info", {type: "about", info: info, authorized: true, data: data});
-                        else if (req.params.id === "contact") res.render("info", {type: "contact", info: info, authorized: true, data: data});
-                        else if (req.params.id === "purchase") res.render("info", {type: "purchase", info: info, authorized: true, data: data});
-                        else if (req.params.id === "title") res.render("info", {type: "title", info: info, authorized: true, data: data});
+                        if (req.params.id === "about") res.render("adminModals/info", {type: "about", info: info, authorized: true, data: data});
+                        else if (req.params.id === "contact") res.render("adminModals/info", {type: "contact", info: info, authorized: true, data: data});
+                        else if (req.params.id === "purchase") res.render("adminModals/info", {type: "purchase", info: info, authorized: true, data: data});
+                        else if (req.params.id === "title") res.render("adminModals/info", {type: "title", info: info, authorized: true, data: data});
 
                     }).catch(function(err) {
 
@@ -389,7 +465,11 @@ app.post('/logIn', function(req, res) {
 //Submits DB query to insert a new collection.
 app.post("/addCollection", function(req, res) {
 
-    if (req.session.loggedin === false) res.status(400).send({message: "Unauthorized for database access."});
+    if (req.session.loggedin === false) {
+
+        res.status(400).send({message: "Unauthorized for database access."});
+        return;
+    }
 
     let title = req.body.title;
     let description = req.body.description;
@@ -402,7 +482,11 @@ app.post("/addCollection", function(req, res) {
 //Submits DB query to edit a collections information.
 app.post("/editCollection", function(req, res) {
 
-    if (req.session.loggedin === false) res.status(400).send({message: "Unauthorized for database access."});
+    if (req.session.loggedin === false) {
+
+        res.status(400).send({message: "Unauthorized for database access."});
+        return;
+    }
 
     let cid = req.body.cid;
     let title = req.body.title;
@@ -418,49 +502,66 @@ app.post("/editCollection", function(req, res) {
 //then submits DB queries to delete all of the posts and the collection.
 app.post("/deleteCollection", function(req, res) {
 
-    if (req.session.loggedin === false) res.status(400).send({message: "Unauthorized for database access."});
+    if (req.session.loggedin === false) {
+
+        res.status(400).send({message: "Unauthorized for database access."});
+        return;
+    }
 
     let cid = req.body.cid;
 
     db.any("SELECT image_loc, thumbnail_loc FROM post WHERE collection = $1", [cid])
     .then(function(posts) {
+        console.log("A");
+        if (posts.length === 0) {
 
-        posts.forEach(function(post, i) {
+            db.none("DELETE FROM collection WHERE cid = $1", [cid])
+            .then(function(result) { success(res); })
+            .catch(function(err) { error(err, res); });
+        }
+        else {
 
-            deleteImage(post.image_loc)
-            .then(function(result) {
+            posts.forEach(function(post, i) {
 
-                deleteImage(post.thumbnail_loc)
+                deleteImage(post.image_loc)
                 .then(function(result) {
 
-                    db.none("DELETE FROM post WHERE pid = $1", [post.pid])
+                    deleteImage(post.thumbnail_loc)
                     .then(function(result) {
 
-                        if (i === posts.length - 1) {
+                        db.none("DELETE FROM post WHERE pid = $1", [post.pid])
+                        .then(function(result) {
 
-                            db.none("DELETE FROM post WHERE collection = $1", [cid])
-                            .then(function(result) {
+                            if (i === posts.length - 1) {
 
-                                db.none("DELETE FROM collection WHERE cid = $1", [cid])
-                                .then(function(result) { success(res); })
-                                .catch(function(err) { error(err, res); });
+                                db.none("DELETE FROM post WHERE collection = $1", [cid])
+                                .then(function(result) {
 
-                            }).catch(function(err) { error(err, res); });
-                        }
+                                    db.none("DELETE FROM collection WHERE cid = $1", [cid])
+                                    .then(function(result) { success(res); })
+                                    .catch(function(err) { error(err, res); });
 
-                    }).catch(function(err) { error(err, res); });
+                                }).catch(function(err) { error(err, res); });
+                            }
+
+                        }).catch(function(err) { error(err, res); });
+
+                    }).catch(function(err) { error(err, res); })
 
                 }).catch(function(err) { error(err, res); })
-
-            }).catch(function(err) { error(err, res); })
-        });
+            });
+        }
     });
 });
 
 //Submits DB query to add a new post.
 app.post("/addPost", function(req, res) {
 
-    if (req.session.loggedin === false) res.status(400).send({message: "Unauthorized for database access."});
+    if (req.session.loggedin === false) {
+
+        res.status(400).send({message: "Unauthorized for database access."});
+        return;
+    }
 
     let title = req.body.title;
     let description = req.body.description;
@@ -480,7 +581,11 @@ app.post("/addPost", function(req, res) {
 //request to delete the post.
 app.post("/deletePost", function(req, res) {
 
-    if (req.session.loggedin === false) res.status(400).send({message: "Unauthorized for database access."});
+    if (req.session.loggedin === false) {
+
+        res.status(400).send({message: "Unauthorized for database access."});
+        return;
+    }
 
     let pid = req.body.pid;
 
@@ -508,7 +613,11 @@ app.post("/deletePost", function(req, res) {
 //If the image reference was changed, submits AWS requests to delete the old ones.
 app.post("/editPost", function(req, res) {
 
-    if (req.session.loggedin === false) res.status(400).send({message: "Unauthorized for database access."});
+    if (req.session.loggedin === false) {
+
+        res.status(400).send({message: "Unauthorized for database access."});
+        return;
+    }
 
     let title = req.body.title;
     let description = req.body.description;
@@ -552,7 +661,11 @@ app.post("/editPost", function(req, res) {
 
 app.post("/updateInfo", function(req, res) {
 
-    if (req.session.loggedin === false) res.status(400).send({message: "Unauthorized for database access."});
+    if (req.session.loggedin === false) {
+
+        res.status(400).send({message: "Unauthorized for database access."});
+        return;
+    }
 
     let type = req.body.type;
 
@@ -595,9 +708,127 @@ app.post("/updateInfo", function(req, res) {
     else error("Unknown information type", res);
 });
 
+app.post("/addSize", function(req, res) {
+
+    if (req.session.loggedin === false) {
+
+        res.status(400).send({message: "Unauthorized for database access."});
+        return;
+    }
+
+    let width = req.body.width;
+    let height = req.body.height;
+    let price = req.body.price;
+
+    db.none("INSERT INTO sizes(width, price, height) VALUES($1, $2, $3)", [width, price, height])
+    .then(function(result) { success(res); })
+    .catch(function(err) { error(err, res); });
+});
+
+app.post("/editSize", function(req, res) {
+
+    if (req.session.loggedin === false) {
+
+        res.status(400).send({message: "Unauthorized for database access."});
+        return;
+    }
+
+    let width = req.body.width;
+    let height = req.body.height;
+    let price = req.body.price;
+    let sid = req.body.sid;
+
+    db.none("UPDATE sizes SET width = $1, price = $2, height = $3 WHERE sid = $4", [width, price, height, sid])
+    .then(function(result) { success(res); })
+    .catch(function(err) { error(err, res); });
+});
+
+app.post("/deleteSize", function(req, res) {
+
+    if (req.session.loggedin === false) {
+
+        res.status(400).send({message: "Unauthorized for database access."});
+        return;
+    }
+
+    let sid = req.body.sid;
+
+    db.none("DELETE FROM sizes WHERE sid = $1", [sid])
+    .then(function(result) { success(res); })
+    .catch(function(err) { error(err, res); });
+});
+
+app.post("/addType", function(req, res) {
+
+    if (req.session.loggedin === false) {
+
+        res.status(400).send({message: "Unauthorized for database access."});
+        return;
+    }
+
+    let name = req.body.name;
+    let mult = req.body.mult;
+
+    db.none("INSERT INTO print_types(name, mult) VALUES($1, $2)", [name, mult])
+    .then(function(result) { success(res); })
+    .catch(function(err) { error(err, res); });
+});
+
+app.post("/editType", function(req, res) {
+
+    if (req.session.loggedin === false) {
+
+        res.status(400).send({message: "Unauthorized for database access."});
+        return;
+    }
+
+    let name = req.body.name;
+    let mult = req.body.mult;
+    let ptid = req.body.ptid;
+
+    db.none("UPDATE print_types SET name = $1, mult = $2 WHERE ptid = $3", [name, mult, ptid])
+    .then(function(result) { success(res); })
+    .catch(function(err) { error(err, res); });
+});
+
+app.post("/deleteType", function(req, res) {
+
+    if (req.session.loggedin === false) {
+
+        res.status(400).send({message: "Unauthorized for database access."});
+        return;
+    }
+
+    let ptid = req.body.ptid;
+
+    db.none("DELETE FROM print_types WHERE ptid = $1", [ptid])
+    .then(function(result) { success(res); })
+    .catch(function(err) { error(err, res); });
+});
+
+app.post("/trueSize", function(req, res) {
+
+    if (req.session.loggedin === false) {
+
+        res.status(400).send({message: "Unauthorized for database access."});
+        return;
+    }
+
+    let price = req.body.price;
+    let mult = req.body.mult;
+
+    db.none("UPDATE basic_info SET truesize_price = $1, aspect_ratio_mult = $2 WHERE bid = 0", [price, mult])
+    .then(function(result) { success(res); })
+    .catch(function(err) { error(err, res); });
+});
+
 app.post("/reorder", function(req, res) {
 
-    if (req.session.loggedin === false) res.status(400).send({message: "Unauthorized for database access."});
+    if (req.session.loggedin === false) {
+
+        res.status(400).send({message: "Unauthorized for database access."});
+        return;
+    }
 
     let post = req.body.pid;
     let collection = req.body.cid;
@@ -616,10 +847,19 @@ app.post("/reorder", function(req, res) {
 //Handles file uploads
 app.post('/upload', upload.single("file"), function(req, res) {
 
-    if (req.session.loggedin === false) res.status(400).send({message: "Unauthorized for database access."});
+    if (req.session.loggedin === false) {
 
+        res.status(400).send({message: "Unauthorized for database access."});
+        return;
+    }
+    
     let fileType = path.extname(req.file.originalname).toLowerCase();
-    if (fileType !== ".jpg" && fileType !== ".png") res.status(403).send({message: "Only jpgs and pngs allowed."});
+    console.log(fileType);
+    if (fileType !== ".jpeg" && fileType !== ".jpg" && fileType !== ".png") {
+
+        res.status(403).send({message: "Only jpgs and pngs allowed."});
+        return;
+    }
 
     const content = fs.readFileSync(req.file.path);
 

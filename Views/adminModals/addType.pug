@@ -1,0 +1,17 @@
+extends ../pricing.pug
+
+block modalScript
+    script(src = "../Scripts/modal.js")
+    
+block modal
+    div#shadow
+    modal(name = "addType")#modal
+        div#error
+        p.text.modal_field_label Print Type
+        input(name = "name", type = "text").modal_field
+        br
+        p.text.modal_field_label Price Modifier (%)
+        input(name = "mult", type = "text").modal_field
+        br
+        button(type = "button").submit#submit Submit
+        button(type = "button").cancel#cancel Cancel
