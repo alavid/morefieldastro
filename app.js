@@ -179,7 +179,7 @@ app.get("/admin/pricing/:modal?/:id?", function(req, res) {
                             }
                         }
 
-                        if (typeof selected === "undefined") res.status(400).render("400");
+                        if (typeof selected === "undefined") res.status(404).render("404", {message: "Index not found"});
                         else res.status(200).render("adminModals/editSize", {size: selected, sizes: sizes, printTypes: printTypes});
                     }
                 }
@@ -257,7 +257,11 @@ app.get('/admin/:modal?/:id?', function(req, res) {
                         if (req.params.modal === "editPost") res.render("adminModals/editPost", {authorized: true, data: data, post: post});
                         else res.render("adminModals/deletePost", {authorized: true, data: data, post: post});
 
-                    })
+                    }).catch(function(err) {
+
+                        console.log(err);
+                        res.status(404).render("404", {message: "Index not found"});
+                    });
                 }
                 else if (req.params.modal === "addCollection")
                     res.render("adminModals/addCollection", {authorized: true, data: data});
@@ -272,8 +276,7 @@ app.get('/admin/:modal?/:id?', function(req, res) {
                     }).catch(function(err) {
 
                             console.log(err);
-                            res.status(400).send({message: "Internal server error."});
-                    });
+                            res.status(404).render("404", {message: "Index not found"});                    });
                 }
                 else if (req.params.modal === "info") {
 
@@ -852,7 +855,7 @@ app.post('/upload', upload.single("file"), function(req, res) {
         res.status(400).send({message: "Unauthorized for database access."});
         return;
     }
-    
+
     let fileType = path.extname(req.file.originalname).toLowerCase();
     console.log(fileType);
     if (fileType !== ".jpeg" && fileType !== ".jpg" && fileType !== ".png") {
