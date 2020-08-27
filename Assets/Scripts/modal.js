@@ -45,7 +45,14 @@ $(document).ready(() => {
         }
         else {
 
-            inputs.forEach((object) => { data[$(object).attr("name")] = $(object).val(); });
+            inputs.forEach((object) => {
+
+                var val = $(object).val();
+
+                if (!isNaN(val) && val.indexOf('.') !== -1) val = parseFloat(val).toFixed(2);
+
+                data[$(object).attr("name")] = val;
+            });
 
             $.ajax({url: dest, type: "POST", async: false, data: data})
             .done((res) => { close(); })
