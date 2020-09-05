@@ -60,19 +60,28 @@
 .thumbnail
     border-radius: 3px
 
-#zoom_button
+.zoom
     position: absolute
-    width: 55px
-    height: 55px
-    font-size: 25pt
+    width: 45px
+    height: 45px
+    font-size: 22pt
     font-weight: bold
     text-align: center
     border: 0px
     background-color: rgba(0, 0, 0, 0)
     bottom: 10px
-    right: 5px
     outline: none
     box-shadow: none
+
+.zoom:hover, .zoom:focus
+    background-color: rgba(0, 0, 0, 0)
+
+#zoom_in
+    right: 5px
+
+#zoom_out
+    display: none
+    right: 50px
 
 #modal_info
     padding-left: 10px

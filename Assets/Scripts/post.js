@@ -2,7 +2,7 @@ window.onload = () => {
 
     document.body.style.overflow = "hidden";
 
-    var zoomed = false;
+    var zoom = 1;
     var clicking = false;
     var prevX;
     var prevY;
@@ -21,29 +21,58 @@ window.onload = () => {
             height = img.naturalHeight;
             width = img.naturalWidth;
 
-            if (height > 650) newWidth = 650 * (width / height);
+            if (height > 625) newWidth = 625 * (width / height);
             else newWidth = width;
 
             $("#modal_thumb").css("max-width", newWidth);
         }
     });
 
-    $("#zoom_button").click((event) => {
+    $("#zoom_in").click((event) => {
 
-        let target = $(event.target).parent().children().first().children().first();
+        let container = $(event.target).parent();
+        let containerSize = {width: $(container).width(), height: $(container).height()};
+        let target = $(container).children().first().children().first();
+        let scroll = {left: $(target).parent().scrollLeft(), top: $(target).parent().scrollTop()}
 
-        if (zoomed === false) {
+        if (scroll.left === 0) {
 
-            target.css("transform", "translate(75%, 75%) scale(2.5, 2.5)");
-            $(event.target).html("-");
-            zoomed = true;
+            scroll.left = containerSize.width / 1.3;
+            scroll.top = containerSize.height / 1.3;
         }
-        else {
 
-            target.css("transform", "scale(1, 1)");
-            $(event.target).html("+");
-            zoomed = false;
+        zoom++;
+        var translation = `${((zoom - 1) * 100) / 2}%`
+        target.css("transform", `translate(${translation}, ${translation}) scale(${zoom}, ${zoom})`);
+        if (zoom === 4) $("#zoom_in").css("display", "none");
+        $("#zoom_out").css("display", "block");
+        $(target).parent().scrollLeft(scroll.left);
+        $(target).parent().scrollTop(scroll.top);
+    });
+
+    $("#zoom_out").click((event) => {
+
+        let container = $(event.target).parent();
+        let containerSize = {width: $(container).width(), height: $(container).height()};
+        let target = $(container).children().first().children().first();
+        let scroll = {left: $(target).parent().scrollLeft(), top: $(target).parent().scrollTop()}
+
+        if (((zoom - 1) / zoom) * scroll.left < 0.5 * containerSize.width) {
+
+            scroll.left += (0.5 * containerSize.width) - (((zoom - 1) / zoom) * scroll.left);
         }
+
+        if (((zoom - 1) / zoom) * scroll.top < 0.5 * containerSize.height) {
+
+            scroll.top += (0.5 * containerSize.height) - (((zoom - 1) / zoom) * scroll.top);
+        }
+
+        zoom--;
+        target.css("transform", `translate(75%, 75%) scale(${zoom}, ${zoom})`);
+        if (zoom === 1) $("#zoom_out").css("display", "none");
+        $("#zoom_in").css("display", "block");
+        $(target).parent().scrollLeft(scroll.left);
+        $(target).parent().scrollTop(scroll.top);
     });
 
     $("#thumb_container").mousedown((event) => { press(event); });
@@ -51,7 +80,7 @@ window.onload = () => {
 
     function press(event) {
 
-        if (zoomed) {
+        if (zoom !== 1) {
             event.preventDefault();
             if (event.type === "mousedown") {
 
@@ -79,7 +108,7 @@ window.onload = () => {
 
         console.log("a");
 
-        if (clicking && zoomed) {
+        if (clicking && zoom !== 1) {
 
             event.preventDefault();
 
