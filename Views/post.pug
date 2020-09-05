@@ -10,7 +10,9 @@ block modal
             i(onClick = `location.href="/${encodeURIComponent(gallery)}"`).fas.fa-times#close_button
         div#modal_content
             div#modal_thumb
-                img(src = `${cur.image_loc}`).thumbnail
+                div#thumb_container
+                    img(src = `${cur.image_loc}`)#thumbnail
+                button#zoom_button +
             div#modal_info
                 h2.modal_title.text #{cur.title}
                 if cur.description !== "null"
