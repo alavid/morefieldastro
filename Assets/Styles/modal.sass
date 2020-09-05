@@ -62,28 +62,27 @@
 .thumbnail
     display: block
 
-.zoom
-    position: absolute
-    width: 45px
-    height: 45px
+#zoom
+    text-align: right
+
+.zoom_button
+    display: inline-block
+    width: 35px
+    height: 35px
+    color: black
     font-size: 22pt
     font-weight: bold
     text-align: center
     border: 0px
     background-color: rgba(0, 0, 0, 0)
-    bottom: 10px
     outline: none
     box-shadow: none
 
-.zoom:hover, .zoom:focus
+.zoom_button:hover, .zoom_button:focus
     background-color: rgba(0, 0, 0, 0)
-
-#zoom_in
-    right: 5px
 
 #zoom_out
     display: none
-    right: 50px
 
 #modal_info
     padding-left: 10px
@@ -127,6 +126,20 @@
     #modal_info
         padding-left: 0px
         padding-top: 10px
+
+    #post_disp_modal
+        left: 0
+        right: 0
+        top: 0
+        bottom: 0
+        transform: none
+        padding-left: 2%
+        padding-right: 2%
+        border-radius: 0px
+        width: 96%
+
+    #getPrint
+        width: 96vw
 
 .modal_title
     color: main.$modal_text_color

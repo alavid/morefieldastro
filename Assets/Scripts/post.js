@@ -21,7 +21,7 @@ window.onload = () => {
             height = img.naturalHeight;
             width = img.naturalWidth;
 
-            if (height > 625) newWidth = 625 * (width / height);
+            if (height > 600) newWidth = 600 * (width / height);
             else newWidth = width;
 
             $("#modal_thumb").css("max-width", newWidth);
@@ -30,7 +30,9 @@ window.onload = () => {
 
     $("#zoom_in").click((event) => {
 
-        let container = $(event.target).parent();
+        console.log("A");
+
+        let container = $(event.target).parent().parent();
         let containerSize = {width: $(container).width(), height: $(container).height()};
         let target = $(container).children().first().children().first();
         let scroll = {left: $(target).parent().scrollLeft(), top: $(target).parent().scrollTop()}
@@ -49,9 +51,9 @@ window.onload = () => {
         zoom++;
         var translation = ((zoom - 1) * 100) / 2;
         target.css("transform", `translate(${translation}%, ${translation}%) scale(${zoom}, ${zoom})`);
-        
+
         if (zoom === 4) $("#zoom_in").css("display", "none");
-        $("#zoom_out").css("display", "block");
+        $("#zoom_out").css("display", "inline-block");
 
         $(target).parent().scrollLeft(scroll.left);
         $(target).parent().scrollTop(scroll.top);
@@ -59,7 +61,7 @@ window.onload = () => {
 
     $("#zoom_out").click((event) => {
 
-        let container = $(event.target).parent();
+        let container = $(event.target).parent().parent();
         let containerSize = {width: $(container).width(), height: $(container).height()};
         let target = $(container).children().first().children().first();
         let scroll = { left: $(target).parent().scrollLeft(), top: $(target).parent().scrollTop() }
@@ -72,7 +74,7 @@ window.onload = () => {
         target.css("transform", `translate(${translation}%, ${translation}%) scale(${zoom}, ${zoom})`);
 
         if (zoom === 1) $("#zoom_out").css("display", "none");
-        $("#zoom_in").css("display", "block");
+        $("#zoom_in").css("display", "inline-block");
 
         $(target).parent().scrollLeft(scroll.left);
         $(target).parent().scrollTop(scroll.top);

@@ -12,8 +12,9 @@ block modal
             div#modal_thumb
                 div#thumb_container
                     img(src = `${cur.image_loc}`).thumbnail
-                button.zoom#zoom_out -
-                button.zoom#zoom_in +
+                div#zoom
+                    button.zoom_button#zoom_out -
+                    button.zoom_button#zoom_in +
             div#modal_info
                 h2.modal_title.text #{cur.title}
                 if cur.description !== "null"
