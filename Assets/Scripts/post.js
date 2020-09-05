@@ -37,15 +37,22 @@ window.onload = () => {
 
         if (scroll.left === 0) {
 
-            scroll.left = containerSize.width / 1.3;
-            scroll.top = containerSize.height / 1.3;
+            scroll.left = containerSize.width / 2;
+            scroll.top = containerSize.height / 2;
+        }
+        else {
+
+            scroll.left = scroll.left / ((zoom - 1) / zoom);
+            scroll.top = scroll.top / ((zoom - 1) / zoom);
         }
 
         zoom++;
-        var translation = `${((zoom - 1) * 100) / 2}%`
-        target.css("transform", `translate(${translation}, ${translation}) scale(${zoom}, ${zoom})`);
+        var translation = ((zoom - 1) * 100) / 2;
+        target.css("transform", `translate(${translation}%, ${translation}%) scale(${zoom}, ${zoom})`);
+        
         if (zoom === 4) $("#zoom_in").css("display", "none");
         $("#zoom_out").css("display", "block");
+
         $(target).parent().scrollLeft(scroll.left);
         $(target).parent().scrollTop(scroll.top);
     });
@@ -55,22 +62,18 @@ window.onload = () => {
         let container = $(event.target).parent();
         let containerSize = {width: $(container).width(), height: $(container).height()};
         let target = $(container).children().first().children().first();
-        let scroll = {left: $(target).parent().scrollLeft(), top: $(target).parent().scrollTop()}
+        let scroll = { left: $(target).parent().scrollLeft(), top: $(target).parent().scrollTop() }
 
-        if (((zoom - 1) / zoom) * scroll.left < 0.5 * containerSize.width) {
-
-            scroll.left += (0.5 * containerSize.width) - (((zoom - 1) / zoom) * scroll.left);
-        }
-
-        if (((zoom - 1) / zoom) * scroll.top < 0.5 * containerSize.height) {
-
-            scroll.top += (0.5 * containerSize.height) - (((zoom - 1) / zoom) * scroll.top);
-        }
+        scroll.left = scroll.left * ((zoom - 2) / (zoom - 1));
+        scroll.top = scroll.top * ((zoom - 2) / (zoom - 1));
 
         zoom--;
-        target.css("transform", `translate(75%, 75%) scale(${zoom}, ${zoom})`);
+        var translation = ((zoom - 1) * 100) / 2;
+        target.css("transform", `translate(${translation}%, ${translation}%) scale(${zoom}, ${zoom})`);
+
         if (zoom === 1) $("#zoom_out").css("display", "none");
         $("#zoom_in").css("display", "block");
+
         $(target).parent().scrollLeft(scroll.left);
         $(target).parent().scrollTop(scroll.top);
     });
@@ -105,8 +108,6 @@ window.onload = () => {
     $("#thumb_container").on({"touchmove": (event) => { move(event); }});
 
     function move(event) {
-
-        console.log("a");
 
         if (clicking && zoom !== 1) {
 
