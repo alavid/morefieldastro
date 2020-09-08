@@ -28,56 +28,68 @@ window.onload = () => {
         }
     });
 
+    $("#open_full_screen").click((event) => {
+
+        $("#full_screen").css("display", "block");
+    });
+
+    $("#close_full_screen").click((event) => {
+
+        $("#full_screen").css("display", "none");
+    });
+
     $("#zoom_in").click((event) => {
 
-        console.log("A");
+        if (zoom !== 4) {
 
-        let container = $(event.target).parent().parent();
-        let containerSize = {width: $(container).width(), height: $(container).height()};
-        let target = $(container).children().first().children().first();
-        let scroll = {left: $(target).parent().scrollLeft(), top: $(target).parent().scrollTop()}
+            let containerSize = {width: $("#modal_thumb").width(), height: $("#modal_thumb").height()};
+            let target = $(".thumbnail");
+            let scroll = { left: $("#thumb_container").scrollLeft(), top: $("#thumb_container").scrollTop() }
 
-        if (scroll.left === 0) {
+            if (scroll.left === 0) {
 
-            scroll.left = containerSize.width / 2;
-            scroll.top = containerSize.height / 2;
+                scroll.left = containerSize.width / 2;
+                scroll.top = containerSize.height / 2;
+            }
+            else {
+
+                scroll.left = scroll.left / ((zoom - 1) / zoom);
+                scroll.top = scroll.top / ((zoom - 1) / zoom);
+            }
+
+            zoom++;
+            var translation = ((zoom - 1) * 100) / 2;
+            target.css("transform", `translate(${translation}%, ${translation}%) scale(${zoom}, ${zoom})`);
+
+            if (zoom === 4) $("#zoom_in").css("color", "#cfcfcf");
+            $("#zoom_out").css("color", "black");
+
+            $("#thumb_container").scrollLeft(scroll.left);
+            $("#thumb_container").scrollTop(scroll.top);
         }
-        else {
-
-            scroll.left = scroll.left / ((zoom - 1) / zoom);
-            scroll.top = scroll.top / ((zoom - 1) / zoom);
-        }
-
-        zoom++;
-        var translation = ((zoom - 1) * 100) / 2;
-        target.css("transform", `translate(${translation}%, ${translation}%) scale(${zoom}, ${zoom})`);
-
-        if (zoom === 4) $("#zoom_in").css("display", "none");
-        $("#zoom_out").css("display", "inline-block");
-
-        $(target).parent().scrollLeft(scroll.left);
-        $(target).parent().scrollTop(scroll.top);
     });
 
     $("#zoom_out").click((event) => {
 
-        let container = $(event.target).parent().parent();
-        let containerSize = {width: $(container).width(), height: $(container).height()};
-        let target = $(container).children().first().children().first();
-        let scroll = { left: $(target).parent().scrollLeft(), top: $(target).parent().scrollTop() }
+        if (zoom !== 1) {
 
-        scroll.left = scroll.left * ((zoom - 2) / (zoom - 1));
-        scroll.top = scroll.top * ((zoom - 2) / (zoom - 1));
+            let containerSize = {width: $("#modal_thumb").width(), height: $("#modal_thumb").height()};
+            let target = $(".thumbnail");
+            let scroll = { left: $("#thumb_container").scrollLeft(), top: $("#thumb_container").scrollTop() }
 
-        zoom--;
-        var translation = ((zoom - 1) * 100) / 2;
-        target.css("transform", `translate(${translation}%, ${translation}%) scale(${zoom}, ${zoom})`);
+            scroll.left = scroll.left * ((zoom - 2) / (zoom - 1));
+            scroll.top = scroll.top * ((zoom - 2) / (zoom - 1));
 
-        if (zoom === 1) $("#zoom_out").css("display", "none");
-        $("#zoom_in").css("display", "inline-block");
+            zoom--;
+            var translation = ((zoom - 1) * 100) / 2;
+            target.css("transform", `translate(${translation}%, ${translation}%) scale(${zoom}, ${zoom})`);
 
-        $(target).parent().scrollLeft(scroll.left);
-        $(target).parent().scrollTop(scroll.top);
+            if (zoom === 1) $("#zoom_out").css("color", "#cfcfcf");
+            $("#zoom_in").css("color", "black");
+
+            $("#thumb_container").scrollLeft(scroll.left);
+            $("#thumb_container").scrollTop(scroll.top);
+        }
     });
 
     $("#thumb_container").mousedown((event) => { press(event); });

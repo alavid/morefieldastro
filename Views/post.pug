@@ -5,6 +5,10 @@ block modalScript
 
 block modal
     div#shadow
+    div#full_screen
+        img(src = `${cur.image_loc}`)#full_screen_img
+        button.zoom_button#close_full_screen
+            i.fas.fa-compress-arrows-alt
     modal#post_disp_modal
         div#close
             i(onClick = `location.href="/${encodeURIComponent(gallery)}"`).fas.fa-times#close_button
@@ -13,8 +17,12 @@ block modal
                 div#thumb_container
                     img(src = `${cur.image_loc}`).thumbnail
                 div#zoom
-                    button.zoom_button#zoom_out -
-                    button.zoom_button#zoom_in +
+                    button.zoom_button#open_full_screen
+                        i.fas.fa-expand-arrows-alt
+                    button.zoom_button#zoom_out
+                        i.fas.fa-search-minus
+                    button.zoom_button#zoom_in
+                        i.fas.fa-search-plus
             div#modal_info
                 h2.modal_title.text #{cur.title}
                 if cur.description !== "null"

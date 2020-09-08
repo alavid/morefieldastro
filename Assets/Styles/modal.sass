@@ -41,6 +41,27 @@
 #post_disp_modal::-webkit-scrollbar-thumb:hover
         background: #cfcfcf
 
+#full_screen
+    display: none
+    position: absolute
+    width: 100%
+    top: 0
+    left: 0
+    bottom: 0
+    right: 0
+    z-index: 2100
+    overflow: auto
+    background-color: main.$background_color
+
+#full_screen_img
+    box-shadow: 0 0 8px main.$shadow_color
+
+#close_full_screen
+    position: fixed
+    bottom: 10px
+    right: 10px
+    color: white
+
 #modal_content
     display: flex
     flex-direction: row
@@ -67,10 +88,9 @@
 
 .zoom_button
     display: inline-block
-    width: 35px
-    height: 35px
     color: black
-    font-size: 22pt
+    width: 50px
+    font-size: 18pt
     font-weight: bold
     text-align: center
     border: 0px
@@ -82,7 +102,8 @@
     background-color: rgba(0, 0, 0, 0)
 
 #zoom_out
-    display: none
+    display: inline-block
+    color: #cfcfcf
 
 #modal_info
     padding-left: 10px
