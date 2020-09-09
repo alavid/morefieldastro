@@ -643,20 +643,31 @@ app.post("/editPost", function(req, res) {
         db.one("SELECT image_loc, thumbnail_loc FROM post WHERE pid = $1", [pid])
         .then(function(path) {
 
-            deleteImage(path.image_loc)
-            .then(function(result) {
+            if (path.image_loc !== newPath) {
 
-                deleteImage(path.thumbnail_loc)
+                deleteImage(path.image_loc)
                 .then(function(result) {
 
-                    db.none("UPDATE post SET title = $1, description = $2, size = $3, image_loc = $4, thumbnail_loc = $5, original_size = $6 WHERE pid = $7",
-                    [title, description, size, newPath, newThumbPath, originalSize, pid])
-                    .then(function(result) { success(res); })
-                    .catch(function(err) { error(err, res); });
+                    deleteImage(path.thumbnail_loc)
+                    .then(function(result) {
+
+                        db.none("UPDATE post SET title = $1, description = $2, size = $3, image_loc = $4, thumbnail_loc = $5, original_size = $6 WHERE pid = $7",
+                        [title, description, size, newPath, newThumbPath, originalSize, pid])
+                        .then(function(result) { success(res); })
+                        .catch(function(err) { error(err, res); });
+
+                    }).catch(function(err) { error(err, res); });
 
                 }).catch(function(err) { error(err, res); });
+            }
 
-            }).catch(function(err) { error(err, res); });
+            else {
+
+                db.none("UPDATE post SET title = $1, description = $2, size = $3, image_loc = $4, thumbnail_loc = $5, original_size = $6 WHERE pid = $7",
+                [title, description, size, newPath, newThumbPath, originalSize, pid])
+                .then(function(result) { success(res); })
+                .catch(function(err) { error(err, res); });
+            }
 
         }).catch(function(err) { error(err, res); });
     }
@@ -857,7 +868,6 @@ app.post('/upload', upload.single("file"), function(req, res) {
     }
 
     let fileType = path.extname(req.file.originalname).toLowerCase();
-    console.log(fileType);
     if (fileType !== ".jpeg" && fileType !== ".jpg" && fileType !== ".png") {
 
         res.status(403).send({message: "Only jpgs and pngs allowed."});
@@ -871,8 +881,6 @@ app.post('/upload', upload.single("file"), function(req, res) {
         Key: CUBE + "/public/" + req.file.originalname,
         Body: content
     }
-
-    console.log(req.file.originalname);
 
     s3.upload(params, function(err, data) {
         if (err) error(err, res);
