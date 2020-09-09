@@ -872,6 +872,8 @@ app.post('/upload', upload.single("file"), function(req, res) {
         Body: content
     }
 
+    console.log(req.file.originalname);
+
     s3.upload(params, function(err, data) {
         if (err) error(err, res);
         else res.status(200).send({message: "Success", cube: CUBE});

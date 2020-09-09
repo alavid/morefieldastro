@@ -2,7 +2,7 @@ function upload( file ) {
 
     return new Promise(( resolve, reject ) => {
 
-        let largeImage = resize(file, 2000);
+        let largeImage = resize(file, 4000);
 
         largeImage.then(( data ) => {
 
@@ -24,7 +24,7 @@ function upload( file ) {
 
                     $.ajax({url: "upload", dataType: "text", cache: false, contentType: false,
                             processData: false, data: thumbData, type: "POST"})
-                    .done(( res ) => { console.log("E"); resolve({size: originalSize, cube: JSON.parse(res).cube}); })
+                    .done(( res ) => { resolve({size: originalSize, cube: JSON.parse(res).cube}); })
                     .catch(( err ) => { reject(err); });
 
                 }).catch(( err ) => { reject(err); });
