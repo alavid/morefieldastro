@@ -251,7 +251,7 @@ app.get('/admin/:modal?/:id?', function(req, res) {
                     res.render("adminModals/addPost", {authorzied: true, data: data});
                 else if (req.params.modal === "editPost" || req.params.modal === "deletePost") {
 
-                    db.one("SELECT pid, title, description, size, image_loc FROM post WHERE pid = $1", [req.params.id])
+                    db.one("SELECT pid, title, description, image_loc, original_size FROM post WHERE pid = $1", [req.params.id])
                     .then(function(post) {
 
                         if (req.params.modal === "editPost") res.render("adminModals/editPost", {authorized: true, data: data, post: post});
@@ -568,14 +568,13 @@ app.post("/addPost", function(req, res) {
 
     let title = req.body.title;
     let description = req.body.description;
-    let size = req.body.size;
     let collection = req.body.collection;
     let path = req.body.path;
     let thumbPath = req.body.thumbPath;
     let originalSize = req.body.originalSize;
 
-    db.none("INSERT INTO post(title, description, size, collection, image_loc, thumbnail_loc, original_size) VALUES($1, $2, $3, $4, $5, $6, $7)",
-            [title, description, size, collection, path, thumbPath, originalSize])
+    db.none("INSERT INTO post(title, description, collection, image_loc, thumbnail_loc, original_size) VALUES($1, $2, $3, $4, $5, $6, $7)",
+            [title, description, collection, path, thumbPath, originalSize])
     .then(function(result) { success(res); })
     .catch(function(err) { error(err, res); });
 });
@@ -624,13 +623,12 @@ app.post("/editPost", function(req, res) {
 
     let title = req.body.title;
     let description = req.body.description;
-    let size = req.body.size;
     let pid = req.body.pid;
 
     if (typeof req.body.path === "undefined") {
 
-        db.none("UPDATE post SET title = $1, description = $2, size = $3 WHERE pid = $4",
-        [title, description, size, pid])
+        db.none("UPDATE post SET title = $1, description = $2 WHERE pid = $4",
+        [title, description, pid])
         .then(function(result) { success(res); })
         .catch(function(err) { error(err, res); });
     }
@@ -638,7 +636,7 @@ app.post("/editPost", function(req, res) {
 
         let newPath = req.body.path;
         let newThumbPath = req.body.thumbPath;
-        let originalSize = req.body.oSize;
+        let originalSize = req.body.originalSize;
 
         db.one("SELECT image_loc, thumbnail_loc FROM post WHERE pid = $1", [pid])
         .then(function(path) {
@@ -651,8 +649,8 @@ app.post("/editPost", function(req, res) {
                     deleteImage(path.thumbnail_loc)
                     .then(function(result) {
 
-                        db.none("UPDATE post SET title = $1, description = $2, size = $3, image_loc = $4, thumbnail_loc = $5, original_size = $6 WHERE pid = $7",
-                        [title, description, size, newPath, newThumbPath, originalSize, pid])
+                        db.none("UPDATE post SET title = $1, description = $2, image_loc = $4, thumbnail_loc = $5, original_size = $6 WHERE pid = $7",
+                        [title, description, newPath, newThumbPath, originalSize, pid])
                         .then(function(result) { success(res); })
                         .catch(function(err) { error(err, res); });
 
@@ -663,8 +661,8 @@ app.post("/editPost", function(req, res) {
 
             else {
 
-                db.none("UPDATE post SET title = $1, description = $2, size = $3, image_loc = $4, thumbnail_loc = $5, original_size = $6 WHERE pid = $7",
-                [title, description, size, newPath, newThumbPath, originalSize, pid])
+                db.none("UPDATE post SET title = $1, description = $2, image_loc = $4, thumbnail_loc = $5, original_size = $6 WHERE pid = $7",
+                [title, description, newPath, newThumbPath, originalSize, pid])
                 .then(function(result) { success(res); })
                 .catch(function(err) { error(err, res); });
             }

@@ -9,6 +9,7 @@ block modal
     div#shadow
     modal(name = `editPost-pid-${post.pid}`)#modal
         img(src = `${post.image_loc}`).thumbnail
+        p.text.modal_text Original Size: #{post.original_size}
         br
         div#error
         p.text.modal_thumb Thumbnail
@@ -19,9 +20,6 @@ block modal
         br
         p.text.modal_field_label Description
         textarea(name = "description").modal_field #{post.description}
-        br
-        p.text.modal_field_label Size
-        input(name = "size", type = "text" value = `${post.size}`).modal_field
         br
         button(type = "button").submit#submit Submit
         button(type = "button").cancel#cancel Cancel

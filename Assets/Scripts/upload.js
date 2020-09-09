@@ -15,7 +15,7 @@ function upload( file ) {
                     processData: false, data: formData, type: "POST"})
             .done(( res ) => {
 
-                let thumbnail = resize(file, 320, `${file.name.split(".")[0]}_thumb.${file.name.split(".")[1]}`);
+                let thumbnail = resize(file, 400, `${file.name.split(".")[0]}_thumb.${file.name.split(".")[1]}`);
 
                 thumbnail.then(( data ) => {
 
@@ -24,7 +24,7 @@ function upload( file ) {
 
                     $.ajax({url: "upload", dataType: "text", cache: false, contentType: false,
                             processData: false, data: thumbData, type: "POST"})
-                    .done(( res ) => { resolve({size: originalSize, cube: JSON.parse(res).cube}); })
+                    .done(( res ) => { console.log(originalSize); resolve({size: originalSize, cube: JSON.parse(res).cube}); })
                     .catch(( err ) => { reject(err); });
 
                 }).catch(( err ) => { reject(err); });

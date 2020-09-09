@@ -29,6 +29,8 @@ $(document).ready(() => {
             let fileData = $(file[0]).prop("files")[0];
             upload(fileData).then((res) => {
 
+                console.log(res);
+
                 inputs.forEach((object) => { data[$(object).attr("name")] = $(object).val(); });
 
                 let fileName = fileData.name.split(".");
@@ -36,6 +38,7 @@ $(document).ready(() => {
                 data["thumbPath"] = `https://cloud-cube.s3.amazonaws.com/${res.cube}/public/${fileName[0]}_thumb.${fileName[1]}`;
                 data["path"] = `https://cloud-cube.s3.amazonaws.com/${res.cube}/public/${fileData.name}`;
                 data["collection"] = parseInt($(location).attr("pathname").split("/")[3]);
+                data["originalSize"] = res.size;
 
                 $.ajax({url: dest, type: "POST", async: false, data: data})
                 .done((res) => { close(); })
