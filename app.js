@@ -112,6 +112,83 @@ app.use(bodyParser.json());
 //Establishing temp directory for image uploads
 const upload = multer({ dest: "uploads/" });
 
+
+var model = {};
+
+function populateModel() {
+
+    db.one("SELECT * FROM basic_info WHERE bid = 0", []).then(function(info) {
+
+        model["aboutImage"] = info.about_img_loc;
+        model["about"] = info.about;
+        model["contact"] = info.contact;
+        model["purchase"] = info.contact;
+        model["title"] = info.title;
+        model["intro"] = info.intro;
+        model["trueSizePrice"] = info.truesize_price;
+        model["aspectRatioMult"] = info.aspect_ratio_mult;
+    });
+
+    db.any("SELECT * FROM collection", []).then(function(collections) {
+
+        model["collections"] = []
+
+        collections.forEach((collection, i) => {
+
+            model.collections[i] = {    id: collection.cid,
+                                        title: collection.title,
+                                        description: collection.description,
+                                        posts: []};
+
+            db.any("SELECT * FROM post WHERE collection = $1", [collection.cid]).then(function(posts) {
+
+                posts.forEach((post, k) => {
+
+                    model.collections[i].posts[k] = {   id: post.pid,
+                                                        image: post.image_loc,
+                                                        title: post.title,
+                                                        description: post.description,
+                                                        index: post.index,
+                                                        thumbnail: post.thumbnail,
+                                                        orginalSize: post.original_size };
+
+                    console.log(JSON.stringify(model));
+                });
+            });
+        });
+
+    });
+
+    db.any("SELECT * FROM print_types", []).then(function(printTypes) {
+
+        model["printTypes"] = []
+
+        printTypes.forEach((printType, i) => {
+
+            model.printTypes[i] = { id: printType.ptid,
+                                    name: printType.name,
+                                    mult: printType.mult};
+        });
+
+    });
+
+    db.any("SELECT * FROM sizes", []).then(function(sizes) {
+
+        model["sizes"] = []
+
+        sizes.forEach((size, i) => {
+
+            model.sizes[i] = {  id: size.sid,
+                                width: size.width,
+                                height: size.height,
+                                price: size.price};
+        });
+
+    });
+}
+
+populateModel();
+
 ////////////////////////////////////////////////////////////////////////////////
 //Web Pages/////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
