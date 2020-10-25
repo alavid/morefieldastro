@@ -1,7 +1,5 @@
 window.onload = () => {
 
-    document.body.style.overflow = "hidden";
-
     var zoom = 1;
     var clicking = false;
     var prevX;
@@ -31,11 +29,13 @@ window.onload = () => {
     $("#open_full_screen").click((event) => {
 
         $("#full_screen").css("display", "block");
+        $("body").css("overflow", "hidden");
     });
 
     $("#close_full_screen").click((event) => {
 
         $("#full_screen").css("display", "none");
+        $("body").css("overflow", "auto");
     });
 
     $("#zoom_in").click((event) => {
