@@ -5,7 +5,7 @@ block modalScript
     
 block modal
     div#shadow
-    modal(name = `editSize-sid-${size.sid}`)#modal
+    modal(name = `editSize-sid-${size.id}`)#modal
         div#error
         p.text.modal_field_label Width (inches)
         input(name = "width", type = "text", value = `${size.width}`).modal_field

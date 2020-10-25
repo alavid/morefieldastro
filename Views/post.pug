@@ -1,48 +1,50 @@
-extends gallery.pug
-
-block modalScript
-    script(src = "../Scripts/post.js")
-
-block modal
-    div#shadow
-    div#full_screen
-        img(src = `${cur.image_loc}`)#full_screen_img
-        button.zoom_button#close_full_screen
-            i.fas.fa-compress-arrows-alt
-    modal#post_disp_modal
-        div#close
-            i(onClick = `location.href="/${encodeURIComponent(gallery)}"`).fas.fa-times#close_button
-        div#modal_content
-            div#modal_thumb
-                div#thumb_container
-                    img(src = `${cur.image_loc}`).thumbnail
-                div#zoom
-                    button.zoom_button#open_full_screen
-                        i.fas.fa-expand-arrows-alt
-                    button.zoom_button#zoom_out
-                        i.fas.fa-search-minus
-                    button.zoom_button#zoom_in
-                        i.fas.fa-search-plus
-            div#modal_info
-                h2.modal_title.text #{cur.title}
-                if cur.description !== "null"
-                    p.modal_desc.text #{cur.description}
-                if cur.original_size !== null
-                    p.modal_size.text Full size: #{cur.original_size}
-                //-p(style = `font-weight: "bold"`).modal_desc.text Print options:
-                //-div#getPrint
-                    select.sizes.modal_button
-                        option.order_width #{"width: "}
-                            p.price price
-                        option.order_width #{"width: "}
-                            p.price price
-                        option.order_width #{"width: "}
-                            p.price price
-                        option.order_width #{"width: "}
-                            p.price price
-                    button.modal_button#add_to_cart Add to Cart 
-        div#modal_buttons
-            if prev !== null
-                button(onClick = `location.href="/${encodeURIComponent(gallery)}/${encodeURIComponent(prev.title)}"`).modal_button#prev Previous
-            if next !== null
-                button(onClick = `location.href="/${encodeURIComponent(gallery)}/${encodeURIComponent(next.title)}"`).modal_button#next Next
+doctype html
+html(lang = "en")
+    head
+        title Morefield Astrophotography
+        meta(charset = "utf-8")
+        meta(content = "width=device-width, initial-scale=1", name = "viewport")
+        link(rel = "stylesheet", type = "text/css", href = "../Styles/style.css")
+        script(src = "../Scripts/jquery-3.4.1.js")
+        script(src = "../Scripts/fontAwesome.js")
+        script(src = "../Scripts/post.js")
+    body
+        header
+            h1.title KEVIN MOREFIELD
+            ul.text#nav_bar
+                li.nav_item
+                    button(onClick = `location.href="/"`).nav_button#home_button Home
+                li.nav_item
+                    button(onClick = `location.href="/?sect=about"`).nav_button#about_button About
+                li.nav_item
+                    button(onClick = `location.href="/?sect=contact"`).nav_button#contact_button Contact
+                li.nav_item
+                    button(onClick = `location.href="/?sect=purchase"`).nav_button#purchase_button Purchase
+        div#full_screen
+            img(src = `${post.image}`)#full_screen_img
+            button.zoom_button#close_full_screen
+                i.fas.fa-compress-arrows-alt
+        div#post
+            div#post_content
+                div#post_thumb
+                    div#thumb_container
+                        img(src = `${post.image}`).thumbnail
+                    div#zoom
+                        button.zoom_button#open_full_screen
+                            i.fas.fa-expand-arrows-alt
+                        button.zoom_button#zoom_out
+                            i.fas.fa-search-minus
+                        button.zoom_button#zoom_in
+                            i.fas.fa-search-plus
+                div#post_info
+                    h2.post_title.text #{post.title}
+                    if post.description !== "null"
+                        p.post_desc.text #{post.description}
+                    if post.original_size !== null
+                        p.post_size.text Full size: #{post.originalSize}
+            div#post_buttons
+                if prev !== null
+                    button(onClick = `location.href="/${encodeURIComponent(collection.title)}/${encodeURIComponent(prev.title)}"`).nav_button#prev Previous
+                button(onClick = `location.href="/${encodeURIComponent(collection.title)}"`).nav_button#back_button View Collection
+                if next !== null
+                    button(onClick = `location.href="/${encodeURIComponent(collection.title)}/${encodeURIComponent(next.title)}"`).nav_button#next Next

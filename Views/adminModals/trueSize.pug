@@ -8,11 +8,11 @@ block modal
     modal(name = "trueSize").modal#modal
         div#error
         p.text.modal_field_label True Size Formula
-        input(name = "base_price", type = "text", value = `${data.truesize_price}`).short_input#base_price
+        input(name = "base_price", type = "text", value = `${data.trueSizePrice}`).short_input#base_price
         span.text.modal_text  $ per inch longest side
         br
         span.text.modal_text +/- 
-        input(name = "aspect_ratio_mult", type = "text", value = `${data.aspect_ratio_mult}`).short_input#ratio_mult
+        input(name = "aspect_ratio_mult", type = "text", value = `${data.aspectRatioMult}`).short_input#ratio_mult
         span.text.modal_text  % multiplier for 1:1/2:1
         br
         button(type = "button").submit#submit_pricing Submit

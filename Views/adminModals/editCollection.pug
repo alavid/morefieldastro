@@ -5,13 +5,13 @@ block modalScript
     
 block modal
     div#shadow
-    modal(name = `editCollection-cid-${col.cid}`)#modal
+    modal(name = `editCollection-cid-${collection.id}`)#modal
         div#error
         p.text.modal_field_label Title
-        input(name = "title", type = "text", value = `${col.title}`).modal_field
+        input(name = "title", type = "text", value = `${collection.title}`).modal_field
         br
         p.text.modal_field_label Description
-        textarea(name = "description").modal_field #{col.description}
+        textarea(name = "description").modal_field #{collection.description}
         br
         button(type = "button").submit#submit Submit
         button(type = "button").cancel#cancel Cancel

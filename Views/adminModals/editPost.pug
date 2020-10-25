@@ -7,9 +7,9 @@ block modalScript
  
 block modal
     div#shadow
-    modal(name = `editPost-pid-${post.pid}`)#modal
-        img(src = `${post.image_loc}`).thumbnail
-        p.text.modal_text Original Size: #{post.original_size}
+    modal(name = `editPost-pid-${post.id}`)#modal
+        img(src = `${post.image}`).thumbnail
+        p.text.modal_text Original Size: #{post.originalSize}
         br
         div#error
         p.text.modal_thumb Thumbnail

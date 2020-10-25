@@ -32,8 +32,8 @@ html(lang = "en")
                                 td.stand_height #{row.height} in.
                                 td.stand_price $#{row.price}
                                 td.stand_size_buttons
-                                    button(onClick = `location.href = "/admin/pricing/editSize/${encodeURIComponent(row.sid)}"`).edit_button Edit
-                                    button(id = `delete_${row.sid}`).delete_size Delete
+                                    button(onClick = `location.href = "/admin/pricing/editSize/${encodeURIComponent(row.id)}"`).edit_button Edit
+                                    button(id = `delete_${row.id}`).delete_size Delete
                     button(onClick = `location.href = "/admin/pricing/addSize"`).add_button Add Size
                 div#printTypes
                     h2.text.admin-header Print Types
@@ -47,7 +47,7 @@ html(lang = "en")
                                 td.type_name #{row.name}
                                 td.type_mult +#{row.mult}%
                                 td.print_type_buttons
-                                    button(onClick = `location.href = "/admin/pricing/editType/${encodeURIComponent(row.ptid)}"`).edit_button Edit
-                                    button(id = `delete_${row.ptid}`).delete_type Delete
+                                    button(onClick = `location.href = "/admin/pricing/editType/${encodeURIComponent(row.id)}"`).edit_button Edit
+                                    button(id = `delete_${row.id}`).delete_type Delete
                     button(onClick = `location.href = "/admin/pricing/addType"`).add_button Add Type
                     block modal

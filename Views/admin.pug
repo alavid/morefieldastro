@@ -33,23 +33,23 @@ html(lang = "en")
                     button(onClick = `location.href = "/admin/info/purchase"`).basic_info_button#purchase_button Purchase Info
                     button(onClick = `location.href = "/admin/info/title"`).basic_info_button#title_button Title Info
                     button(onClick = `location.href = "/admin/pricing"`).basic_info_button#pricing_button Pricing Page
-                each row in data
+                each collection in data
                     div.col_container
                         div.col_header
                             div.col_info
-                                h2.text.admin-header #{row.collection.title}
-                                p.text.col_desc #{row.collection.description}
+                                h2.text.admin-header #{collection.title}
+                                p.text.col_desc #{collection.description}
                             div.col_buttons
-                                button(onClick = `location.href = "/admin/editCollection/${encodeURIComponent(row.collection.cid)}"`).edit_button.edit_col_button Edit
-                                button(onClick = `location.href = "/admin/deleteCollection/${encodeURIComponent(row.collection.cid)}"`).edit_button.edit_col_button Delete
-                        ul(id = `cid-${row.collection.cid}`).admin_post_container
-                            each post in row.posts
-                                li(id = `pid-${post.pid}`).post
-                                    img(src = `${post.thumbnail_loc}`).thumbnail
+                                button(onClick = `location.href = "/admin/editCollection/${encodeURIComponent(collection.id)}"`).edit_button.edit_col_button Edit
+                                button(onClick = `location.href = "/admin/deleteCollection/${encodeURIComponent(collection.id)}"`).edit_button.edit_col_button Delete
+                        ul(id = `cid-${collection.id}`).admin_post_container
+                            each post in collection.posts
+                                li(id = `pid-${post.id}`).post
+                                    img(src = `${post.thumbnail}`).thumbnail
                                     h3.text #{post.title}
-                                    button(onClick = `location.href = "/admin/editPost/${encodeURIComponent(post.pid)}"`).edit_button Edit
-                                    button(onClick = `location.href = "/admin/deletePost/${encodeURIComponent(post.pid)}"`).delete_button Delete
-                            button(onClick = `location.href = "/admin/addPost/${encodeURIComponent(row.collection.cid)}"`).add_post +
+                                    button(onClick = `location.href = "/admin/editPost/${encodeURIComponent(post.id)}"`).edit_button Edit
+                                    button(onClick = `location.href = "/admin/deletePost/${encodeURIComponent(post.id)}"`).delete_button Delete
+                            button(onClick = `location.href = "/admin/addPost/${encodeURIComponent(collection.id)}"`).add_post +
                 button(onClick = `location.href = "/admin/addCollection"`).add_button Add Collection
                 block modal
 

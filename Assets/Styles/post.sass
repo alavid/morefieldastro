@@ -1,0 +1,118 @@
+@use "main"
+
+#post
+    padding: 20px
+    max-width: 1250px
+    margin: 0px auto
+
+#full_screen
+    display: none
+    position: absolute
+    width: 100%
+    top: 0
+    left: 0
+    bottom: 0
+    right: 0
+    z-index: 2100
+    background-color: main.$background_color
+
+#full_screen_img
+    box-shadow: 0 0 8px main.$shadow_color
+
+#close_full_screen
+    position: fixed
+    bottom: 10px
+    right: 10px
+    color: white
+
+#post_content
+    margin-top: 20px
+    margin-bottom: 20px
+    display: flex
+    flex-direction: row
+
+#post_thumb
+    flex: 3
+    display: block
+    position: relative
+    margin: 0px
+    padding: 0px
+
+#thumb_container
+    margin-bottom: 10px
+    display: block
+    padding: 0px
+    overflow: hidden
+    border-radius: 3px
+
+.thumbnail
+    display: block
+
+#zoom
+    text-align: right
+
+.zoom_button
+    display: inline-block
+    color: white
+    width: 50px
+    font-size: 18pt
+    font-weight: bold
+    text-align: center
+    border: 0px
+    background-color: rgba(0, 0, 0, 0)
+    outline: none
+    box-shadow: none
+
+.zoom_button:hover, .zoom_button:focus
+    background-color: main.$background_color
+
+#zoom_out
+    display: inline-block
+    color: main.$grey_text_color
+
+#post_info
+    width: 100%
+    text-align: left
+    padding-left: 10px
+    padding-top: 0px
+    flex: 1
+
+#post_buttons
+    display: flex
+    justify-content: space-between
+    margin-bottom: 20px
+
+.post_title
+    margin-bottom: 3px
+    margin-top: 0px
+
+.post_size, .post_desc
+    margin-top: 8px
+    margin-bottom: 3px
+
+#getPrint
+    display: flex
+
+@media screen and (max-aspect-ratio: "10/9")
+
+    #post_content
+        flex-direction: column
+        align-items: center
+
+    #post_info
+        padding-left: 0px
+        padding-top: 10px
+
+    #post_disp_modal
+        left: 0
+        right: 0
+        top: 0
+        bottom: 0
+        transform: none
+        padding-left: 2%
+        padding-right: 2%
+        border-radius: 0px
+        width: 96%
+
+    #getPrint
+        width: 96vw

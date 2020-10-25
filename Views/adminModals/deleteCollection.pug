@@ -5,8 +5,8 @@ block modalScript
     
 block modal
     div#shadow
-    modal(name = `deleteCollection-cid-${col.cid}`)#modal
+    modal(name = `deleteCollection-cid-${collection.id}`)#modal
         div#error
-        p.text.modal_field_label Are you sure you want to delete #{col.title}?
+        p.text.modal_field_label Are you sure you want to delete #{collection.title}?
         button(type = "button").submit#submit Yes
         button(type = "button").cancel#cancel No

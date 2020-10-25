@@ -42,7 +42,7 @@ window.onload = () => {
 
         if (zoom !== 4) {
 
-            let containerSize = {width: $("#modal_thumb").width(), height: $("#modal_thumb").height()};
+            let containerSize = {width: $("#post_thumb").width(), height: $("#post_thumb").height()};
             let target = $(".thumbnail");
             let scroll = { left: $("#thumb_container").scrollLeft(), top: $("#thumb_container").scrollTop() }
 
@@ -61,8 +61,8 @@ window.onload = () => {
             var translation = ((zoom - 1) * 100) / 2;
             target.css("transform", `translate(${translation}%, ${translation}%) scale(${zoom}, ${zoom})`);
 
-            if (zoom === 4) $("#zoom_in").css("color", "#cfcfcf");
-            $("#zoom_out").css("color", "black");
+            if (zoom === 4) $("#zoom_in").css("color", "#919191");
+            $("#zoom_out").css("color", "white");
 
             $("#thumb_container").scrollLeft(scroll.left);
             $("#thumb_container").scrollTop(scroll.top);
@@ -73,7 +73,7 @@ window.onload = () => {
 
         if (zoom !== 1) {
 
-            let containerSize = {width: $("#modal_thumb").width(), height: $("#modal_thumb").height()};
+            let containerSize = {width: $("#post_thumb").width(), height: $("#post_thumb").height()};
             let target = $(".thumbnail");
             let scroll = { left: $("#thumb_container").scrollLeft(), top: $("#thumb_container").scrollTop() }
 
@@ -84,8 +84,8 @@ window.onload = () => {
             var translation = ((zoom - 1) * 100) / 2;
             target.css("transform", `translate(${translation}%, ${translation}%) scale(${zoom}, ${zoom})`);
 
-            if (zoom === 1) $("#zoom_out").css("color", "#cfcfcf");
-            $("#zoom_in").css("color", "black");
+            if (zoom === 1) $("#zoom_out").css("color", "#919191");
+            $("#zoom_in").css("color", "white");
 
             $("#thumb_container").scrollLeft(scroll.left);
             $("#thumb_container").scrollTop(scroll.top);

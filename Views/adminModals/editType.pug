@@ -5,7 +5,7 @@ block modalScript
     
 block modal
     div#shadow
-    modal(name = `editType-ptid-${printType.ptid}`)#modal
+    modal(name = `editType-ptid-${printType.id}`)#modal
         div#error
         p.text.modal_field_label Print Type
         input(name = "name", type = "text", value = `${printType.name}`).modal_field

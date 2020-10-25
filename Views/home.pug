@@ -28,12 +28,12 @@ html(lang = "en")
             div#collections
                 h3.text#cols_title Collections
                 each collection in collections
-                    div(style = `background-image:url("${collection.image_loc}")`).thumb
+                    div(style = `background-image:url("${collection.posts[0].image}")`).thumb
                         button(onClick = `location.href="/${encodeURIComponent(collection.title)}"`).thumbButton #{collection.title}
             div#footer
                 div#about
                     div#about_photo
-                        img(src = `${info.about_img_loc}`)#about_thumb
+                        img(src = `${info.aboutImage}`)#about_thumb
                 div#otherInfo
                     div#about_text
                         p.text#bio_text #{info.about}

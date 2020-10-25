@@ -23,12 +23,12 @@ html(lang = "en")
         div#content
             div.col_container
                 div#col_info
-                    h2.text.gall_title #{title}
-                    p.text.gall_desc #{description}
+                    h2.text.gall_title #{collection.title}
+                    p.text.gall_desc #{collection.description}
                 div.post_container
-                    each post in posts
-                        a(href = `/${encodeURIComponent(title)}/${encodeURIComponent(post.title)}`).gallery_post
-                            div(style = `background-image:url("${post.thumbnail_loc}")`).gall_thumb
+                    each post in collection.posts
+                        a(href = `/${encodeURIComponent(collection.title)}/${encodeURIComponent(post.title)}`).gallery_post
+                            div(style = `background-image:url("${post.thumbnail}")`).gall_thumb
                             h3.text.gallery_post_title #{post.title}
             div#footer
                 p.text © Kevin Morefield 2020

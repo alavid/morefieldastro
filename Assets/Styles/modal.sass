@@ -16,109 +16,6 @@
     max-height: 92%
     padding: 10px
 
-#post_disp_modal
-    position: fixed
-    left: 50%
-    top: 50%
-    overflow: auto
-    transform: translate(-50%, -50%)
-    z-index: 2000
-    background-color: main.$modal_color
-    padding: 10px
-    border-radius: 3px
-    width: 90%
-    max-width: 1400px
-
-#post_disp_modal::-webkit-scrollbar
-        width: 6px
-
-#post_disp_modal::-webkit-scrollbar-track
-        background: white
-
-#post_disp_modal::-webkit-scrollbar-thumb
-        background: #cfcfcf
-
-#post_disp_modal::-webkit-scrollbar-thumb:hover
-        background: #cfcfcf
-
-#full_screen
-    display: none
-    position: absolute
-    width: 100%
-    top: 0
-    left: 0
-    bottom: 0
-    right: 0
-    z-index: 2100
-    overflow: auto
-    background-color: main.$background_color
-
-#full_screen_img
-    box-shadow: 0 0 8px main.$shadow_color
-
-#close_full_screen
-    position: fixed
-    bottom: 10px
-    right: 10px
-    color: white
-
-#modal_content
-    display: flex
-    flex-direction: row
-
-#modal_thumb
-    flex: 3
-    display: block
-    position: relative
-    margin: 0px
-    padding: 0px
-
-#thumb_container
-    margin: 0px
-    display: block
-    padding: 0px
-    overflow: hidden
-    border-radius: 3px
-
-.thumbnail
-    display: block
-
-#zoom
-    text-align: right
-
-.zoom_button
-    display: inline-block
-    color: black
-    width: 50px
-    font-size: 18pt
-    font-weight: bold
-    text-align: center
-    border: 0px
-    background-color: rgba(0, 0, 0, 0)
-    outline: none
-    box-shadow: none
-
-.zoom_button:hover, .zoom_button:focus
-    background-color: rgba(0, 0, 0, 0)
-
-#zoom_out
-    display: inline-block
-    color: #cfcfcf
-
-#modal_info
-    padding-left: 10px
-    padding-top: 0px
-    flex: 1
-
-#close
-    text-align: right
-    width: 100%
-    margin-bottom: 5px
-    background-color: white
-    border: 0px
-    color: #cfcfcf
-    font-size: 16pt
-
 #modal_buttons
     margin-top: 10px
 
@@ -131,36 +28,6 @@
 
 .modal_button:hover
     background-color: #cfcfcf
-
-#prev
-    float: left
-
-#next
-    float: right
-
-@media screen and (max-aspect-ratio: "1/1")
-
-    #modal_content
-        flex-direction: column
-        align-items: center
-
-    #modal_info
-        padding-left: 0px
-        padding-top: 10px
-
-    #post_disp_modal
-        left: 0
-        right: 0
-        top: 0
-        bottom: 0
-        transform: none
-        padding-left: 2%
-        padding-right: 2%
-        border-radius: 0px
-        width: 96%
-
-    #getPrint
-        width: 96vw
 
 .modal_title
     color: main.$modal_text_color
@@ -196,9 +63,6 @@ textarea
     width: 140px
     margin-top: 20px
     margin-left: 40px
-
-#getPrint
-    display: flex
 
 #add_to_cart
     width: 160px

@@ -5,7 +5,7 @@ block modalScript
     
 block modal
     div#shadow
-    modal(name = `deletePost-pid-${post.pid}`)#modal
+    modal(name = `deletePost-pid-${post.id}`)#modal
         div#error
         p.text.modal_field_label Are you sure you want to delete #{post.title}?
         button(type = "button").submit#submit Yes
