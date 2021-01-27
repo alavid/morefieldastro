@@ -714,7 +714,7 @@ app.post("/editPost", function(req, res) {
                     deleteImage(path.thumbnail_loc)
                     .then(function(result) {
 
-                        db.none("UPDATE post SET title = $1, description = $2, image_loc = $4, thumbnail_loc = $5, original_size = $6 WHERE pid = $7",
+                        db.none("UPDATE post SET title = $1, description = $2, image_loc = $3, thumbnail_loc = $4, original_size = $5 WHERE pid = $6",
                         [title, description, newPath, newThumbPath, originalSize, pid])
                         .then(function(result) {
                             popPosts().catch(err => { console.log(err); });
@@ -728,7 +728,7 @@ app.post("/editPost", function(req, res) {
 
             else {
 
-                db.none("UPDATE post SET title = $1, description = $2, image_loc = $4, thumbnail_loc = $5, original_size = $6 WHERE pid = $7",
+                db.none("UPDATE post SET title = $1, description = $2, image_loc = $3, thumbnail_loc = $4, original_size = $5 WHERE pid = $6",
                 [title, description, newPath, newThumbPath, originalSize, pid])
                 .then(function(result) {
                     popPosts().catch(err => { console.log(err); });
