@@ -276,11 +276,11 @@ function popSizes() {
     });
 }
 
-popInfo();
-popPosts();
-popCollections();
-popPrintTypes();
-popSizes();
+popInfo().catch((err) => { console.log(err) });
+popPosts().catch((err) => { console.log(err) });
+popCollections().catch((err) => { console.log(err) });
+popPrintTypes().catch((err) => { console.log(err) });
+popSizes().catch((err) => { console.log(err) });
 
 ////////////////////////////////////////////////////////////////////////////////
 //Web Pages/////////////////////////////////////////////////////////////////////
