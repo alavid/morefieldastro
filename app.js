@@ -129,7 +129,7 @@ function popInfo() {
 
         db.one("SELECT * FROM basic_info WHERE bid = 0", []).then(function(info) {
 
-            console.log("DB returned")
+            console.log("info returned");
 
             model["info"] = {
                 aboutImage: info.about_img_loc,
@@ -144,6 +144,14 @@ function popInfo() {
 
             resolve();
 
+        }).then(() => {
+
+            //Start Server
+
+            app.listen(port, function() {
+                console.log("== Server listening on port " + port);
+            });
+
         }).catch(err => { reject(err) });
     });
 }
@@ -153,6 +161,8 @@ function popPosts() {
     return new Promise((resolve, reject) => {
 
         db.any("SELECT * FROM post", []).then(function(posts) {
+
+            console.log("posts returned");
 
             model["posts"] = [];
 
@@ -180,6 +190,8 @@ function popCollections() {
     return new Promise((resolve, reject) => {
 
         db.any("SELECT * FROM collection", []).then(function(collections) {
+
+            console.log("collections returned");
 
             model["collections"] = []
 
@@ -223,6 +235,8 @@ function popPrintTypes() {
 
         db.any("SELECT * FROM print_types ORDER BY mult", []).then(function(printTypes) {
 
+            console.log("print types returned");
+
             model["printTypes"] = []
 
             printTypes.forEach((printType, i) => {
@@ -243,6 +257,8 @@ function popSizes() {
     return new Promise((resolve, reject) => {
 
         db.any("SELECT * FROM sizes ORDER BY width, height, price", []).then(function(sizes) {
+
+            console.log("sizes returned");
 
             model["sizes"] = []
 
@@ -265,7 +281,6 @@ popPosts();
 popCollections();
 popPrintTypes();
 popSizes();
-sleep(1500);
 
 ////////////////////////////////////////////////////////////////////////////////
 //Web Pages/////////////////////////////////////////////////////////////////////
@@ -969,10 +984,4 @@ app.post('/upload', upload.single("file"), function(req, res) {
         if (err) error(err, res);
         else res.status(200).send({message: "Success", cube: CUBE});
     });
-})
-
-//Start Server
-
-app.listen(port, function() {
-    console.log("== Server listening on port " + port);
 });
