@@ -127,6 +127,8 @@ function popInfo() {
 
     return new Promise((resolve, request) => {
 
+        console.log("Promise Returned");
+
         db.one("SELECT * FROM basic_info WHERE bid = 0", []).then(function(info) {
 
             console.log("info returned");
