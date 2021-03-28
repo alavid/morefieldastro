@@ -129,6 +129,8 @@ function popInfo() {
 
         db.one("SELECT * FROM basic_info WHERE bid = 0", []).then(function(info) {
 
+            console.log("DB returned")
+
             model["info"] = {
                 aboutImage: info.about_img_loc,
                 about: info.about,
@@ -272,6 +274,7 @@ sleep(1500);
 //Renders client home page
 app.get('/', function(req, res) {
 
+    console.log(model.info);
     res.status(200).render("home", { collections: model.collections, info: model.info });
 
 });
