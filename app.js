@@ -144,8 +144,6 @@ function popInfo() {
                 aspectRatioMult: info.aspect_ratio_mult
             }
 
-            resolve();
-
         }).then(() => {
 
             //Start Server
@@ -153,6 +151,8 @@ function popInfo() {
             app.listen(port, function() {
                 console.log("== Server listening on port " + port);
             });
+
+            resolve();
 
         }).catch(err => { reject(err) });
     });
