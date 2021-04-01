@@ -127,8 +127,6 @@ function popInfo() {
 
     return new Promise((resolve, request) => {
 
-        console.log("Promise Returned");
-
         db.one("SELECT * FROM basic_info WHERE bid = 0", []).then(function(info) {
 
             console.log("info returned");
@@ -144,14 +142,6 @@ function popInfo() {
                 aspectRatioMult: info.aspect_ratio_mult
             }
 
-        }).then(() => {
-
-            //Start Server
-
-            app.listen(port, function() {
-                console.log("== Server listening on port " + port);
-            });
-
             resolve();
 
         }).catch(err => { reject(err) });
@@ -161,6 +151,8 @@ function popInfo() {
 function popPosts() {
 
     return new Promise((resolve, reject) => {
+
+        console.log("Promise Running");
 
         db.any("SELECT * FROM post", []).then(function(posts) {
 
@@ -179,6 +171,10 @@ function popPosts() {
                     thumbnail: post.thumbnail,
                     originalSize: post.original_size
                 };
+            });
+
+            app.listen(port, function() {
+                console.log("== Server listening on port " + port);
             });
 
             resolve();
