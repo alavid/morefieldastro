@@ -10,7 +10,7 @@ let logger = require("morgan");
 let bcrypt = require("bcryptjs");
 let multer = require("multer");
 let AWS = require("aws-sdk");
-let pgp = require("pg-promise")({promiseLib: promise});
+let { Client } = require("pg");
 let sanitize = require("sanitize");
 let pug = require("pug");
 let session = require("express-session");
@@ -23,20 +23,14 @@ let helmet = require("helmet");
 //  Add each variable to .env with command "heroku config:get <varname> -a <project> -s >> .env"
 //  Database credentials are rotated occasionally, so if the connection is failing make sure the .env still contains the right var.
 
-var conString = process.env.DATABASE_URL;
+const DB = new Client({
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false
+    }
+});
 
-var conData = conString.split(/\/|@|:/);
-
-const cn = {
-    host: conData[5],
-    port: conData[6],
-    database: conData[7],
-    user: conData[3],
-    password: conData[4],
-    ssl: true
-};
-
-let db = pgp(cn);
+DB.connect();
 
 //Configuring S3 cube
 
@@ -127,9 +121,9 @@ function popInfo() {
 
     return new Promise((resolve, request) => {
 
-        db.one("SELECT * FROM basic_info WHERE bid = 0", []).then(function(info) {
+        DB.query("SELECT * FROM basic_info WHERE bid = 0", []).then(function(data) {
 
-            console.log("info returned");
+            var info = data.rows[0];
 
             model["info"] = {
                 aboutImage: info.about_img_loc,
@@ -152,11 +146,9 @@ function popPosts() {
 
     return new Promise((resolve, reject) => {
 
-        console.log("Promise Running");
+        DB.query("SELECT * FROM post", []).then(function(data) {
 
-        db.any("SELECT * FROM post", []).then(function(posts) {
-
-            console.log("posts returned");
+            var posts = data.rows;
 
             model["posts"] = [];
 
@@ -173,10 +165,6 @@ function popPosts() {
                 };
             });
 
-            app.listen(port, function() {
-                console.log("== Server listening on port " + port);
-            });
-
             resolve();
 
         }).catch(err => { reject(err); });
@@ -187,9 +175,9 @@ function popCollections() {
 
     return new Promise((resolve, reject) => {
 
-        db.any("SELECT * FROM collection", []).then(function(collections) {
+        DB.query("SELECT * FROM collection", []).then(function(data) {
 
-            console.log("collections returned");
+            var collections = data.rows;
 
             model["collections"] = []
 
@@ -202,7 +190,9 @@ function popCollections() {
                     posts: []
                 };
 
-                db.any("SELECT * FROM post WHERE collection = $1 ORDER BY index", [collection.cid]).then(function(posts) {
+                DB.query("SELECT * FROM post WHERE collection = $1 ORDER BY index", [collection.cid]).then(function(postData) {
+
+                    posts = postData.rows;
 
                     posts.forEach((post, k) => {
 
@@ -231,9 +221,9 @@ function popPrintTypes() {
 
     return new Promise((resolve, reject) => {
 
-        db.any("SELECT * FROM print_types ORDER BY mult", []).then(function(printTypes) {
+        DB.query("SELECT * FROM print_types ORDER BY mult", []).then(function(data) {
 
-            console.log("print types returned");
+            var printTypes = data.rows;
 
             model["printTypes"] = []
 
@@ -254,9 +244,9 @@ function popSizes() {
 
     return new Promise((resolve, reject) => {
 
-        db.any("SELECT * FROM sizes ORDER BY width, height, price", []).then(function(sizes) {
+        DB.query("SELECT * FROM sizes ORDER BY width, height, price", []).then(function(data) {
 
-            console.log("sizes returned");
+            var sizes = data.rows;
 
             model["sizes"] = []
 
@@ -274,11 +264,11 @@ function popSizes() {
     });
 }
 
-popInfo().catch((err) => { console.log(err) });
-popPosts().catch((err) => { console.log(err) });
-popCollections().catch((err) => { console.log(err) });
-popPrintTypes().catch((err) => { console.log(err) });
-popSizes().catch((err) => { console.log(err) });
+popInfo().catch(err => { console.log(err); });
+popPosts().catch(err => { console.log(err); });
+popCollections().catch(err => { console.log(err); });
+popPrintTypes().catch(err => { console.log(err); });
+popSizes().catch(err => { console.log(err); });
 
 ////////////////////////////////////////////////////////////////////////////////
 //Web Pages/////////////////////////////////////////////////////////////////////
@@ -287,7 +277,6 @@ popSizes().catch((err) => { console.log(err) });
 //Renders client home page
 app.get('/', function(req, res) {
 
-    console.log(model.info);
     res.status(200).render("home", { collections: model.collections, info: model.info });
 
 });
@@ -473,8 +462,10 @@ app.post('/logIn', function(req, res) {
     var email = req.body.email;
     var password = req.body.password;
 
-    db.one('SELECT * FROM "user" WHERE "email"=$1', [email])
-    .then(function(data) {
+    DB.query('SELECT * FROM "user" WHERE "email"=$1', [email])
+    .then(function(result) {
+
+        var data = result.rows[0];
 
         bcrypt.compare(password, data.password, function(err, result) {
 
@@ -492,7 +483,7 @@ app.post('/logIn', function(req, res) {
                     req.session.email = email;
                     var response = {message: "Success", authorized: true};
                 }
-                else var response = {message: "Failure: Amin access not authorized", authorize: true};
+                else var response = {message: "Failure: Admin access not authorized", authorize: true};
             }
             else var response = {message: "Failure: Incorrect password", authorize: false};
 
@@ -548,7 +539,7 @@ app.post("/addCollection", function(req, res) {
     let title = req.body.title;
     let description = req.body.description;
 
-    db.none("INSERT INTO collection(title, description) VALUES($1, $2)", [title, description])
+    DB.query("INSERT INTO collection(title, description) VALUES($1, $2)", [title, description])
     .then(function(result) {
         popCollections().then(_ => { success(res); }).catch(err => { error(err, res) });
     }).catch(function(err) { error(err, res) });
@@ -567,7 +558,7 @@ app.post("/editCollection", function(req, res) {
     let title = req.body.title;
     let description = req.body.description;
 
-    db.none("UPDATE collection SET title = $1, description = $2 WHERE cid = $3", [title, description, cid])
+    DB.query("UPDATE collection SET title = $1, description = $2 WHERE cid = $3", [title, description, cid])
     .then(function(result) {
         popCollections().then(_ => { success(res); }).catch(err => { error(err, res) });
     }).catch(function(err) { error(err, res) });
@@ -586,12 +577,14 @@ app.post("/deleteCollection", function(req, res) {
 
     let cid = req.body.cid;
 
-    db.any("SELECT image_loc, thumbnail_loc FROM post WHERE collection = $1", [cid])
-    .then(function(posts) {
+    DB.query("SELECT image_loc, thumbnail_loc FROM post WHERE collection = $1", [cid])
+    .then(function(data) {
+
+        var posts = data.rows;
 
         if (posts.length === 0) {
 
-            db.none("DELETE FROM collection WHERE cid = $1", [cid])
+            DB.query("DELETE FROM collection WHERE cid = $1", [cid])
             .then(function(result) {
                 popCollections().then(_ => { success(res); }).catch(err => { error(err); });
             }).catch(function(err) { error(err, res); });
@@ -606,15 +599,15 @@ app.post("/deleteCollection", function(req, res) {
                     deleteImage(post.thumbnail_loc)
                     .then(function(result) {
 
-                        db.none("DELETE FROM post WHERE pid = $1", [post.pid])
+                        DB.query("DELETE FROM post WHERE pid = $1", [post.pid])
                         .then(function(result) {
 
                             if (i === posts.length - 1) {
 
-                                db.none("DELETE FROM post WHERE collection = $1", [cid])
+                                DB.query("DELETE FROM post WHERE collection = $1", [cid])
                                 .then(function(result) {
 
-                                    db.none("DELETE FROM collection WHERE cid = $1", [cid])
+                                    DB.query("DELETE FROM collection WHERE cid = $1", [cid])
                                     .then(function(result) {
                                         popCollections().then(_ => { success(res); }).catch(err => { error(err, res) });
                                     }).catch(function(err) { error(err, res); });
@@ -648,7 +641,7 @@ app.post("/addPost", function(req, res) {
     let thumbPath = req.body.thumbPath;
     let originalSize = req.body.originalSize;
 
-    db.none("INSERT INTO post(title, description, collection, image_loc, thumbnail_loc, original_size) VALUES($1, $2, $3, $4, $5, $6)",
+    DB.query("INSERT INTO post(title, description, collection, image_loc, thumbnail_loc, original_size) VALUES($1, $2, $3, $4, $5, $6)",
             [title, description, collection, path, thumbPath, originalSize])
     .then(function(result) {
         popPosts().catch(err => { console.log(err); });
@@ -668,8 +661,10 @@ app.post("/deletePost", function(req, res) {
 
     let pid = req.body.pid;
 
-    db.one("SELECT image_loc, thumbnail_loc FROM post WHERE pid = $1", [pid])
-    .then(function(path) {
+    DB.query("SELECT image_loc, thumbnail_loc FROM post WHERE pid = $1", [pid])
+    .then(function(data) {
+
+        var path = data.rows[0];
 
         deleteImage(path.image_loc)
         .then(function(result) {
@@ -677,7 +672,7 @@ app.post("/deletePost", function(req, res) {
             deleteImage(path.thumbnail_loc)
             .then(function(result) {
 
-                db.none("DELETE FROM post WHERE pid = $1", [pid])
+                DB.query("DELETE FROM post WHERE pid = $1", [pid])
                 .then(function(result) {
                     popPosts().catch(err => { console.log(err); });
                     popCollections().then(_ => { success(res); }).catch(err => { error(err, res); });
@@ -706,7 +701,7 @@ app.post("/editPost", function(req, res) {
 
     if (typeof req.body.path === "undefined") {
 
-        db.none("UPDATE post SET title = $1, description = $2 WHERE pid = $3",
+        DB.query("UPDATE post SET title = $1, description = $2 WHERE pid = $3",
         [title, description, pid])
         .then(function(result) {
             popPosts().catch(err => { console.log(err); });
@@ -719,8 +714,10 @@ app.post("/editPost", function(req, res) {
         let newThumbPath = req.body.thumbPath;
         let originalSize = req.body.originalSize;
 
-        db.one("SELECT image_loc, thumbnail_loc FROM post WHERE pid = $1", [pid])
-        .then(function(path) {
+        DB.query("SELECT image_loc, thumbnail_loc FROM post WHERE pid = $1", [pid])
+        .then(function(data) {
+
+            var path = data.rows[0];
 
             if (path.image_loc !== newPath) {
 
@@ -730,7 +727,7 @@ app.post("/editPost", function(req, res) {
                     deleteImage(path.thumbnail_loc)
                     .then(function(result) {
 
-                        db.none("UPDATE post SET title = $1, description = $2, image_loc = $3, thumbnail_loc = $4, original_size = $5 WHERE pid = $6",
+                        DB.query("UPDATE post SET title = $1, description = $2, image_loc = $3, thumbnail_loc = $4, original_size = $5 WHERE pid = $6",
                         [title, description, newPath, newThumbPath, originalSize, pid])
                         .then(function(result) {
                             popPosts().catch(err => { console.log(err); });
@@ -744,7 +741,7 @@ app.post("/editPost", function(req, res) {
 
             else {
 
-                db.none("UPDATE post SET title = $1, description = $2, image_loc = $3, thumbnail_loc = $4, original_size = $5 WHERE pid = $6",
+                DB.query("UPDATE post SET title = $1, description = $2, image_loc = $3, thumbnail_loc = $4, original_size = $5 WHERE pid = $6",
                 [title, description, newPath, newThumbPath, originalSize, pid])
                 .then(function(result) {
                     popPosts().catch(err => { console.log(err); });
@@ -774,14 +771,14 @@ app.post("/updateInfo", function(req, res) {
 
             let path = req.body.path;
 
-            db.none("UPDATE basic_info SET about_img_loc = $1, about = $2", [path, bio])
+            DB.query("UPDATE basic_info SET about_img_loc = $1, about = $2", [path, bio])
             .then(function(result) {
                 popInfo().then(_ => { success(res); }).catch(err => { error(err, res); });
             }).catch(function(err) { error(err, res); });
         }
         else {
 
-            db.none("UPDATE basic_info SET about = $1", [bio])
+            DB.query("UPDATE basic_info SET about = $1", [bio])
             .then(function(result) {
                 popInfo().then(_ => { success(res); }).catch(err => { error(err, res); });
             }).catch(function(err) { error(err, res); });
@@ -791,7 +788,7 @@ app.post("/updateInfo", function(req, res) {
 
         let info = req.body.info;
 
-        db.none("UPDATE basic_info SET " + type + " = $1", [info])
+        DB.query("UPDATE basic_info SET " + type + " = $1", [info])
         .then(function(result) {
             popInfo().then(_ => { success(res); }).catch(err => { error(err, res); });
         }).catch(function(err) { error(err, res); });
@@ -801,7 +798,7 @@ app.post("/updateInfo", function(req, res) {
         let title = req.body.title;
         let intro = req.body.intro;
 
-        db.none("UPDATE basic_info SET title = $1, intro = $2", [title, intro])
+        DB.query("UPDATE basic_info SET title = $1, intro = $2", [title, intro])
         .then(function(result) {
             popInfo().then(_ => { success(res); }).catch(err => { error(err, res); });
         }).catch(function(err) { error(err, res); });
@@ -821,7 +818,7 @@ app.post("/addSize", function(req, res) {
     let height = req.body.height;
     let price = req.body.price;
 
-    db.none("INSERT INTO sizes(width, price, height) VALUES($1, $2, $3)", [width, price, height])
+    DB.query("INSERT INTO sizes(width, price, height) VALUES($1, $2, $3)", [width, price, height])
     .then(function(result) {
         popSizes().then(_ => { success(res); }).catch(err => { error(err, res); });
     }).catch(function(err) { error(err, res); });
@@ -840,7 +837,7 @@ app.post("/editSize", function(req, res) {
     let price = req.body.price;
     let sid = req.body.sid;
 
-    db.none("UPDATE sizes SET width = $1, price = $2, height = $3 WHERE sid = $4", [width, price, height, sid])
+    DB.query("UPDATE sizes SET width = $1, price = $2, height = $3 WHERE sid = $4", [width, price, height, sid])
     .then(function(result) {
         popSizes().then(_ => { success(res); }).catch(err => { error(err, res); });
     }).catch(function(err) { error(err, res); });
@@ -856,7 +853,7 @@ app.post("/deleteSize", function(req, res) {
 
     let sid = req.body.sid;
 
-    db.none("DELETE FROM sizes WHERE sid = $1", [sid])
+    DB.query("DELETE FROM sizes WHERE sid = $1", [sid])
     .then(function(result) {
         popSizes().then(_ => { success(res); }).catch(err => { error(err, res); });
     }).catch(function(err) { error(err, res); });
@@ -873,7 +870,7 @@ app.post("/addType", function(req, res) {
     let name = req.body.name;
     let mult = req.body.mult;
 
-    db.none("INSERT INTO print_types(name, mult) VALUES($1, $2)", [name, mult])
+    DB.query("INSERT INTO print_types(name, mult) VALUES($1, $2)", [name, mult])
     .then(function(result) {
         popPrintTypes().then(_ => { success(res); }).catch(err => { error(err, res); });
     }).catch(function(err) { error(err, res); });
@@ -891,7 +888,7 @@ app.post("/editType", function(req, res) {
     let mult = req.body.mult;
     let ptid = req.body.ptid;
 
-    db.none("UPDATE print_types SET name = $1, mult = $2 WHERE ptid = $3", [name, mult, ptid])
+    DB.query("UPDATE print_types SET name = $1, mult = $2 WHERE ptid = $3", [name, mult, ptid])
     .then(function(result) {
         popPrintTypes().then(_ => { success(res); }).catch(err => { error(err, res); });
     }).catch(function(err) { error(err, res); });
@@ -907,7 +904,7 @@ app.post("/deleteType", function(req, res) {
 
     let ptid = req.body.ptid;
 
-    db.none("DELETE FROM print_types WHERE ptid = $1", [ptid])
+    DB.query("DELETE FROM print_types WHERE ptid = $1", [ptid])
     .then(function(result) {
         popPrintTypes().then(_ => { success(res); }).catch(err => { error(err, res); });
     }).catch(function(err) { error(err, res); });
@@ -924,7 +921,7 @@ app.post("/trueSize", function(req, res) {
     let price = req.body.price;
     let mult = req.body.mult;
 
-    db.none("UPDATE basic_info SET truesize_price = $1, aspect_ratio_mult = $2 WHERE bid = 0", [price, mult])
+    DB.query("UPDATE basic_info SET truesize_price = $1, aspect_ratio_mult = $2 WHERE bid = 0", [price, mult])
     .then(function(result) {
         popInfo().then(_ => { success(res); }).catch(err => { error(err, res); });
     }).catch(function(err) { error(err, res); });
@@ -942,10 +939,10 @@ app.post("/reorder", function(req, res) {
     let collection = req.body.cid;
     let index = req.body.newIndex;
 
-    db.none("UPDATE post SET index = $1 WHERE pid = $1", [index, post])
+    DB.query("UPDATE post SET index = $1 WHERE pid = $1", [index, post])
     .then(function(result) {
 
-        db.none("UPDATE post SET index = index + 1 WHERE collection = $1 AND index >= $2 AND pid != $3", [collection, index, post])
+        DB.query("UPDATE post SET index = index + 1 WHERE collection = $1 AND index >= $2 AND pid != $3", [collection, index, post])
         .then(function(result) {
             popPosts();
             popCollections().then(_ => { success(res); }).catch(err => { error(err, res); });
@@ -982,4 +979,8 @@ app.post('/upload', upload.single("file"), function(req, res) {
         if (err) error(err, res);
         else res.status(200).send({message: "Success", cube: CUBE});
     });
+});
+
+app.listen(port, function() {
+    console.log("== Server listening on port " + port);
 });
