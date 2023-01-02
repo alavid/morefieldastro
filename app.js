@@ -16,6 +16,7 @@ let pug = require("pug");
 let session = require("express-session");
 let MemoryStore = require("memorystore")(session);
 let helmet = require("helmet");
+const { Console } = require("console");
 let dotenv = require("dotenv").config();
 
 //Establish database connection
@@ -940,16 +941,20 @@ app.post("/reorder", function(req, res) {
     let collection = req.body.cid;
     let index = req.body.newIndex;
 
-    DB.query("UPDATE post SET index = $1 WHERE pid = $2", [index, post])
-    .then(function(result) {
-
-        DB.query("UPDATE post SET index = index + 1 WHERE collection = $1 AND index >= $2 AND pid != $3", [collection, index, post])
+    DB.query("SELECT index FROM post WHERE pid = $1", [post])
+    .then(function(data){
+        let oldIndex = data.rows[0].index;
+        DB.query("UPDATE post SET index = $1 WHERE pid = $2", [index, post])
         .then(function(result) {
-            popPosts();
-            popCollections().then(_ => { success(res); }).catch(err => { error(err, res); });
-        }).catch(function(err) { error(err, res); });
-    })
-    .catch(function(err) { error(err, res); });
+
+            DB.query("UPDATE post SET index = index + 1 WHERE collection = $1 AND index >= $2 AND index < $3 AND pid != $4", [collection, index, oldIndex, post])
+            .then(function(result) {
+                popPosts();
+                popCollections().then(_ => { success(res); }).catch(err => { error(err, res); });
+            }).catch(function(err) { error(err, res); });
+        })
+        .catch(function(err) { error(err, res); });
+    }).catch(function(err) { error(err, res); });
 });
 
 //Handles file uploads
