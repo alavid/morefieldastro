@@ -24,8 +24,6 @@ let dotenv = require("dotenv").config();
 //  Add each variable to .env with command "heroku config:get <varname> -a <project> -s >> .env"
 //  Database credentials are rotated occasionally, so if the connection is failing make sure the .env still contains the right var.
 
-console.log(process.env);
-
 const DB = new Client({
     connectionString: process.env.DATABASE_URL,
     ssl: {
