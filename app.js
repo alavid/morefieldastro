@@ -16,12 +16,15 @@ let pug = require("pug");
 let session = require("express-session");
 let MemoryStore = require("memorystore")(session);
 let helmet = require("helmet");
+let dotenv = require("dotenv").config();
 
 //Establish database connection
 //NOTE: IF RUNNING LOCALLY, process.env will only work if you copy the heroku config vars to a .env file.
 //  Check all config vars with command "heroku config -a <project>"
 //  Add each variable to .env with command "heroku config:get <varname> -a <project> -s >> .env"
 //  Database credentials are rotated occasionally, so if the connection is failing make sure the .env still contains the right var.
+
+console.log(process.env);
 
 const DB = new Client({
     connectionString: process.env.DATABASE_URL,
@@ -939,7 +942,7 @@ app.post("/reorder", function(req, res) {
     let collection = req.body.cid;
     let index = req.body.newIndex;
 
-    DB.query("UPDATE post SET index = $1 WHERE pid = $1", [index, post])
+    DB.query("UPDATE post SET index = $1 WHERE pid = $2", [index, post])
     .then(function(result) {
 
         DB.query("UPDATE post SET index = index + 1 WHERE collection = $1 AND index >= $2 AND pid != $3", [collection, index, post])
